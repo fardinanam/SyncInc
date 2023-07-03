@@ -30,7 +30,7 @@
   ```
 - go to the project directory
   ```bash
-    cd frontend/syncinc
+    cd Front-end/syncinc
   ```
 - run the server
   ```bash
