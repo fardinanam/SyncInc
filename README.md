@@ -24,13 +24,13 @@
   ```
 
 ## React Setup
-- install dependencies
-  ```bash
-    npm install
-  ```
 - go to the project directory
   ```bash
     cd Front-end/syncinc
+  ```
+- install dependencies
+  ```bash
+    npm install
   ```
 - run the server
   ```bash
