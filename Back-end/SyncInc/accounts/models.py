@@ -29,6 +29,9 @@ class User(AbstractUser):
     address = models.CharField(max_length=254, blank=True)
     profile_picture = models.ImageField(
         upload_to='profile_pictures/', blank=True)
+    
+    email_token = models.CharField(max_length=254, default='')
+    is_email_verified = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'username'
     EMAIL_FIELD = 'email'
