@@ -17,10 +17,10 @@ class LoginView(APIView):
             serializer = LoginSerializer(data=data)
 
             if serializer.is_valid():
+                # authenticate user
                 email = serializer.data['email']
-                password = serializer.data['password']
-
-                user = authenticate(email=email, password=password)
+                password = make_password(serializer.data['password'], salt=email)
+                user = User.objects.filter(email=email, password=password).first()
 
                 if user is None:
                     return Response({
@@ -30,10 +30,10 @@ class LoginView(APIView):
                     }, status=status.HTTP_400_BAD_REQUEST)
 
                 refresh = RefreshToken.for_user(user)
-                return {
+                return Response({
                     'refresh': str(refresh),
                     'access': str(refresh.access_token),
-                }, status.HTTP_200_OK
+                }, status.HTTP_200_OK)
 
             return Response({
                 'status': 400,
