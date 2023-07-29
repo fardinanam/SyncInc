@@ -20,7 +20,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         hashes the password and
         generates email token before saving
         '''
-        validated_data['password'] = make_password(validated_data['password'])
+        validated_data['password'] = make_password(validated_data['password'], salt=validated_data['email'])
         validated_data['email_token'] = str(uuid.uuid4())
 
         return super().create(validated_data)
