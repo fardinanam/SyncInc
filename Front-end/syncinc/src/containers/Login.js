@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from 'react-router-dom';
 import '../styles/auth.css'
 export const Login = (props) => {
     const [email, setEmail] = useState('');
@@ -19,7 +20,7 @@ export const Login = (props) => {
                 <input value={pass} onChange={(e) => setPass(e.target.value)} type="password" placeholder="********" id="password" name="password" />
                 <button type="submit">Log In</button>
             </form>
-            <button className="link-btn" onClick={() => props.onFormSwitch('register')}>Don't have an account? Register here.</button>
+            <p className="link-btn">Don't have an account? <Link to="/register">Register here.</Link></p>
         </div>
     )
 }

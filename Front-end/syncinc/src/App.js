@@ -1,22 +1,19 @@
 import React, { useState } from "react";
-import logo from './logo.svg';
+import { Routes, Route } from "react-router-dom";
 import './App.css';
+import { Home } from "./containers/Home";
 import { Login } from "./containers/Login";
 import { Register } from "./containers/Register";
 
 function App() {
-  const [currentForm, setCurrentForm] = useState('login');
 
-  const toggleForm = (formName) => {
-    setCurrentForm(formName);
-  }
 
   return (
-    <div className="App">
-      {
-        currentForm === "login" ? <Login onFormSwitch={toggleForm} /> : <Register onFormSwitch={toggleForm} />
-      }
-    </div>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+    </Routes>
   );
 }
 export default App;
