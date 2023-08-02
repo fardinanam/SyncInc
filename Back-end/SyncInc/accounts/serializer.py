@@ -1,8 +1,16 @@
 from rest_framework import serializers
-from django.contrib.auth.hashers import make_password
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import User
 import uuid
 
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        token['username'] = user.username
+
+        return token
 
 class RegisterUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,10 +28,12 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         hashes the password and
         generates email token before saving
         '''
-        validated_data['password'] = make_password(validated_data['password'], salt=validated_data['email'])
+        # validated_data['password'] = make_password(validated_data['password'], salt=validated_data['email'])
         validated_data['email_token'] = str(uuid.uuid4())
-
-        return super().create(validated_data)
+        user = super().create(validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
 
 
 class LoginSerializer(serializers.Serializer):

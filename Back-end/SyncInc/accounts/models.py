@@ -2,8 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator
-from project_api.models import Tag
-
 
 class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -36,11 +34,9 @@ class User(AbstractUser):
     email_token = models.CharField(max_length=254, default='')
     is_email_verified = models.BooleanField(default=False)
 
-    tag = models.ManyToManyField(Tag, blank=True, null=True)
-
-    USERNAME_FIELD = 'username'
-    EMAIL_FIELD = 'email'
-    REQUIRED_FIELDS = ['email']
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
+    
 
     def name(self):
         return self.first_name + ' ' + self.last_name

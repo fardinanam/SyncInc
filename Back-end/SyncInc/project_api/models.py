@@ -7,6 +7,12 @@ from django.core.exceptions import ValidationError
 
 class Tag(models.Model):
     name = models.CharField(max_length=40, unique=True)
+    users = models.ManyToManyField(
+        User, 
+        related_name='tags',
+        related_query_name='tag',
+        blank=True
+    )
 
     def __str__(self):
         return self.name
@@ -24,7 +30,7 @@ class Vendor(models.Model):
         blank=True,
     )
 
-    tag = models.ManyToManyField(Tag, blank=True, null=True)
+    tag = models.ManyToManyField(Tag, blank=True)
 
     def __str__(self):
         return self.name
@@ -36,8 +42,7 @@ class Organization(models.Model):
         Vendor, 
         related_name='organizations',
         related_query_name='organization',
-        blank=True, 
-        null=True
+        blank=True
     )
     
     def __str__(self):
@@ -68,8 +73,17 @@ class Designation(models.Model):
     joined_at = models.DateTimeField(auto_now_add=True)
     left_at = models.DateTimeField(blank=True, null=True)
 
+    
+    unique_together = ['employee', 'organization']
+
+    def clean(self):
+        # check if the user is already an employee of the organization
+        if self.employee in self.organization.employees.all():
+            raise ValidationError(
+                'The user is already an employee of the organization')
+
     def __str__(self):
-        return self.employee.name + ' - ' + self.organization.name + ' - ' + self.role
+        return self.employee.__str__() + ' - ' + self.organization.__str__() + ' - ' + self.role
     
 class Client(models.Model):
     organization = models.ForeignKey(
@@ -142,8 +156,7 @@ class AbstractTask(models.Model):
         Tag, 
         related_name='%(class)ss',
         related_query_name='%(class)s',
-        blank=True,
-        null=True
+        blank=True
     )
 
     name = models.CharField(max_length=127)

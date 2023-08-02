@@ -23,6 +23,16 @@
     python manage.py runserver
   ```
 
+## How to run the database migration
+
+```bash
+    python manage.py makemigrations accounts
+    python manage.py makemigrations project_api
+    python manage.py migrate accounts
+    python manage.py migrate project_api
+    python manage.py migrate
+```
+
 ## React Setup
 - go to the project directory
   ```bash
