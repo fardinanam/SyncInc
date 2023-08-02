@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator
+from project_api.models import Tag
 
 
 class User(AbstractUser):
@@ -18,10 +19,12 @@ class User(AbstractUser):
     is_active = models.BooleanField(default=True)
     phone = models.CharField(
         _('phone number'),
-        validators=[RegexValidator(regex=r'^0[0-9]{10}$')],
-        max_length=11,
+        # a validator to check if the phone number is valid
+        # phone number may or maynot contain country code
+        validators=[RegexValidator(
+            regex=r'^([0|\+[0-9]{1,5})?([0-9]{6,10})$')],
+        max_length=16,
         help_text='e.g. 01712345678',
-        unique=True,
         blank=True,
     )
 
@@ -32,6 +35,8 @@ class User(AbstractUser):
     
     email_token = models.CharField(max_length=254, default='')
     is_email_verified = models.BooleanField(default=False)
+
+    tag = models.ManyToManyField(Tag, blank=True, null=True)
 
     USERNAME_FIELD = 'username'
     EMAIL_FIELD = 'email'
