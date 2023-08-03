@@ -1,25 +1,31 @@
-import React, {createContext, useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React, { createContext, useState } from "react";
 import './App.css';
-import { Home } from "./containers/Home";
-import { Login } from "./containers/Login";
-import { Register } from "./containers/Register";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import RequireAuth from "./utils/RequireAuth";
 
-export const LoginContext = createContext();
+import { AuthProvider } from './context/AuthContext';
+
+import { Home } from "./pages/Home";
+import { Login } from "./pages/Login";
+import { Register } from "./pages/Register";
+import Header from "./components/Header";
 
 function App() {
-  const [loggedIn, setLoggedIn] = useState(false);
   return (
-    <LoginContext.Provider value={[loggedIn, setLoggedIn]}>
     <BrowserRouter>
+    <AuthProvider>
+      <Header />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={
+          <RequireAuth>
+            <Home />
+          </RequireAuth>
+        } exact />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
       </Routes>
+      </AuthProvider>
     </BrowserRouter>
-    </LoginContext.Provider>
-    
   );
 }
 export default App;

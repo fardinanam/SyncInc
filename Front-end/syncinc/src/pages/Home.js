@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import {Link} from 'react-router-dom';
 import '../styles/auth.css'
-import { useContext } from "react";
-import { LoginContext } from "../App";
+import AuthContext from "../context/AuthContext";
 
 export const Home = (props) => {
-    const [loggedIn, setLoggedIn] = useContext(LoginContext);
+    const {loggedIn} = React.useContext(AuthContext);
     return (
         <div className="auth-form-container">
             {loggedIn ? 
