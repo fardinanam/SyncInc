@@ -1,20 +1,19 @@
-import React, { createContext, useState } from "react";
+import React from "react";
 import './App.css';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import RequireAuth from "./utils/RequireAuth";
 
 import { AuthProvider } from './context/AuthContext';
 
-import { Home } from "./pages/Home";
-import { Login } from "./pages/Login";
-import { Register } from "./pages/Register";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Header from "./components/Header";
 
 function App() {
   return (
     <BrowserRouter>
     <AuthProvider>
-      <Header />
       <Routes>
         <Route path="/" element={
           <RequireAuth>

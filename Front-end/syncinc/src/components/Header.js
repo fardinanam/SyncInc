@@ -1,26 +1,30 @@
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
+import Logo from "../assets/logo.svg"
+import SearchBar from "./SearchBar";
+import ProfileMenu from "./ProfileMenu";
+import { AppBar, Button, Icon, Toolbar, Typography } from "@mui/material";
 
-// this header function is just a demo of how to use the AuthContext
 const Header = () => {
-    let {user, logoutUser} = useContext(AuthContext)
+    let {user} = useContext(AuthContext)
+    
     return (
-        <div>
-            <Link to="/">Home</Link>
-            <span> | </span>
-            {user ? (
-                <button onClick={logoutUser}>Logout</button>
-            ) : (
-                <Link to="/login">Login</Link>
-            )}
-            <span> | </span>
-            <Link to="/register">Register</Link>
-
-            {user && <p>Hello {user.username}</p>}
-            
-        </div>
-    );
+        <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+            <Toolbar>
+                <Icon sx={{
+                    width: '3rem',
+                }} >
+                    <img src={Logo} alt="SyncInc Logo" />
+                </Icon>
+                <Typography variant="h6" component="div" sx={{ flexGrow: 1}}>
+                    SyncInc.
+                </Typography>
+                <SearchBar />
+                <ProfileMenu />
+            </Toolbar>
+        </AppBar>
+    )
 }
 
 export default Header;
