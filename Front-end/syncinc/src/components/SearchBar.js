@@ -6,9 +6,9 @@ import SearchIcon from '@mui/icons-material/Search';
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
-    backgroundColor: alpha(theme.palette.common.white, 0.15),
+    backgroundColor: '#F5F5F5',
     '&:hover': {
-        backgroundColor: alpha(theme.palette.common.white, 0.25),
+        backgroundColor: '#F5F5F5',
     },
     marginLeft: 0,
     width: '100%',
@@ -47,7 +47,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 const SearchBar = () => {
     return (
-        <Search>
+        <Search color='background'>
             <SearchIconWrapper>
                 <SearchIcon />
             </SearchIconWrapper>

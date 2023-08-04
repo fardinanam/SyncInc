@@ -35,7 +35,7 @@ const ProfileMenu = () => {
                 {user.first_name + " " + user.last_name}
             </Typography>
             <Tooltip title="Open settings">
-                <IconButton onClick={handleOpenUserMenu} sx={{ fontSize: "large", color:"white" }}>
+                <IconButton onClick={handleOpenUserMenu} sx={{ fontSize: "large" }}>
                     <ExpandMoreIcon />
                 </IconButton>
             </Tooltip>
