@@ -8,11 +8,15 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import DescriptionIcon from '@mui/icons-material/Description';
-import ListIcon from '@mui/icons-material/List';
+import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
+import WorkIcon from '@mui/icons-material/Work';
+import { useNavigate } from 'react-router-dom';
 
 const drawerWidth = 240;
 
 const SideBar = () => {
+    let navigate = useNavigate();
+
     return (
         <Drawer
             variant="permanent"
@@ -27,7 +31,7 @@ const SideBar = () => {
             <Box sx={{ overflow: 'auto' }}>
             <List>
                 <ListItem key="dashboard" disablePadding>
-                    <ListItemButton>
+                    <ListItemButton onClick={() => navigate('/')}>
                         <ListItemIcon>
                             <DashboardIcon fontSize='small' />
                         </ListItemIcon>
@@ -46,9 +50,18 @@ const SideBar = () => {
                 <ListItem key="tasks" disablePadding>
                     <ListItemButton>
                         <ListItemIcon>
-                            <ListIcon fontSize='small' />
+                            <AssignmentRoundedIcon fontSize='small' />
                         </ListItemIcon>
                         <ListItemText primary="Tasks" />
+                    </ListItemButton>
+                </ListItem>
+
+                <ListItem key="organizations" disablePadding>
+                    <ListItemButton onClick={() => navigate('/organizations')}>
+                        <ListItemIcon>
+                            <WorkIcon fontSize='small' />
+                        </ListItemIcon>
+                        <ListItemText primary="Organizations" />
                     </ListItemButton>
                 </ListItem>
             </List>

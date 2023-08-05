@@ -7,12 +7,13 @@ import Header from '../components/Header';
 import SideBar from '../components/SideBar';
 import SummaryCard from '../components/SummaryCard';
 import { Grid } from '@mui/material';
+import FormatListNumberedRtlRoundedIcon from '@mui/icons-material/FormatListNumberedRtlRounded';
 
 export default function ClippedDrawer() {
     return (
         <Box 
             sx={{ display: 'flex', 
-            backgroundColor: '#000000',}}
+            backgroundColor: 'main',}}
         >
         <CssBaseline />
         <Header />
@@ -39,14 +40,24 @@ export default function ClippedDrawer() {
                     title="Ongoing Tasks"
                     count={3}
                     name="Tasks"  
-                />
+                >
+                    <FormatListNumberedRtlRoundedIcon 
+                        color='primary'
+                        fontSize='large'
+                    />
+                </SummaryCard>
                 </Grid>
                 <Grid item>
                 <SummaryCard
                     title="Ongoing Projects"
                     count={2}
                     name="Projects"
-                />
+                >
+                    <FormatListNumberedRtlRoundedIcon 
+                        color='secondary'
+                        fontSize='large'
+                    />
+                </SummaryCard>
                 </Grid>
             </Grid>
         </Box>

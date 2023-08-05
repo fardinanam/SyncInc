@@ -5,7 +5,7 @@ import RequireAuth from "./utils/RequireAuth";
 import { ThemeProvider } from '@mui/material/styles';
 
 import { AuthProvider } from './context/AuthContext';
-
+import Organizations from "./pages/Organizations";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -20,6 +20,11 @@ function App() {
                     <Route path="/" element={
                         <RequireAuth>
                             <Home />
+                        </RequireAuth>
+                    } exact />
+                    <Route path="/organizations" element={
+                        <RequireAuth>
+                            <Organizations />
                         </RequireAuth>
                     } exact />
                     <Route path="/login" element={<Login />} />
