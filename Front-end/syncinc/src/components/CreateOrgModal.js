@@ -6,6 +6,8 @@ import Typography from "@mui/material/Typography";
 import { TextField } from "@mui/material";
 import { baseUrl } from '../utils/config';
 import AuthContext from '../context/AuthContext';
+import axios from "axios";
+
 
 const style = {
     position: 'absolute',
@@ -20,28 +22,47 @@ const style = {
     pt: 2,
     px: 4,
     pb: 3,
-  };
+};
 
 const CreateOrgModal = (props) => {
     const {user, authTokens} = useContext(AuthContext);
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Submitted");
-        console.log(localStorage.getItem('authTokens').access);
-
-        let response = await fetch(baseUrl + 'create_organization/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorizaton': 'Bearer ' + authTokens?.access
-            },
-            body: JSON.stringify({
-                
-                'username': user.username,
-                'name': e.target.name.value
-            })
+        const body = JSON.stringify({
+            'username': user.username,
+            'name': e.target.name.value 
         });
-        console.log(response);
+
+        const config = {
+            headers:{
+            'Authorization': 'Bearer ' + authTokens?.access,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            }
+        };
+        
+        try {
+            const response = await axios.post(
+                `${baseUrl}create_organization/`,
+                body,
+                config
+            )
+
+            console.log(response);
+        } catch (error) {
+            console.log(error.response.data.message);
+        }
+        // const response = await axios.get(
+        
+        //     `${baseUrl}get_organizations/`,  
+        //     {
+        //         headers: {
+        //             'Authorization': 'Bearer ' + authTokens?.access,
+        //             'Accept': 'application/json',
+        //             'Content-Type': 'application/json',
+        //         }
+        //     }  
+        // )
     }
     return (
         <>
