@@ -17,7 +17,7 @@ const Projects = () => {
                 
                 alignItems='center'
             >
-                <Button variant='contained' onSubmit={() => navigate('/addProject')}><AddRoundedIcon />project</Button>
+                <Button variant='contained' onClick={() => navigate('/add_project')}><AddRoundedIcon />project</Button>
             </Box>
             <Grid  
                 container 

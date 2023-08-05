@@ -10,11 +10,13 @@ import { Grid } from '@mui/material';
 
 const MainLayout = (props) => {
     const {children} = props;
-
+        const bgColor = props.bgColor ? props.bgColor : 'background.main';
         return (
         <Box 
-            sx={{ display: 'flex', 
-            backgroundColor: '#000000',}}
+            sx={{ 
+                display: 'flex', 
+                backgroundColor: 'main',
+            }}
         >
             <CssBaseline />
             <Header />
@@ -24,7 +26,7 @@ const MainLayout = (props) => {
                 sx={{ 
                     flexGrow: 1, 
                     p: 3,
-                    backgroundColor: 'background.main',
+                    backgroundColor: bgColor,
                     overflow: 'auto',
                     height: '100vh',
                 }}

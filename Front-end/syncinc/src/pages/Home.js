@@ -8,27 +8,11 @@ import SideBar from '../components/SideBar';
 import SummaryCard from '../components/SummaryCard';
 import { Grid } from '@mui/material';
 import FormatListNumberedRtlRoundedIcon from '@mui/icons-material/FormatListNumberedRtlRounded';
+import MainLayout from '../components/MainLayout';
 
 export default function ClippedDrawer() {
     return (
-        <Box 
-            sx={{ display: 'flex', 
-            backgroundColor: 'main',}}
-        >
-        <CssBaseline />
-        <Header />
-        <SideBar />
-        <Box 
-            component="main" 
-            sx={{ 
-                flexGrow: 1, 
-                p: 3,
-                backgroundColor: 'background.main',
-                overflow: 'auto',
-                height: '100vh',
-            }}
-        >
-        <Toolbar />
+        <MainLayout>
             <Grid  
                 container 
                 spacing={3}
@@ -60,7 +44,6 @@ export default function ClippedDrawer() {
                 </SummaryCard>
                 </Grid>
             </Grid>
-        </Box>
-        </Box>
+        </MainLayout>
     );
 }
