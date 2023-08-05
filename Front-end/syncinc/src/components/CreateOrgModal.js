@@ -29,7 +29,6 @@ const CreateOrgModal = (props) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const body = JSON.stringify({
-            'username': user.username,
             'name': e.target.name.value 
         });
 
@@ -49,8 +48,10 @@ const CreateOrgModal = (props) => {
             )
 
             console.log(response);
+            props.handleClose("Organization created successfully!");
         } catch (error) {
             console.log(error.response.data.message);
+            props.handleClose(error.response.data.message);
         }
         // const response = await axios.get(
         

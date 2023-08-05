@@ -12,14 +12,15 @@ import SummaryCard from '../components/SummaryCard';
 import WorkIcon from '@mui/icons-material/Work';
 
 const Organizations = () => {
-    
+    // TODO: Use Toasts instead of alerts
     let [isOpen, setIsOpen] = useState(false);
 
     const handleOpen = () => {
         setIsOpen(true);
     }
-    const handleClose = () => {
+    const handleClose = (message) => {
         setIsOpen(false);
+        alert(message);
     }
 
     return (

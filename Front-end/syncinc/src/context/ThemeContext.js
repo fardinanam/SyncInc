@@ -4,6 +4,9 @@ import { light } from "@mui/material/styles/createPalette";
 
 const theme = createTheme({
     palette: {
+        primary: {
+            main: "#6C5DD3",
+        },
         background: {
             main: "#F5F5F5",
             light: "#FFFFFF",

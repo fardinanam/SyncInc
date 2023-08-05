@@ -37,8 +37,13 @@ def get_organizations(request):
 def create_organization(request):
     try:
         # process the organization data
-        # TODO: use token to get the user
+        token = get_token_from_request(request)
+        access_token_obj = AccessToken(token)
+        username = access_token_obj['username']
+
         data = request.data
+        data['username'] = username
+        
         serializer = OrganizationSerializer(data=data)
         print('before validation')
         if not serializer.is_valid():
