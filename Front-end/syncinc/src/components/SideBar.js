@@ -39,7 +39,7 @@ const SideBar = () => {
                     </ListItemButton>
                 </ListItem>
                 <ListItem key="projects" disablePadding>
-                    <ListItemButton>
+                    <ListItemButton onClick={() => navigate('/projects')}>
                         <ListItemIcon>
                             <DescriptionIcon fontSize='small' />
                         </ListItemIcon>

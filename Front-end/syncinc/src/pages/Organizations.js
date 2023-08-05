@@ -44,7 +44,6 @@ const Organizations = () => {
                 <Box 
                     display= 'flex'
                     justifyContent= 'end'
-                    fullWidth
                     
                     alignItems='center'
                 >

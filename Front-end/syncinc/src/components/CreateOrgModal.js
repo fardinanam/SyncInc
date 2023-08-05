@@ -4,6 +4,8 @@ import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Typography from "@mui/material/Typography";
 import { TextField } from "@mui/material";
+import { baseUrl } from '../utils/config';
+import AuthContext from '../context/AuthContext';
 
 const style = {
     position: 'absolute',
@@ -21,7 +23,26 @@ const style = {
   };
 
 const CreateOrgModal = (props) => {
+    const {user, authTokens} = useContext(AuthContext);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        console.log("Submitted");
+        console.log(localStorage.getItem('authTokens').access);
 
+        let response = await fetch(baseUrl + 'create_organization/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorizaton': 'Bearer ' + authTokens?.access
+            },
+            body: JSON.stringify({
+                
+                'username': user.username,
+                'name': e.target.name.value
+            })
+        });
+        console.log(response);
+    }
     return (
         <>
             <Modal
@@ -40,7 +61,7 @@ const CreateOrgModal = (props) => {
                 </Typography>
                 <Box
                 component="form"
-                onSubmit={e => {}}
+                onSubmit={handleSubmit}
                 noValidate
                 sx={{ mt: 1 }}
             >
