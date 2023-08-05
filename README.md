@@ -23,6 +23,31 @@
     python manage.py runserver
   ```
 
+### Django Setup using Anaconda
+- install anaconda
+  - for **WindowsOS**, follow
+https://docs.anaconda.com/free/anaconda/install/windows/ 
+  - for **LinuxOS**, follow https://docs.anaconda.com/free/anaconda/install/linux/ 
+
+- create a virtual environment
+  ```bash
+    conda create -n ENV 
+  ```
+- activate the virtual environment
+  ```bash
+    conda activate ENV
+  ```
+- install dependencies (please make sure you are in the "Back-end" directory)
+  ```bash
+    pip install --upgrade pip
+    pip install -r requirements.txt
+  ```
+- run the server
+  ```bash
+    python manage.py runserver
+  ```
+
+
 ## How to run the database migration
 
 ```bash
