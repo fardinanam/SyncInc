@@ -10,6 +10,8 @@ from .serializer import *
 def get_organizations(request):
     try:
         # get the organizations
+
+        # TODO: use token for user data
         data = request.data
         user = data.get('username')
         user = User.objects.get(username=user)

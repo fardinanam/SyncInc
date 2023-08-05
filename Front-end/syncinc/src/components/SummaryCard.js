@@ -1,11 +1,9 @@
-import { Icon } from '@mui/material';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import FormatListNumberedRtlRoundedIcon from '@mui/icons-material/FormatListNumberedRtlRounded';
 
 const SummaryCard = (props) => {
-    let {title, name, count} = props;
+    let {title, name, count, children} = props;
     return (
         <Card 
             sx={{ 
@@ -15,11 +13,7 @@ const SummaryCard = (props) => {
             }}
         >
             <CardContent>
-                
-                <FormatListNumberedRtlRoundedIcon 
-                    fontSize='large'
-                    color='primary'    
-                />
+                {children}
                 
                 <Typography 
                     sx={{ 
