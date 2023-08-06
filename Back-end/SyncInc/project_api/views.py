@@ -1,18 +1,21 @@
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from .models import *
 from .serializer import *
+from .utils import *
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_organizations(request):
     try:
-        # get the organizations
-        data = request.data
-        user = data.get('username')
-        user = User.objects.get(username=user)
+        token = get_token_from_request(request)
+        access_token_obj = AccessToken(token)
+        username = access_token_obj['username']
+        user = User.objects.get(username=username)
+
         designations = user.designations.all()
         organizations = [designation.organization for designation in designations]
         serializer = OrganizationSerializer(organizations, many=True)
@@ -34,12 +37,19 @@ def get_organizations(request):
 def create_organization(request):
     try:
         # process the organization data
-        data = request.data
-        serializer = OrganizationSerializer(data=data)
+        token = get_token_from_request(request)
+        access_token_obj = AccessToken(token)
+        username = access_token_obj['username']
 
+        data = request.data
+        data['username'] = username
+        
+        serializer = OrganizationSerializer(data=data)
+        print('before validation')
         if not serializer.is_valid():
+            print(serializer.errors)
             return Response({
-                'message': 'Invalid data',
+                'message': serializer.errors.get('non_field_errors')[0],
                 'data': serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
         
