@@ -3,6 +3,7 @@ import jwt_decode from 'jwt-decode';
 import { baseUrl } from '../utils/config';
 import { useNavigate } from 'react-router-dom';
 import { refreshTokenDelay } from '../utils/config';
+import Load from '../components/Load';
 
 const AuthContext = createContext();
 
@@ -18,12 +19,13 @@ const AuthProvider = ({ children }) => {
             : null
         );
     
-    let [loading, setLoading] = useState(true);
+    let [loading, setLoading] = useState(false);
 
     let navigate = useNavigate();
 
     const loginUser = async (e) => {
         e.preventDefault();
+        setLoading(true);
         let response = await fetch(baseUrl + 'accounts/login/', {
             method: 'POST',
             headers: {
@@ -45,6 +47,7 @@ const AuthProvider = ({ children }) => {
         } else {
             alert(data.message);
         }
+        setLoading(false);
     }
 
     const logoutUser = () => {
@@ -55,27 +58,30 @@ const AuthProvider = ({ children }) => {
     }
 
     const updateToken = async () => {
-        console.log('Update Token Called');
-        let response = await fetch(baseUrl + 'accounts/token/refresh/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({'refresh': authTokens?.refresh})
-        })
+        if (authTokens?.refresh) {
+            setLoading(true);   
+            console.log('Update Token Called with authTokens:', authTokens?.refresh);
+            let response = await fetch(baseUrl + 'accounts/token/refresh/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({'refresh': authTokens?.refresh})
+            })
 
-        let data = await response.json();
-        console.log('updateToken data:', data);
+            let data = await response.json();
+            // console.log('updateToken data:', data);
 
-        if (response.status === 200) {
-            setAuthTokens(data);
-            setUser(jwt_decode(data.access));
-            localStorage.setItem('authTokens', JSON.stringify(data));
-        } else {
-            logoutUser();
+            if (response.status === 200) {
+                setAuthTokens(data);
+                setUser(jwt_decode(data.access));
+                localStorage.setItem('authTokens', JSON.stringify(data));
+            } else {
+                logoutUser();
+            }
+
+            setLoading(false);
         }
-
-        setLoading(false);
     }
 
     let contextData = {
@@ -90,17 +96,13 @@ const AuthProvider = ({ children }) => {
             updateToken();
         }
 
-        let interval = setInterval(() => {
-            if (authTokens) {
-                updateToken();
-            }
-        }, refreshTokenDelay);
+        const interval = setInterval(updateToken, refreshTokenDelay);
         return () => clearInterval(interval);
-    }, [authTokens, loading]);
+    }, []);
 
     return (
         <AuthContext.Provider value={contextData}>
-            {loading ? null : children}
+            {loading ? <Load /> : children}
         </AuthContext.Provider>
     )
 }

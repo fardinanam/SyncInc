@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import { Grid } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import MainLayout from '../components/MainLayout';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,11 +12,16 @@ const Projects = () => {
     return (
         <MainLayout>
             <Box 
-                display= 'flex'
-                justifyContent= 'end'
-                
+                display= 'flex'                
                 alignItems='center'
             >
+                <Typography
+                    variant='h4'
+                    sx={{ fontWeight: 'bold' }}
+                    flexGrow={1}
+                >
+                    Your Projects
+                </Typography>
                 <Button variant='contained' onClick={() => navigate('/add_project')}><AddRoundedIcon />project</Button>
             </Box>
             <Grid  

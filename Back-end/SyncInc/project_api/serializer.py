@@ -3,9 +3,13 @@ from .models import Organization, Designation, Project, Client
 from accounts.models import User
 
 class OrganizationSerializer(serializers.ModelSerializer):
+    num_projects = serializers.SerializerMethodField()
     class Meta:
         model = Organization
-        fields = ['name']
+        fields = ['id', 'name', 'num_projects']
+    
+    def get_num_projects(self, obj):
+        return obj.projects.count()
 
     def validate(self, data):
         valid_data = super().validate(data)
@@ -34,6 +38,18 @@ class OrganizationSerializer(serializers.ModelSerializer):
         ).save()
         
         return organization
+
+class OrganizationDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Organization
+        fields = ['id', 'name', 'projects']
+        depth = 1
+        # The depth attribute inside the Meta class determines the depth of relationships that 
+        # should be included in the serialized output. The value 1 means that it will include 
+        # the related objects' data for fields with a ForeignKey or OneToOneField relationship 
+        # up to a depth of 1 level. In this case, if the projects field is a ForeignKey or 
+        # OneToOneField to another model, the related object's data will be included in the 
+        # serialized output.
     
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:

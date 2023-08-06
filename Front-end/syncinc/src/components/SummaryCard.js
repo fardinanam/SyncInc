@@ -7,10 +7,14 @@ const SummaryCard = (props) => {
     return (
         <Card 
             sx={{ 
-                width: 200,
                 borderRadius: 2,
                 boxShadow: 0,
+                width: 200,
+                '&:hover': {
+                    cursor: 'pointer',
+                },
             }}
+            onClick={props.onClick}
         >
             <CardContent>
                 {children}
