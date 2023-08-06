@@ -19,9 +19,8 @@ const Organizations = () => {
     const handleOpen = () => {
         setIsOpen(true);
     }
-    const handleClose = (message) => {
+    const handleClose = () => {
         setIsOpen(false);
-        alert(message);
     }
 
     return (

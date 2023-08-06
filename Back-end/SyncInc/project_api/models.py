@@ -103,6 +103,9 @@ class Client(models.Model):
         blank=True,
     )
     address = models.CharField(max_length=254, blank=True)
+    
+    def __str__(self):
+        return self.name
 
 class Project(models.Model):
     organization = models.ForeignKey(
@@ -129,10 +132,10 @@ class Project(models.Model):
     )
     
     name = models.CharField(max_length=254)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True)
     start_time = models.DateTimeField(auto_now_add=True)
-    end_time = models.DateTimeField()
-    deadline = models.DateTimeField()
+    end_time = models.DateTimeField(blank=True, null=True)
+    deadline = models.DateTimeField(blank=True, null=True)
 
     def clean(self):
         if self.project_leader and self.project_leader not in self.organization.employees.all():
@@ -171,7 +174,7 @@ class AbstractTask(models.Model):
     )
 
     start_time = models.DateTimeField(auto_now_add=True)
-    end_time = models.DateTimeField()
+    end_time = models.DateTimeField(blank=True, null=True)
     deadline = models.DateTimeField()
 
     def clean(self):
@@ -198,7 +201,7 @@ class UserTask(AbstractTask):
     )
 
     file = models.FileField(upload_to='files/', blank=True)
-    rating = models.IntegerField()
+    rating = models.IntegerField(blank=True, null=True)
 
     def clean(self):
         if self.assignee and self.assignee not in self.project.organization.employees.all():
