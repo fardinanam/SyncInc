@@ -48,10 +48,12 @@ const CreateOrgModal = (props) => {
             )
 
             console.log(response);
-            props.handleClose("Organization created successfully!");
+            props.handleClose();
+            alert("Organization created successfully!");
         } catch (error) {
             console.log(error.response.data.message);
-            props.handleClose(error.response.data.message);
+            props.handleClose();
+            alert(error.response.data.message)
         }
         // const response = await axios.get(
         

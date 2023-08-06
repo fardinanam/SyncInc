@@ -88,6 +88,7 @@ def create_project(request):
         }, status=status.HTTP_200_OK)
         
     except Exception as e:
+        print(e)
         return Response({
             'message': 'Something went wrong',
             'data': None
