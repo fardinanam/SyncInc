@@ -1,5 +1,4 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
@@ -11,9 +10,7 @@ from .utils import *
 @permission_classes([IsAuthenticated])
 def get_organizations(request):
     try:
-        token = get_token_from_request(request)
-        access_token_obj = AccessToken(token)
-        username = access_token_obj['username']
+        username = get_data_from_token(request, 'username')
         user = User.objects.get(username=username)
 
         designations = user.designations.all()
@@ -37,9 +34,7 @@ def get_organizations(request):
 def create_organization(request):
     try:
         # process the organization data
-        token = get_token_from_request(request)
-        access_token_obj = AccessToken(token)
-        username = access_token_obj['username']
+        username = get_data_from_token(request, 'username')
 
         data = request.data
         data['username'] = username
@@ -66,6 +61,40 @@ def create_organization(request):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
+        
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_project(request):
+    try:
+        username = get_data_from_token(request, 'username')
+        
+        data = request.data
+        data['username'] = username
+        
+        serializer = ProjectSerializer(data=data)
+        
+        if not serializer.is_valid():
+            print(serializer.errors)
+            return Response({
+                'message': serializer.errors.get('non_field_errors')[0],
+                'data': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        project = serializer.save()
+        
+        return Response({
+            'message': 'Project created successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+    
     
 # @api_view(['POST'])
 # @permission_classes([IsAuthenticated])
