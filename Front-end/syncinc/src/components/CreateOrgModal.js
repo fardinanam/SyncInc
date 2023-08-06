@@ -47,25 +47,13 @@ const CreateOrgModal = (props) => {
                 config
             )
 
-            console.log(response);
-            props.handleClose();
+            props.handleClose(response.data.data);
             alert("Organization created successfully!");
         } catch (error) {
             console.log(error.response.data.message);
             props.handleClose();
             alert(error.response.data.message)
         }
-        // const response = await axios.get(
-        
-        //     `${baseUrl}get_organizations/`,  
-        //     {
-        //         headers: {
-        //             'Authorization': 'Bearer ' + authTokens?.access,
-        //             'Accept': 'application/json',
-        //             'Content-Type': 'application/json',
-        //         }
-        //     }  
-        // )
     }
     return (
         <>

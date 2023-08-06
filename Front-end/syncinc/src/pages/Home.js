@@ -13,13 +13,20 @@ import MainLayout from '../components/MainLayout';
 export default function ClippedDrawer() {
     return (
         <MainLayout>
+            <Box>
+                <Typography variant='h5' sx={{ fontWeight: 'bold' }}>
+                    Dashboard
+                </Typography>
+            </Box>
             <Grid  
                 container 
                 spacing={3}
-                columns={{ xs: 2, sm: 4, md: 12 }}
-            
+                paddingTop={2}
+                columns={{ xs: 12, sm: 6, md: 3 }}
             >
-                <Grid item>
+                <Grid 
+                    item
+                >
                 <SummaryCard
                     title="Ongoing Tasks"
                     count={3}
@@ -31,7 +38,9 @@ export default function ClippedDrawer() {
                     />
                 </SummaryCard>
                 </Grid>
-                <Grid item>
+                <Grid 
+                    item
+                >
                 <SummaryCard
                     title="Ongoing Projects"
                     count={2}

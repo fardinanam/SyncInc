@@ -18,10 +18,46 @@ def get_organizations(request):
         serializer = OrganizationSerializer(organizations, many=True)
 
         return Response({
-            'message': 'Organizations fetched successfully',
+            'message': f'Organizations of {user.username} fetched successfully',
             'data': serializer.data
         }, status=status.HTTP_200_OK)
 
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_organization_details(request, organization_id):
+    """
+        Get organization name and all the projects of the organization
+        from the given organization id
+    """
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        organization = Organization.objects.get(id=organization_id)
+        serializer = OrganizationDetailsSerializer(organization)
+
+        # check if the user is an admin of the organization
+        designation = user.designations.filter(organization=organization).first()
+        # for designation in designations:
+
+        if designation and designation.role != 'Admin':
+            return Response({
+                'message': 'You are not authorized to view this organization',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        return Response({
+            'message': f'Details of the organization {organization.name}',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+        
     except Exception as e:
         print(e)
         return Response({
@@ -53,7 +89,7 @@ def create_organization(request):
         return Response({
             'message': 'Organization created successfully',
             'data': serializer.data
-        }, status=status.HTTP_200_OK)
+        }, status=status.HTTP_201_CREATED)
 
     except Exception as e:
         print(e)
@@ -85,7 +121,7 @@ def create_project(request):
         return Response({
             'message': 'Project created successfully',
             'data': serializer.data
-        }, status=status.HTTP_200_OK)
+        }, status=status.HTTP_201_CREATED)
         
     except Exception as e:
         print(e)

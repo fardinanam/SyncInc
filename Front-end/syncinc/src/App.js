@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import theme from "./context/ThemeContext";
 import AddProject from "./pages/AddProject";
+import OrganizationProjects from "./pages/OrganizationProjects";
 
 function App() {
     return (
@@ -37,6 +38,11 @@ function App() {
                         <Route path="/add_project" element={
                             <RequireAuth>
                                 <AddProject />
+                            </RequireAuth>
+                        } exact />
+                        <Route path="/organization/:id/projects" element={
+                            <RequireAuth>
+                                <OrganizationProjects />
                             </RequireAuth>
                         } exact />
                         <Route path="/login" element={<Login />} />
