@@ -18,5 +18,8 @@ COPY . /app/
 # Expose the port the app runs on
 EXPOSE 8000
 
+# change the directory to SyncInc and run the django commands 
+WORKDIR /app/SyncInc
+
 # Start the Django development server
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
