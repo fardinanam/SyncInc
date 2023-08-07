@@ -4,13 +4,17 @@ from accounts.models import User
 
 class OrganizationSerializer(serializers.ModelSerializer):
     num_projects = serializers.SerializerMethodField()
+    num_members = serializers.SerializerMethodField()
     class Meta:
         model = Organization
-        fields = ['id', 'name', 'num_projects']
+        fields = ['id', 'name', 'num_projects', 'num_members']
     
     def get_num_projects(self, obj):
         return obj.projects.count()
-
+    
+    def get_num_members(self, obj):
+        return obj.employees.count() + obj.vendors.count()
+    
     def validate(self, data):
         valid_data = super().validate(data)
         user = self.initial_data.get('username')
@@ -21,14 +25,12 @@ class OrganizationSerializer(serializers.ModelSerializer):
         for designation in designations:
             if designation.role == 'Admin' and designation.organization.name == valid_data['name']:
                 raise serializers.ValidationError('Organization already exists for the user')
-
         return valid_data
 
     def create(self, validated_data):
         # check if the organization already exists for the user as an admin
         user = self.initial_data.get('username')
         user = User.objects.get(username=user)
-        
         organization = super().create(validated_data)
         organization.save()
         Designation.objects.create(
@@ -36,7 +38,6 @@ class OrganizationSerializer(serializers.ModelSerializer):
             organization=organization,
             role='Admin'
         ).save()
-        
         return organization
 
 class OrganizationDetailsSerializer(serializers.ModelSerializer):
@@ -50,6 +51,7 @@ class OrganizationDetailsSerializer(serializers.ModelSerializer):
         # up to a depth of 1 level. In this case, if the projects field is a ForeignKey or 
         # OneToOneField to another model, the related object's data will be included in the 
         # serialized output.
+
     
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
