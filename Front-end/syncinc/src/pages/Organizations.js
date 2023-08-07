@@ -49,7 +49,9 @@ const Organizations = () => {
                 }  
 
             )
-
+            console.log(response);
+            console.log(response.data);
+            console.log(response.data.data);
             setOrganizations(response.data.data);
         } catch (error) {
             console.log(error.response.data.message);
