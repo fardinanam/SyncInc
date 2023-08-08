@@ -31,7 +31,7 @@ const MainLayout = (props) => {
                     height: '100vh',
                 }}
             >
-                <Toolbar />
+                <Toolbar position='fixed'/>
                 {children}
             </Box>
         </Box>

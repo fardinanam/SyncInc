@@ -59,7 +59,7 @@ const Organizations = () => {
     }
 
     return (
-        <MainLayout>
+        <>
             <Box 
                 display= 'flex'
                 alignItems='center'
@@ -98,7 +98,7 @@ const Organizations = () => {
                 }
             </Grid>
 
-        </MainLayout>
+        </>
     )
 }
 

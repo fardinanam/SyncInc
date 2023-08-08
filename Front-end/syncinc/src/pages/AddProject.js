@@ -12,7 +12,7 @@ const AddProject = () => {
     const navigate = useNavigate();
 
     return(
-        <MainLayout>
+        <>
             <Box
                 component="form"
                 noValidate
@@ -117,7 +117,7 @@ const AddProject = () => {
                     <Grid item xs={0} sm={3} />
                 </Grid>
             </Box>
-        </MainLayout>
+        </>
     )
 }
 

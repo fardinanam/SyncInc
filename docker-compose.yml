@@ -1,0 +1,20 @@
+version: '3'
+services:
+  django:
+    build:
+      context: ./Back-end/SyncInc
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./Back-end/SyncInc:/app
+    
+
+  react:
+    build:
+      context: ./Front-end/syncinc
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./Front-end/syncinc:/app
+    depends_on:
+      - django

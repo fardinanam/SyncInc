@@ -1,10 +1,6 @@
 import Box from '@mui/material/Box';
-import CssBaseline from '@mui/material/CssBaseline';
-import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 
-import Header from '../components/Header';
-import SideBar from '../components/SideBar';
 import SummaryCard from '../components/SummaryCard';
 import { Grid } from '@mui/material';
 import FormatListNumberedRtlRoundedIcon from '@mui/icons-material/FormatListNumberedRtlRounded';
@@ -12,7 +8,8 @@ import MainLayout from '../components/MainLayout';
 
 export default function ClippedDrawer() {
     return (
-        <MainLayout>
+        // <MainLayout selected='dashboard'>
+        <>
             <Box>
                 <Typography variant='h5' sx={{ fontWeight: 'bold' }}>
                     Dashboard
@@ -53,6 +50,7 @@ export default function ClippedDrawer() {
                 </SummaryCard>
                 </Grid>
             </Grid>
-        </MainLayout>
+        </>
+        // </MainLayout>
     );
 }
