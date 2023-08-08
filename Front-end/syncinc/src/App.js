@@ -14,6 +14,7 @@ import theme from "./context/ThemeContext";
 import AddProject from "./pages/AddProject";
 import OrganizationProjects from "./pages/OrganizationProjects";
 import MainLayout from "./components/MainLayout";
+import OrganizationMembers from "./pages/OrganizationMembers";
 
 function App() {
     return (
@@ -32,6 +33,7 @@ function App() {
                                         <Route path="/projects" element={<Projects />} exact />
                                         <Route path="/add_project" element={<AddProject />} exact />
                                         <Route path="/organization/:id/projects" element={<OrganizationProjects />} exact />
+                                        <Route path="/organization/:id/members" element={<OrganizationMembers />} exact />
                                     </Routes>
                                 </MainLayout>
                             </RequireAuth>
