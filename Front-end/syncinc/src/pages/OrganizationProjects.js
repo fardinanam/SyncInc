@@ -48,7 +48,7 @@ const OrganizationProjects = (props) => {
     }
 
     return (
-        <MainLayout>
+        <>
             <Box 
                 display= 'flex'                
                 alignItems='center'
@@ -87,7 +87,7 @@ const OrganizationProjects = (props) => {
                 </Grid>
             ))}
             </Grid>
-        </MainLayout>
+        </>
     );
 };
 

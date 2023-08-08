@@ -43,7 +43,7 @@ const AuthProvider = ({ children }) => {
             setAuthTokens(data);
             setUser(jwt_decode(data.access)); // decode the JWT token
             localStorage.setItem('authTokens', JSON.stringify(data));
-            navigate('/');
+            navigate('/dashboard');
         } else {
             alert(data.message);
         }

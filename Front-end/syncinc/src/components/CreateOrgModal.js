@@ -59,7 +59,7 @@ const CreateOrgModal = (props) => {
         <>
             <Modal
                 open={props.open}
-                onClose={props.handleClose}
+                onClose={() => props.handleClose()}
             >
             <Box 
                 sx={{ 

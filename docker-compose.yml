@@ -7,8 +7,7 @@ services:
       - "8000:8000"
     volumes:
       - ./Back-end/SyncInc:/app
-    depends_on:
-      - react
+    
 
   react:
     build:
@@ -17,3 +16,5 @@ services:
       - "3000:3000"
     volumes:
       - ./Front-end/syncinc:/app
+    depends_on:
+      - django

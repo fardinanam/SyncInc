@@ -10,13 +10,13 @@ const Projects = () => {
     const navigate = useNavigate();
 
     return (
-        <MainLayout>
+        <>
             <Box 
                 display= 'flex'                
                 alignItems='center'
             >
                 <Typography
-                    variant='h4'
+                    variant='h5'
                     sx={{ fontWeight: 'bold' }}
                     flexGrow={1}
                 >
@@ -30,7 +30,7 @@ const Projects = () => {
                 columns={{ xs: 12, sm: 6, md: 3 }}
             >
             </Grid>
-        </MainLayout>
+        </>
 
     )
 }

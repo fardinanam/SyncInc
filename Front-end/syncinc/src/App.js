@@ -13,6 +13,7 @@ import Register from "./pages/Register";
 import theme from "./context/ThemeContext";
 import AddProject from "./pages/AddProject";
 import OrganizationProjects from "./pages/OrganizationProjects";
+import MainLayout from "./components/MainLayout";
 
 function App() {
     return (
@@ -20,33 +21,21 @@ function App() {
             <BrowserRouter>
                 <AuthProvider>
                     <Routes>
-                        <Route path="/" element={
-                            <RequireAuth>
-                                <Home />
-                            </RequireAuth>
-                        } exact />
-                        <Route path="/organizations" element={
-                            <RequireAuth>
-                                <Organizations />
-                            </RequireAuth>
-                        } exact />
-                        <Route path="/projects" element={
-                            <RequireAuth>
-                                <Projects />
-                            </RequireAuth>
-                        } exact />
-                        <Route path="/add_project" element={
-                            <RequireAuth>
-                                <AddProject />
-                            </RequireAuth>
-                        } exact />
-                        <Route path="/organization/:id/projects" element={
-                            <RequireAuth>
-                                <OrganizationProjects />
-                            </RequireAuth>
-                        } exact />
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
+                        <Route path="*" element={
+                            <RequireAuth>
+                                <MainLayout>
+                                    <Routes>
+                                        <Route path="/dashboard" element={<Home />} exact />
+                                        <Route path="/organizations" element={<Organizations />} exact />
+                                        <Route path="/projects" element={<Projects />} exact />
+                                        <Route path="/add_project" element={<AddProject />} exact />
+                                        <Route path="/organization/:id/projects" element={<OrganizationProjects />} exact />
+                                    </Routes>
+                                </MainLayout>
+                            </RequireAuth>
+                        } />
                     </Routes>
                 </AuthProvider>
             </BrowserRouter>
