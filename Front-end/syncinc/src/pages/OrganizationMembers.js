@@ -3,10 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
 import { Box, Typography, Button, Grid, IconButton } from "@mui/material";
-import MainLayout from "../components/MainLayout";
+
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import {List, ListItem, ListItemText, ListItemAvatar, ListItemButton, Collapse} from '@mui/material';
-import ListItemIcon from '@mui/material/ListItemIcon';
+import {Collapse} from '@mui/material';
 
 import AuthContext from '../context/AuthContext';
 import { baseUrl } from "../utils/config";
@@ -24,40 +23,56 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import Rating from '@mui/material/Rating';
 import Chip from "@mui/material/Chip";
+import NameAvatar from "../components/NameAvatar";
+import {ToggleButtonGroup, ToggleButton} from "@mui/material";
+import CollapsibleMemberTable from "../components/CollapsibleMemberTable";
 
 const OrganizationMembers = (props) => {
+    console.log("in members")
     const { authTokens } = useContext(AuthContext);
     const navigate = useNavigate();
     const { id } = useParams();
+    const [selectedValue, setSelectedValue] = useState('members');
+    const [organization, setOrganization] = useState({});
 
-    //const [organizationMembers, setOrganizationMembers] = useState({});
+    const handleToggleChange = (event, newValue) => {
+        console.log(id);
+        console.log(newValue);
+        if(newValue != null) {
+            setSelectedValue(newValue);
+            navigate(`/organization/${id}/${newValue}`);
+        }
+    }
 
-    // useEffect(() => {
-    //     fetchOrganizationMembers();
-    // }, []);
+    const [organizationMembers, setOrganizationMembers] = useState({});
 
-    // // use axios to get organization details
-    // const fetchOrganizationMembers = async () => {
-    //     try {
-    //         const response = await axios.get(
-    //             `${baseUrl}organization_members/${id}/`,  
-    //             {
-    //                 headers: {
-    //                     'Authorization': 'Bearer ' + authTokens?.access,
-    //                     'Accept': 'application/json',
-    //                     'Content-Type': 'application/json',
-    //                 }
-    //             }  
+    useEffect(() => {
+        fetchOrganizationProjectDetails();
+    }, []);
 
-    //         )
+    // use axios to get organization details
+    const fetchOrganizationProjectDetails = async () => {
+        console.log("in members")
+        try {
+            const response = await axios.get(
+                `${baseUrl}organization_details/${id}/`,  
+                {
+                    headers: {
+                        'Authorization': 'Bearer ' + authTokens?.access,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                }  
 
-    //         console.log(response);
-    //         setOrganizationMembers(response.data.data);
-    //     } catch (error) {
-    //         console.log(error.response.data.message);
-    //         // window.location.href = '/organizations';
-    //     }
-    // }
+            )
+
+            console.log(response);
+            setOrganization(response.data.data);
+        } catch (error) {
+            console.log(error.response.data.message);
+            // window.location.href = '/organizations';
+        }
+    }
     const [openEmployees, setOpenEmployees] = useState(false);
     const [openVendors, setOpenVendors] = useState(false);
     const members = [ {id: 1, name: "John Doe", expertise:"Video Editing", completedTasks: 20, averageRating: 4, averageTime: 15, role: "employee" },
@@ -67,124 +82,94 @@ const OrganizationMembers = (props) => {
           ]
 
     return (
-        <MainLayout>
-            <Box 
-                display= 'flex'                
-                alignItems='center'
-                paddingBottom={3}
+        <>
+            <Grid 
+                container
             >
-                <Box flexGrow={1}>
-                    <Typography 
+                <Grid 
+                    item
+                    display={'flex'}
+                    xs={12} md={3}
+                    alignItems={"center"}
+                    justifyContent={"flex-start"}
+                >
+                    <Typography
                         variant='h5'
-                        sx={{ fontWeight: 'bold'}}
-                    > Members</Typography>
-                </Box>
-                <Button variant='contained'onClick={() => navigate('/add_project')}><AddRoundedIcon />Member</Button>
-            </Box>
+                        sx={{ fontWeight: 'bold' }}
+                        flexGrow={1}
+                        >
+                        {organization?.name}
+                    </Typography>
+                </Grid>
+                <Grid 
+                    item 
+                    display={'flex'}
+                    xs={12} md={6}
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                >
+                    <ToggleButtonGroup  
+                        value={selectedValue}
+                        exclusive
+                        onChange={handleToggleChange}
+                        aria-label="text alignment"
+                        sx={{ height: '80%' }}
+                    >
+                        <ToggleButton value="projects" aria-label="left aligned">
+                            <Typography
+                                variant='h6'
+                                flexGrow={1}
+                            >
+                                projects
+                            </Typography>
+                        </ToggleButton>
+                        <ToggleButton value="members" aria-label="right aligned">
+                            <Typography
+                                variant='h6'
+                                flexGrow={1}
+                            >
+                                members
+                            </Typography>
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                </Grid>
+                <Grid 
+                    item
+                    display={'flex'}
+                    xs={12} md={3}
+                    alignItems={'center'}
+                    justifyContent={'flex-end'}
+                >
+                    <Button variant='contained' onClick={() => navigate('add-project') }>
+                        <AddRoundedIcon />
+                        Project
+                    </Button>
 
+                </Grid>
+            
+            </Grid>
+
+        
             <Paper>
                 <Table sx={{ minWidth: 650}} aria-label="simple table">
                         <TableRow>
-                            <TableCell > <TagIcon></TagIcon></TableCell>
-                            <TableCell width="18%">Name <IconButton><SortIcon></SortIcon></IconButton></TableCell>
-                            <TableCell width="18%">Expertise<IconButton><SortIcon></SortIcon></IconButton></TableCell>
-                            <TableCell width="18%">Completed Tasks<IconButton><SortIcon></SortIcon></IconButton></TableCell>
-                            <TableCell width="18%">Average Rating<IconButton><SortIcon></SortIcon></IconButton></TableCell>
-                            <TableCell width="18%">Average Time<IconButton><SortIcon></SortIcon></IconButton></TableCell>
+                            <TableCell width="25%">Name <IconButton><SortIcon></SortIcon></IconButton></TableCell>
+                            <TableCell width="25%">Expertise<IconButton><SortIcon></SortIcon></IconButton></TableCell>
+                            <TableCell width="20%">Completed Tasks<IconButton><SortIcon></SortIcon></IconButton></TableCell>
+                            <TableCell width="15%">Average Rating<IconButton><SortIcon></SortIcon></IconButton></TableCell>
+                            <TableCell width="15%">Average Time<IconButton><SortIcon></SortIcon></IconButton></TableCell>
                         </TableRow>
                 </Table>
             </Paper>
-            
-            <Paper sx={{marginTop: '20px'}}>
-                <Typography variant='h6' sx={{ fontWeight: 'bold', paddingTop: '10px', paddingBottom: '10px'}}>
-                    <IconButton
-                                aria-label="expand row"
-                                size="small"
-                                onClick={() => setOpenEmployees(!openEmployees)}
-                                >
-                                {openEmployees ? (
-                                <KeyboardArrowUpIcon />
-                                ) : (
-                                <KeyboardArrowDownIcon />
-                                )}
-                            
-                    </IconButton>
-                        All Designers
-                </Typography>
-            <Collapse
-            in={openEmployees}
-            timeout="auto"
-            unmountOnExit
-            > 
-                <Table sx={{ minWidth: 650}} aria-label="simple table">
-                <TableBody>
-                    {members.filter(member => member.role === 'employee').map((member) => (
-                    <TableRow
-                    key={member.id}
-                    sx={{alignItems:"flex-start"}}
-                    >   
-                        <TableCell >
-                            {member.id}
-                        </TableCell>
-                        <TableCell width="18%">{member.name}</TableCell>
-                        <TableCell width="18%"><Chip label={member.expertise} color="success" /></TableCell>
-                        <TableCell width="18%">{member.completedTasks}</TableCell>
-                        <TableCell width="18%"><Rating name="average_rating" value={member.averageRating} precision={0.25} readOnly/></TableCell>
-                        <TableCell width="18%">{member.averageTime} days</TableCell>
-                    </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-            
-            </Collapse>
-            </Paper>
-
-
-
-            <Paper sx={{marginTop: '20px'}}>
-                <Typography variant='h6' sx={{ fontWeight: 'bold', paddingTop: '10px', paddingBottom: '10px'}}>
-                    <IconButton
-                                aria-label="expand row"
-                                size="small"
-                                onClick={() => setOpenVendors(!openVendors)}
-                                >
-                                {openVendors ? (
-                                <KeyboardArrowUpIcon />
-                                ) : (
-                                <KeyboardArrowDownIcon />
-                                )}
-                            
-                    </IconButton>
-                        All Designers
-                </Typography>
-            <Collapse
-            in={openVendors}
-            timeout="auto"
-            unmountOnExit
-            > 
-                <Table sx={{ minWidth: 650}} aria-label="simple table">
-                <TableBody>
-                    {members.filter(member => member.role === 'vendor').map((member) => (
-                    <TableRow
-                    key={member.id}
-                    sx={{alignItems:"flex-start"}}
-                    >   
-                        <TableCell >
-                            {member.id}
-                        </TableCell>
-                        <TableCell width="18%">{member.name}</TableCell>
-                        <TableCell width="18%"><Chip label={member.expertise} color="primary" /></TableCell>
-                        <TableCell width="18%">{member.completedTasks}</TableCell>
-                        <TableCell width="18%"><Rating name="average_rating" value={member.averageRating} precision={0.25} readOnly/></TableCell>
-                        <TableCell width="18%">{member.averageTime} days</TableCell>
-                    </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-            
-            </Collapse>
-            </Paper>
-        </MainLayout>
+            <CollapsibleMemberTable
+                title={'All Designers'}
+                members={members.filter(member => member.role === 'employee')}
+            />
+            <CollapsibleMemberTable
+                title={'All Vendors'}
+                members={members.filter(member => member.role === 'vendor')}
+            />
+        </>
     );
 };
 
