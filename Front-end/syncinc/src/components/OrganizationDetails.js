@@ -3,42 +3,40 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
 import { Box, Typography, Button, Grid } from "@mui/material";
+import MainLayout from "./MainLayout";
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import ListItemIcon from '@mui/material/ListItemIcon';
 import WorkIcon from '@mui/icons-material/Work';
 
-import SummaryCard from "../components/SummaryCard";
+
+import SummaryCard from "./SummaryCard";
 import AuthContext from '../context/AuthContext';
 import { baseUrl } from "../utils/config";
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import ToggleButton from '@mui/material/ToggleButton';
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
 
-const OrganizationProjects = (props) => {
+import OrganizationMembers from "../pages/OrganizationMembers";
+import OrganizationProjects from "../pages/OrganizationProjects";
+
+const OrganizationDetails = (props) => {
     const { authTokens } = useContext(AuthContext);
     const navigate = useNavigate();
     const { id } = useParams();
+    console.log("id=",id);
 
-    const [organization, setOrganization] = useState({});
     const [selectedValue, setSelectedValue] = useState('projects');
-
-    const handleToggleChange = (event, newValue) => {
-        console.log(id);
-        console.log(newValue);
-        if(newValue != null) {
-            setSelectedValue(newValue);
-            navigate(`/organization/${id}/${newValue}`);
-        }
-    }
+    const [organization, setOrganization] = useState({});
 
     useEffect(() => {
-        fetchOrganizationProjectDetails();
+        fetchOrganizationDetails();
     }, []);
+    
 
     // use axios to get organization details
-    const fetchOrganizationProjectDetails = async () => {
-        console.log(selectedValue);
-
+    const fetchOrganizationDetails = async () => {
         try {
             const response = await axios.get(
+               
                 `${baseUrl}organization_details/${id}/`,  
                 {
                     headers: {
@@ -88,7 +86,7 @@ const OrganizationProjects = (props) => {
                     <ToggleButtonGroup  
                         value={selectedValue}
                         exclusive
-                        onChange={handleToggleChange}
+                        onChange ={(event, newValue) => {setSelectedValue(newValue)}}
                         aria-label="text alignment"
                         sx={{ height: '80%' }}
                     >
@@ -117,44 +115,17 @@ const OrganizationProjects = (props) => {
                     alignItems={'center'}
                     justifyContent={'flex-end'}
                 >
-                    <Button variant='contained' onClick={() => navigate('add-project') }>
+                    <Button variant='contained' onClick={() => selectedValue === 'projects'? navigate('/add_projects') : navigate('/add_members')}>
                         <AddRoundedIcon />
-                        Project
+                        {selectedValue}
                     </Button>
 
                 </Grid>
             
             </Grid>
-            
-            <Grid  
-                container 
-                spacing={3}
-                columns={{ xs: 12, sm: 6, md: 3 }}
-                paddingTop={2}
-            >
-            {organization?.projects?.map((project, idx) => (
-                <Grid 
-                    item
-                    key={`project-${idx}`}
-                    xs={12}
-                    sm={6}
-                    md={3}
-                >
-                    <SummaryCard
-                        title={project.name}
-                        count={0}
-                        name="Tasks"
-                    >
-                        <WorkIcon fontSize='large' color='primary' />
-                        {/* <ListItemIcon fontSize='small' color='primary' /> */}
-                    </SummaryCard>
-                </Grid>
-            ))}
-            </Grid>
+            {selectedValue === 'projects'? <OrganizationProjects /> : <OrganizationMembers />}
         </>
-        
-        
     );
 };
 
-export default OrganizationProjects;
+export default OrganizationDetails;
