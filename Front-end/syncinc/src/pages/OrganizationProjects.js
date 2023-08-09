@@ -3,9 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
 import { Box, Typography, Button, Grid } from "@mui/material";
-import MainLayout from "../components/MainLayout";
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import ListItemIcon from '@mui/material/ListItemIcon';
 import WorkIcon from '@mui/icons-material/Work';
 
 import SummaryCard from "../components/SummaryCard";
@@ -15,19 +12,19 @@ import { baseUrl } from "../utils/config";
 
 const OrganizationProjects = (props) => {
     const { authTokens } = useContext(AuthContext);
-    const navigate = useNavigate();
-    const { id } = useParams();
+    const id= props.id;
+
     const [organization, setOrganization] = useState({});
 
     useEffect(() => {
-        fetchOrganizationDetails();
+        fetchOrganizationProjectDetails();
     }, []);
 
     // use axios to get organization details
-    const fetchOrganizationDetails = async () => {
+    const fetchOrganizationProjectDetails = async () => {
         try {
             const response = await axios.get(
-                `${baseUrl}organization_details/${id}/`,  
+                `${baseUrl}organization_projects/${id}/`,  
                 {
                     headers: {
                         'Authorization': 'Bearer ' + authTokens?.access,
@@ -48,19 +45,6 @@ const OrganizationProjects = (props) => {
 
     return (
         <>
-            <Box 
-                display= 'flex'                
-                alignItems='center'
-            >
-                <Typography
-                    variant='h5'
-                    sx={{ fontWeight: 'bold' }}
-                    flexGrow={1}
-                >
-                    {organization?.name} Projects
-                </Typography>
-                <Button variant='contained' onClick={() => navigate('/add_project')}><AddRoundedIcon />project</Button>
-            </Box>
             <Grid  
                 container 
                 spacing={3}
@@ -87,6 +71,8 @@ const OrganizationProjects = (props) => {
             ))}
             </Grid>
         </>
+        
+        
     );
 };
 

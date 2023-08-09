@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Organization, Designation, Project, Client
+from .models import Organization, Designation, Project, Client, Vendor
 from accounts.models import User
 
 class OrganizationSerializer(serializers.ModelSerializer):
@@ -40,7 +40,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
         ).save()
         return organization
 
-class OrganizationDetailsSerializer(serializers.ModelSerializer):
+class OrganizationProjectsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = ['id', 'name', 'projects']
@@ -51,7 +51,31 @@ class OrganizationDetailsSerializer(serializers.ModelSerializer):
         # up to a depth of 1 level. In this case, if the projects field is a ForeignKey or 
         # OneToOneField to another model, the related object's data will be included in the 
         # serialized output.
+class EmployeeSerializer(serializers.ModelSerializer):
+    expertise = serializers.SerializerMethodField()
+    class Meta:
+        model = User
+        fields = ['name', 'expertise']
 
+    def get_name(self, obj):
+        return obj.first_name + ' ' + obj.last_name
+    def get_expertise(self, obj):
+        return obj.tags.all()
+
+class VendorSerializer(serializers.ModelSerializer):
+    expertise = serializers.SerializerMethodField()
+    class Meta:
+        model = Vendor
+        fields = ['name', 'expertise']
+    def get_expertise(self, obj):
+        return obj.tags.all()
+
+class OrganizationMembersSerializer(serializers.ModelSerializer):
+    employees = EmployeeSerializer(many=True)
+    vendors = VendorSerializer(many=True)
+    class Meta:
+        model = Organization
+        fields = ['id', 'name', 'employees', 'vendors']
     
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
