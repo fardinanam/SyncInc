@@ -10,39 +10,42 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import DescriptionIcon from '@mui/icons-material/Description';
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 import WorkIcon from '@mui/icons-material/Work';
+import { useTheme } from '@mui/material/styles';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const drawerWidth = 240;
 
 const selectedStyle = {
     "&.Mui-selected": {
-    color: "primary.main",
-    bgcolor: "main.main",
+        color: "primary",
+        bgcolor: "main",
     },
     "&.Mui-selected:after": {
-    content: '""',
-    position: "absolute",
-    top: 0,
-    right: 0,
-    bottom: 0,
-    width: "2px",
-    backgroundColor: "primary.main",
+        content: '""',
+        position: "absolute",
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width: "2px",
+        backgroundColor: "primary.main",
     },
 }
 
 const SideBar = (props) => {
     const navigate = useNavigate();
     const location = useLocation();
+    const theme = useTheme();
+    const mainColor = theme.palette.main[theme.palette.mode]
 
     return (
         <Drawer
             variant="permanent"
             sx={{
-            width: drawerWidth,
-            flexShrink: 0,
-            [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box', borderWidth: 0 },
+                width: drawerWidth,
+                flexShrink: 0,
+                [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box', borderWidth: 0 },
+                backgroundColor:{mainColor}
             }}
-            color='background'
         >
             <Toolbar />
             <Box sx={{ overflow: 'auto' }}>

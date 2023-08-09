@@ -1,5 +1,5 @@
 from django.db import models
-from accounts.models import User
+from accounts.models import User, Address
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
@@ -20,7 +20,12 @@ class Tag(models.Model):
 class Vendor(models.Model):
     name = models.CharField(max_length=254)
     email = models.EmailField(max_length=254)
-    address = models.CharField(max_length=254)
+    address = models.ForeignKey(
+        Address,
+        related_name='vendors',
+        related_query_name='vendor',
+        on_delete=models.CASCADE
+    )
     phone = models.CharField(
         _('phone number'),
         validators=[RegexValidator(
@@ -102,7 +107,14 @@ class Client(models.Model):
         help_text='e.g. 01712345678',
         blank=True,
     )
-    address = models.CharField(max_length=254, blank=True)
+    address = models.ForeignKey(
+        Address,
+        related_name='clients',
+        related_query_name='client',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
     
     def __str__(self):
         return self.name

@@ -1,8 +1,12 @@
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
+import { useTheme } from '@mui/material/styles';
 
 const SummaryCard = (props) => {
+    const theme = useTheme();
+    const backgroundColor = theme.palette.main[theme.palette.mode]
+
     let {title, name, count, children} = props;
     return (
         <Card 
@@ -13,6 +17,7 @@ const SummaryCard = (props) => {
                 '&:hover': {
                     cursor: 'pointer',
                 },
+                backgroundColor: backgroundColor,
             }}
             onClick={props.onClick}
         >

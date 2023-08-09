@@ -168,6 +168,19 @@ AUTH_USER_MODEL = 'accounts.User'
 
 # CORS Settings
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'content-disposition',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'filename',
+]
 
 # Email Settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -176,3 +189,6 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'syncinc408'
 EMAIL_HOST_PASSWORD = 'whobckarhkecskox'
+
+
+

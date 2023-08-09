@@ -10,6 +10,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AuthContext from '../context/AuthContext';
 import { Toolbar } from '@mui/material';
 
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+
 
 const ProfileMenu = () => {
     let {user, logoutUser} = useContext(AuthContext);
@@ -27,6 +30,11 @@ const ProfileMenu = () => {
         logoutUser();
         handleCloseUserMenu();
     };
+
+    const handleAccountSettings = () => {
+        handleCloseUserMenu();
+        window.location.href = "/profile";
+    }
 
     return (
         <Toolbar sx={{ flexGrow: 0 }}>
@@ -55,11 +63,19 @@ const ProfileMenu = () => {
                 open={Boolean(anchorElUser)}
                 onClose={handleCloseUserMenu}
             >
-                <MenuItem key="profile" onClick={handleCloseUserMenu}>
-                    <Typography textAlign="center">Profile</Typography>
+                <MenuItem 
+                    key="account-settings" 
+                    onClick={handleAccountSettings}
+                >
+                    <AccountCircleIcon />
+                    <Typography textAlign="center" ml={1}>Account Settings</Typography>
                 </MenuItem>
-                <MenuItem key="logout" onClick={handleLogout}>
-                    <Typography textAlign="center">Logout</Typography>
+                <MenuItem 
+                    key="logout" 
+                    onClick={handleLogout}
+                >
+                    <LogoutRoundedIcon />
+                    <Typography textAlign="center" ml={1}>Logout</Typography>
                 </MenuItem>
             </Menu>
         </Toolbar>

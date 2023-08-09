@@ -12,7 +12,6 @@ import { baseUrl } from "../utils/config";
 
 const OrganizationProjects = (props) => {
     const { authTokens } = useContext(AuthContext);
-
     const id= props.id;
 
     const [organization, setOrganization] = useState({});
