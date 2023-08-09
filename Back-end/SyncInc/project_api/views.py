@@ -16,7 +16,7 @@ def get_organizations(request):
         designations = user.designations.all()
         organizations = [designation.organization for designation in designations]
         serializer = OrganizationSerializer(organizations, many=True)
-        print(serializer.data)
+        
         return Response({
             'message': f'Organizations of {user.username} fetched successfully',
             'data': serializer.data

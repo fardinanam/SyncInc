@@ -1,14 +1,10 @@
 import React, { useContext } from "react";
-import { Link } from "react-router-dom";
-import AuthContext from "../context/AuthContext";
 import Logo from "../assets/logo.svg"
 import SearchBar from "./SearchBar";
 import ProfileMenu from "./ProfileMenu";
-import { AppBar, Box, Button, Icon, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Toolbar, Typography } from "@mui/material";
 
-const Header = () => {
-    let {user} = useContext(AuthContext)
-    
+const Header = () => {    
     return (
         <AppBar 
             position="fixed" 

@@ -42,3 +42,14 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=254)
     password = serializers.CharField(max_length=254)
+
+class ProfileInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name', 'phone', 'birth_date', 'address', 'is_email_verified', 'tags']
+        depth = 1
+
+        extra_kwargs = {
+            'email_token': {'write_only': True},
+            'is_email_verified': {'read_only': True},    
+        }

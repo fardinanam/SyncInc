@@ -1,10 +1,11 @@
-from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from .serializer import *
 from .utils import send_email_token
+from project_api.utils import get_data_from_token
 
 class LoginView(APIView):
     def post(self, request):
@@ -104,6 +105,24 @@ class VerifyEmailView(APIView):
                 'data': {}
             }, status=status.HTTP_200_OK)
 
+        except Exception as e:
+            print(e)
+            return Response({
+                'message': str(e),
+                'data': {}
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+class ProfileInfoView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            user_id = get_data_from_token(request, 'user_id')
+            serializer = ProfileInfoSerializer(User.objects.get(id=user_id))
+            return Response({
+                'message': 'User profile info',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
         except Exception as e:
             print(e)
             return Response({

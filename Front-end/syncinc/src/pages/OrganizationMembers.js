@@ -67,7 +67,7 @@ const OrganizationMembers = (props) => {
           ]
 
     return (
-        <MainLayout>
+        <>
             <Box 
                 display= 'flex'                
                 alignItems='center'
@@ -184,7 +184,7 @@ const OrganizationMembers = (props) => {
             
             </Collapse>
             </Paper>
-        </MainLayout>
+        </>
     );
 };
 
