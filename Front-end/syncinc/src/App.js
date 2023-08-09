@@ -2,6 +2,7 @@ import React from "react";
 import './App.css';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import RequireAuth from "./utils/RequireAuth";
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { ThemeProvider } from '@mui/material/styles';
 
 import { AuthProvider } from './context/AuthContext';

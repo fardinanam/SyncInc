@@ -17,7 +17,6 @@ const OrganizationProjects = (props) => {
     const { authTokens } = useContext(AuthContext);
     const navigate = useNavigate();
     const { id } = useParams();
-
     const [organization, setOrganization] = useState({});
 
     useEffect(() => {

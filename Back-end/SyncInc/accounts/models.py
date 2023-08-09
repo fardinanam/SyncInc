@@ -2,6 +2,16 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator
+import os
+
+class Address(models.Model):
+    address = models.CharField(max_length=254)
+    city = models.CharField(max_length=50)
+    country = models.CharField(max_length=50)
+    zip_code = models.CharField(max_length=10)
+
+    def __str__(self):
+        return str(self.id)
 
 class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -27,7 +37,7 @@ class User(AbstractUser):
     )
 
     birth_date = models.DateField(null=True, blank=True)
-    address = models.CharField(max_length=254, blank=True)
+    address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True, blank=True)
     profile_picture = models.ImageField(
         upload_to='profile_pictures/', blank=True)
     
@@ -36,6 +46,20 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
+
+    def save(self, *args, **kwargs):
+        try:
+            # Retrieve the current object from the database
+            old_instance = User.objects.get(pk=self.pk)
+        except User.DoesNotExist:
+            pass  # Object is new, so there's no previous file to delete
+        else:
+            # Delete the previous profile_picture file
+            if old_instance.profile_picture:
+                if os.path.isfile(old_instance.profile_picture.path):
+                    os.remove(old_instance.profile_picture.path)
+        
+        super(User, self).save(*args, **kwargs)
     
 
     def name(self):

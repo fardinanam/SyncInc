@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from .serializer import *
@@ -123,6 +124,36 @@ class ProfileInfoView(APIView):
                 'message': 'User profile info',
                 'data': serializer.data
             }, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response({
+                'message': str(e),
+                'data': {}
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+class UpdateProfilePic(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser,)
+
+    def put(self, request):
+        try:
+            user = get_data_from_token(request, 'user_id')
+            print(request.FILES)
+            user = User.objects.get(id=user)
+            serializer = ProfilePicSerializer( instance=user, data=request.data)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    'message': 'Profile picture updated successfully',
+                    'data': serializer.data
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    'message': 'Something went wrong',
+                    'data': serializer.errors
+                }, status=status.HTTP_403_FORBIDDEN) 
+            
         except Exception as e:
             print(e)
             return Response({

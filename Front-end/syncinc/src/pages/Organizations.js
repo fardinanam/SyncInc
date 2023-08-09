@@ -4,7 +4,7 @@ import axios from 'axios';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import CreateOrgModal from '../components/CreateOrgModal';
+import { CreateOrgModal } from '../components/Modals';
 import { Grid, Typography } from '@mui/material';
 import SummaryCard from '../components/SummaryCard';
 import WorkIcon from '@mui/icons-material/Work';

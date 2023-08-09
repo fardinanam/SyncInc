@@ -31,7 +31,7 @@ const ProfileMenu = () => {
         handleCloseUserMenu();
     };
 
-    const handleProfile = () => {
+    const handleAccountSettings = () => {
         handleCloseUserMenu();
         window.location.href = "/profile";
     }
@@ -64,11 +64,11 @@ const ProfileMenu = () => {
                 onClose={handleCloseUserMenu}
             >
                 <MenuItem 
-                    key="profile" 
-                    onClick={handleProfile}
+                    key="account-settings" 
+                    onClick={handleAccountSettings}
                 >
                     <AccountCircleIcon />
-                    <Typography textAlign="center" ml={1}>Profile</Typography>
+                    <Typography textAlign="center" ml={1}>Account Settings</Typography>
                 </MenuItem>
                 <MenuItem 
                     key="logout" 

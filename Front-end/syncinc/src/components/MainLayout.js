@@ -4,18 +4,19 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Header from '../components/Header';
 import SideBar from '../components/SideBar';
 import Toolbar from '@mui/material/Toolbar';
-import Button from '@mui/material/Button';
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import { Grid } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 const MainLayout = (props) => {
+    const theme = useTheme();
+    const background = theme.palette.background[theme.palette.mode]
+    const mainColor = theme.palette.main[theme.palette.mode]
+
     const {children} = props;
-        const bgColor = props.bgColor ? props.bgColor : 'background.main';
         return (
         <Box 
             sx={{ 
                 display: 'flex', 
-                backgroundColor: 'main',
+                backgroundColor: {mainColor},
             }}
         >
             <CssBaseline />
@@ -26,9 +27,10 @@ const MainLayout = (props) => {
                 sx={{ 
                     flexGrow: 1, 
                     p: 3,
-                    backgroundColor: bgColor,
+                    backgroundColor: background,
                     overflow: 'auto',
                     height: '100vh',
+                    borderRadius: '0 3rem 3rem 0',
                 }}
             >
                 <Toolbar position='fixed'/>

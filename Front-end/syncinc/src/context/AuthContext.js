@@ -45,6 +45,7 @@ const AuthProvider = ({ children }) => {
             localStorage.setItem('authTokens', JSON.stringify(data));
             navigate('/dashboard');
         } else {
+            window.location = '/login';
             alert(data.message);
         }
         setLoading(false);

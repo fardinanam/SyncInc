@@ -46,10 +46,18 @@ class LoginSerializer(serializers.Serializer):
 class ProfileInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'email', 'first_name', 'last_name', 'phone', 'birth_date', 'address', 'is_email_verified', 'tags']
+        fields = ['username', 'email', 'first_name', 'last_name', 'phone', 'birth_date', 'address', 'profile_picture', 'tags']
         depth = 1
 
         extra_kwargs = {
             'email_token': {'write_only': True},
             'is_email_verified': {'read_only': True},    
         }
+
+class ProfilePicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['profile_picture']
+    
+    # profile_picture = serializers.ImageField(max_length=None, use_url=False)
+    
