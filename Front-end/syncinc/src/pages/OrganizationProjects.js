@@ -8,26 +8,14 @@ import WorkIcon from '@mui/icons-material/Work';
 import SummaryCard from "../components/SummaryCard";
 import AuthContext from '../context/AuthContext';
 import { baseUrl } from "../utils/config";
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import ToggleButton from '@mui/material/ToggleButton';
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
+
 
 const OrganizationProjects = (props) => {
     const { authTokens } = useContext(AuthContext);
-    const navigate = useNavigate();
-    const { id } = useParams();
+
+    const id= props.id;
 
     const [organization, setOrganization] = useState({});
-    const [selectedValue, setSelectedValue] = useState('projects');
-
-    const handleToggleChange = (event, newValue) => {
-        console.log(id);
-        console.log(newValue);
-        if(newValue != null) {
-            setSelectedValue(newValue);
-            navigate(`/organization/${id}/${newValue}`);
-        }
-    }
 
     useEffect(() => {
         fetchOrganizationProjectDetails();
@@ -35,11 +23,9 @@ const OrganizationProjects = (props) => {
 
     // use axios to get organization details
     const fetchOrganizationProjectDetails = async () => {
-        console.log(selectedValue);
-
         try {
             const response = await axios.get(
-                `${baseUrl}organization_details/${id}/`,  
+                `${baseUrl}organization_projects/${id}/`,  
                 {
                     headers: {
                         'Authorization': 'Bearer ' + authTokens?.access,
@@ -60,72 +46,6 @@ const OrganizationProjects = (props) => {
 
     return (
         <>
-            <Grid 
-                container
-            >
-                <Grid 
-                    item
-                    display={'flex'}
-                    xs={12} md={3}
-                    alignItems={"center"}
-                    justifyContent={"flex-start"}
-                >
-                    <Typography
-                        variant='h5'
-                        sx={{ fontWeight: 'bold' }}
-                        flexGrow={1}
-                        >
-                        {organization?.name}
-                    </Typography>
-                </Grid>
-                <Grid 
-                    item 
-                    display={'flex'}
-                    xs={12} md={6}
-                    alignItems={"center"}
-                    justifyContent={"center"}
-                >
-                    <ToggleButtonGroup  
-                        value={selectedValue}
-                        exclusive
-                        onChange={handleToggleChange}
-                        aria-label="text alignment"
-                        sx={{ height: '80%' }}
-                    >
-                        <ToggleButton value="projects" aria-label="left aligned">
-                            <Typography
-                                variant='h6'
-                                flexGrow={1}
-                            >
-                                projects
-                            </Typography>
-                        </ToggleButton>
-                        <ToggleButton value="members" aria-label="right aligned">
-                            <Typography
-                                variant='h6'
-                                flexGrow={1}
-                            >
-                                members
-                            </Typography>
-                        </ToggleButton>
-                    </ToggleButtonGroup>
-                </Grid>
-                <Grid 
-                    item
-                    display={'flex'}
-                    xs={12} md={3}
-                    alignItems={'center'}
-                    justifyContent={'flex-end'}
-                >
-                    <Button variant='contained' onClick={() => navigate('add-project') }>
-                        <AddRoundedIcon />
-                        Project
-                    </Button>
-
-                </Grid>
-            
-            </Grid>
-            
             <Grid  
                 container 
                 spacing={3}

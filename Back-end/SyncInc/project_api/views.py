@@ -31,7 +31,7 @@ def get_organizations(request):
     
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_organization_details(request, organization_id):
+def get_organization_projects(request, organization_id):
     """
         Get organization name and all the projects of the organization
         from the given organization id
@@ -41,7 +41,7 @@ def get_organization_details(request, organization_id):
         user = User.objects.get(username=username)
 
         organization = Organization.objects.get(id=organization_id)
-        serializer = OrganizationDetailsSerializer(organization)
+        serializer = OrganizationProjectsSerializer(organization)
 
         # check if the user is an admin of the organization
         designation = user.designations.filter(organization=organization).first()
@@ -54,7 +54,45 @@ def get_organization_details(request, organization_id):
             }, status=status.HTTP_401_UNAUTHORIZED)
 
         return Response({
-            'message': f'Details of the organization {organization.name}',
+            'message': f'Projects of the organization {organization.name}',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_organization_members(request, organization_id):
+    """
+        Get organization name and all the projects of the organization
+        from the given organization id
+    """
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        organization = Organization.objects.get(id=organization_id)
+        serializer = OrganizationMembersSerializer(organization)
+
+        print(serializer.data)
+
+        # check if the user is an admin of the organization
+        designation = user.designations.filter(organization=organization).first()
+        # for designation in designations:
+
+        if designation and designation.role != 'Admin':
+            return Response({
+                'message': 'You are not authorized to view this organization',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        return Response({
+            'message': f'Members of the organization {organization.name}',
             'data': serializer.data
         }, status=status.HTTP_200_OK)
         
