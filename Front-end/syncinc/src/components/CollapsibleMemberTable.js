@@ -23,9 +23,9 @@ import NameAvatar from "./NameAvatar";
 
 const CollapsibleMemberTable = ({title, members}) => {
     const [open, setOpen] = useState(true);
-    console.log(title, members);
+    
     return (
-        <Paper sx={{marginTop: '20px'}}>
+        <Paper sx={{marginTop: '2rem'}}>
                 <Typography variant='h6' sx={{ fontWeight: 'bold', paddingTop: '10px', paddingBottom: '10px'}}>
                     <IconButton
                                 aria-label="expand row"

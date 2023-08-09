@@ -12,7 +12,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import theme from "./context/ThemeContext";
 import AddProject from "./pages/AddProject";
-import OrganizationDetails from "./components/OrganizationDetails";
+import OrganizationDetails from "./pages/OrganizationDetails";
 import OrganizationProjects from "./pages/OrganizationProjects";
 import OrganizationMembers from "./pages/OrganizationMembers";
 import MainLayout from "./components/MainLayout";
@@ -33,9 +33,10 @@ function App() {
                                         <Route path="/dashboard" element={<Home />} exact />
                                         <Route path="/projects" element={<Projects />} exact />
                                         <Route path="/organizations" element={<Organizations />} exact />
-                                        <Route path="/organization/:id/projects" element={<OrganizationProjects />} exact />
-                                        <Route path="/organization/:id/members" element={<OrganizationMembers />} exact />
-                                        <Route path="/organization/:id/projects/add-project" element={<AddProject />} exact />
+                                       
+                                        <Route path="/organization/:id" element={<OrganizationDetails />} exact />
+                                               
+                                        <Route path="/organization/:id/add-project" element={<AddProject />} exact />
                                     </Routes>
                                 </MainLayout>
                             </RequireAuth>

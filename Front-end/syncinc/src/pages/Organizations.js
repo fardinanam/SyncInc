@@ -53,6 +53,7 @@ const Organizations = () => {
             console.log(response.data);
             console.log(response.data.data);
             setOrganizations(response.data.data);
+            
         } catch (error) {
             console.log(error.response.data.message);
         }
@@ -89,7 +90,7 @@ const Organizations = () => {
                             title={organization.name}
                             count={organization.num_projects}
                             name="Projects"
-                            onClick={() => navigate(`/organization/${organization.id}/projects`)}  
+                            onClick={() => navigate(`/organization/${organization.id}`, { state: {organization: organization } } ) }  
                         >
                             <WorkIcon fontSize='large' color='primary' />
                         </SummaryCard>
