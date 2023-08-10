@@ -160,3 +160,27 @@ class UpdateProfilePic(APIView):
                 'message': str(e),
                 'data': {}
             }, status=status.HTTP_400_BAD_REQUEST)
+        
+class UpdatePersonalInfo(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        try:
+            user_id = get_data_from_token(request, 'user_id')
+            user = User.objects.get(id=user_id)
+            serializer = PersonalInfoSerializer(instance=user, data=request.data)
+
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            return Response({
+                'message': 'Personal info updated successfully',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            print(e)
+            return Response({
+                'message': str(e),
+                'data': {}
+            }, status=status.HTTP_400_BAD_REQUEST)

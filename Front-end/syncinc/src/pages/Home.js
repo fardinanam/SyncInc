@@ -4,7 +4,6 @@ import Typography from '@mui/material/Typography';
 import SummaryCard from '../components/SummaryCard';
 import { Grid } from '@mui/material';
 import FormatListNumberedRtlRoundedIcon from '@mui/icons-material/FormatListNumberedRtlRounded';
-import MainLayout from '../components/MainLayout';
 
 export default function ClippedDrawer() {
     return (

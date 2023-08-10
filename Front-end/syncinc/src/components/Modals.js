@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
@@ -7,7 +7,13 @@ import { Avatar, Input, TextField } from "@mui/material";
 import { baseUrl } from '../utils/config';
 import AuthContext from '../context/AuthContext';
 import axios from "axios";
+import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 
+const yesterday = dayjs().subtract(10 * 365, 'day');
 
 const style = {
     position: 'absolute',
@@ -105,8 +111,6 @@ const  EditProfilePicModal = (props) => {
         const body = new FormData()
         body.append('profile_picture', selectedFile);
 
-        console.log(body);
-
         const config = {
             headers:{
             'Authorization': 'Bearer ' + authTokens?.access,
@@ -172,18 +176,18 @@ const  EditProfilePicModal = (props) => {
                     color="primary"
                 />
                 <Button
-                    variant="contained"
+                    variant="outlined"
                     color="primary"
                     component="span"
                     fullWidth
                 >
-                    Upload Image
+                    Choose Image
                 </Button>
                 </label>
                 <Button 
                     type="submit" 
                     fullWidth 
-                    variant="contained" 
+                    variant="outlined" 
                     color="success"
                     sx={{ mt: 1 }}
                 >
@@ -195,4 +199,130 @@ const  EditProfilePicModal = (props) => {
     );
 }
 
-export {CreateOrgModal, EditProfilePicModal};
+const EditPersonalInfoModal = (props) => {
+    const {user, authTokens} = useContext(AuthContext);
+    const username = user?.username;
+    const [firstName, setFirstName] = useState(null);
+    const [lastName, setLastName] = useState(null);
+    const [phone, setPhone] = useState(null);
+    const [birthDate, setBirthDate] = useState(null);
+    
+    useEffect(() => {
+        setFirstName(user.first_name);
+        setLastName(user.last_name);
+        setPhone(props.phone);
+        setBirthDate(props.birthDate);
+    }, [user.firstName, user.lastName, props.phone, props.birthDate]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        console.log(birthDate, dayjs(birthDate).format('YYYY-MM-DD'));
+        const body = JSON.stringify({
+            'first_name': firstName,
+            'last_name': lastName,
+            'phone': phone,
+            'birth_date': dayjs(birthDate).format('YYYY-MM-DD'),
+        });
+
+        const config = {
+            headers:{
+                'Authorization': 'Bearer ' + authTokens?.access,
+                'content-type': 'application/json',
+            }
+        }
+
+        try {
+            const response = await axios.put(
+                `${baseUrl}accounts/profile_info/update_personal_info/`,
+                body,
+                config
+            )
+
+            if (response.status === 200) {
+                props.handleClose(response.data.data);
+                alert("Personal information updated successfully!");
+            }
+        } catch (error) {
+            console.log(error.response.data.message);
+            props.handleClose();
+            alert(error.response.data.message);
+        }
+
+
+    }
+
+
+    return (
+        <>
+            <Modal
+                open={props.isOpen}
+                onClose={() => props.handleClose()}
+            >
+                <Box sx={style}>
+                    <Typography id="parent-modal-title" variant="h5" align="center">
+                        Edit Personal Information
+                    </Typography>
+                    <Box
+                        component="form"
+                        onSubmit={handleSubmit}
+                    >
+                        <TextField
+                            defaultValue={firstName}
+                            margin="normal"
+                            fullWidth
+                            id="first_name"
+                            label="First Name"
+                            name="first_name"
+                            autoFocus
+                            onChange={(e) => setFirstName(e.target.value)}
+                        />
+                        <TextField
+                            defaultValue={lastName}
+                            margin="normal"
+                            fullWidth
+                            id="last_name"
+                            label="Last Name"
+                            name="last_name"
+                            onChange={(e) => setLastName(e.target.value)}
+                        />
+                        <TextField
+                            value={phone}
+                            margin="normal"
+                            fullWidth
+                            id="phone"
+                            label="Phone Number"
+                            name="phone"
+                            onChange={(e) => setPhone(e.target.value)}
+                        />
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DemoContainer 
+                                components={['DatePicker']}
+                            >
+                                <DatePicker label="Birth Date" 
+                                    defaultValue={dayjs(birthDate)}
+                                    fullWidth
+                                    id="birth_date"
+                                    name="birth_date"
+                                    onChange={(date) => setBirthDate(date)}
+                                    sx={{
+                                        width: '100%',
+                                    }}
+                                />
+                            </DemoContainer>
+                        </LocalizationProvider> 
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="outlined"
+                            color="success"
+                            sx={{ mt: 2 }}
+                        >
+                            Save
+                        </Button>
+                    </Box>
+                </Box>
+            </Modal>
+        </>
+    )
+}
+export {CreateOrgModal, EditProfilePicModal, EditPersonalInfoModal};

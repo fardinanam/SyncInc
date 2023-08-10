@@ -60,4 +60,8 @@ class ProfilePicSerializer(serializers.ModelSerializer):
         fields = ['profile_picture']
     
     # profile_picture = serializers.ImageField(max_length=None, use_url=False)
-    
+
+class PersonalInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'phone', 'birth_date']

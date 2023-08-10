@@ -9,7 +9,7 @@ import AuthContext from "../context/AuthContext"
 import { useTheme } from "@mui/material/styles"
 
 import EditButton from "../components/EditButton"
-import { EditProfilePicModal } from "../components/Modals"
+import { EditProfilePicModal, EditPersonalInfoModal } from "../components/Modals"
 
 const sectionStyle = {
     borderRadius: 2,
@@ -40,12 +40,18 @@ const Profile = () => {
     const theme = useTheme();
     const mainColor = theme.palette.main[theme.palette.mode]
     let [profileInfo, setProfileInfo] = useState({});
-    let [isOpen, setIsOpen] = useState(false);
-    const handleOpen = () => {
-        setIsOpen(true);
+    let [isProfilePicModalOpen, setIsProfilePicModalOpen] = useState(false);
+    let [isEditPersonalInfoModalOpen, setIsEditPersonalInfoModalOpen] = useState(false);
+
+    const handleEditProfilePicModalOpen = () => {
+        setIsProfilePicModalOpen(true);
     }
 
-    const handleClose = (data) => {
+    const handleEditPersonalInfoModalOpen = () => {
+        setIsEditPersonalInfoModalOpen(true);
+    }
+
+    const handleEditProfilePicModalClose = (data) => {
         if (data) {
             console.log("Profile pic data", data);
 
@@ -54,7 +60,23 @@ const Profile = () => {
                 profile_picture: data.profile_picture
             });
         }
-        setIsOpen(false);
+        setIsProfilePicModalOpen(false);
+    }
+
+    const handleEditPersonalInfoModalClose = (data) => {
+        if (data) {
+            console.log("Personal info data", data);
+
+            setProfileInfo({
+                ...profileInfo, 
+                first_name: data.first_name,
+                last_name: data.last_name,
+                phone_number: data.phone_number,
+                birth_date: data.birth_date,
+            });
+        }
+
+        setIsEditPersonalInfoModalOpen(false);
     }
 
     const fetchProfileInfo = async () => {
@@ -70,8 +92,9 @@ const Profile = () => {
                 }  
 
             )
-
+            
             setProfileInfo(response.data.data);
+            console.log(profileInfo);
         } catch (error) {
             console.log(error.response.data.message);
         }
@@ -115,7 +138,7 @@ const Profile = () => {
                     <Box
                         display={"flex"}
                     >
-                        <Avatar alt={profileInfo.first_name} src={baseUrl.concat(String(profileInfo.profile_picture).substring(1))} sx={{ width: 75, height: 75 }} />
+                        <Avatar alt={profileInfo.first_name} src={profileInfo && baseUrl.concat(String(profileInfo.profile_picture).substring(1))} sx={{ width: 75, height: 75 }} />
                         <Box
                             display={"flex"}
                             flexDirection={"column"}
@@ -129,6 +152,9 @@ const Profile = () => {
                                 {profileInfo.first_name} {profileInfo.last_name}
                             </Typography>
                             <Typography>
+                                {profileInfo.email}
+                            </Typography>
+                            <Typography>
                                 @{profileInfo.username}
                             </Typography>
                         </Box>
@@ -139,13 +165,13 @@ const Profile = () => {
                             <EditButton 
                                 variant="outlined"
                                 size="small"
-                                onClick={handleOpen}
+                                onClick={handleEditProfilePicModalOpen}
                             >
                                 Edit <EditRoundedIcon fontSize="small"/>
                             </EditButton>
                             <EditProfilePicModal 
-                                isOpen={isOpen}
-                                handleClose={handleClose}
+                                isOpen={isProfilePicModalOpen}
+                                handleClose={handleEditProfilePicModalClose}
                                 profile_picture={String(profileInfo.profile_picture).substring(1)}
                             />
                         </Box>
@@ -169,7 +195,14 @@ const Profile = () => {
                         <EditButton 
                             variant="outlined" 
                             size="small"
+                            onClick={handleEditPersonalInfoModalOpen}
                         >Edit <EditRoundedIcon fontSize="small" /> </EditButton>
+                        <EditPersonalInfoModal
+                            isOpen={isEditPersonalInfoModalOpen}
+                            handleClose={handleEditPersonalInfoModalClose}
+                            phone={profileInfo.phone}
+                            birthDate={profileInfo.birth_date}
+                        />
                     </Box>
                     <Grid 
                         container
@@ -187,16 +220,22 @@ const Profile = () => {
                                 value={profileInfo.last_name}
                             />
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        {/* <Grid item xs={12} md={6}>
                             <StackField
                                 title="Email"
                                 value={profileInfo.email}
                             />
-                        </Grid>
+                        </Grid> */}
                         <Grid item xs={12} md={6}>
                             <StackField
                                 title="Phone Number"
                                 value={profileInfo.phone}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <StackField
+                                title="Birth Date"
+                                value={String(new Date(profileInfo.birth_date).toLocaleDateString())}
                             />
                         </Grid>
                     </Grid>
