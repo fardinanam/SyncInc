@@ -54,8 +54,8 @@ class User(AbstractUser):
         except User.DoesNotExist:
             pass  # Object is new, so there's no previous file to delete
         else:
-            # Delete the previous profile_picture file
-            if old_instance.profile_picture:
+            # Delete the previous profile_picture file only if new profile_picture is uploaded
+            if old_instance.profile_picture and self.profile_picture and self.profile_picture != old_instance.profile_picture:
                 if os.path.isfile(old_instance.profile_picture.path):
                     os.remove(old_instance.profile_picture.path)
         
