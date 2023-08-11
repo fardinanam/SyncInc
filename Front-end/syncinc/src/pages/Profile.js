@@ -9,7 +9,7 @@ import AuthContext from "../context/AuthContext"
 import { useTheme } from "@mui/material/styles"
 
 import EditButton from "../components/EditButton"
-import { EditProfilePicModal, EditPersonalInfoModal } from "../components/Modals"
+import { EditProfilePicModal, EditPersonalInfoModal, EditAddressModal } from "../components/Modals"
 
 const sectionStyle = {
     borderRadius: 2,
@@ -38,10 +38,11 @@ const StackField = (props) => {
 const Profile = () => {
     const { authTokens } = useContext(AuthContext);
     const theme = useTheme();
-    const mainColor = theme.palette.main[theme.palette.mode]
+    const mainColor = theme.palette.main
     let [profileInfo, setProfileInfo] = useState({});
     let [isProfilePicModalOpen, setIsProfilePicModalOpen] = useState(false);
     let [isEditPersonalInfoModalOpen, setIsEditPersonalInfoModalOpen] = useState(false);
+    let [isEditAddressModalOpen, setIsEditAddressModalOpen] = useState(false);
 
     const handleEditProfilePicModalOpen = () => {
         setIsProfilePicModalOpen(true);
@@ -51,10 +52,12 @@ const Profile = () => {
         setIsEditPersonalInfoModalOpen(true);
     }
 
+    const handleEditAddressModalOpen = () => {
+        setIsEditAddressModalOpen(true);
+    }
+
     const handleEditProfilePicModalClose = (data) => {
         if (data) {
-            console.log("Profile pic data", data);
-
             setProfileInfo({
                 ...profileInfo, 
                 profile_picture: data.profile_picture
@@ -65,8 +68,6 @@ const Profile = () => {
 
     const handleEditPersonalInfoModalClose = (data) => {
         if (data) {
-            console.log("Personal info data", data);
-
             setProfileInfo({
                 ...profileInfo, 
                 first_name: data.first_name,
@@ -77,6 +78,22 @@ const Profile = () => {
         }
 
         setIsEditPersonalInfoModalOpen(false);
+    }
+
+    const handleEditAddressModalClose = (data) => {
+        if (data) {
+            setProfileInfo({
+                ...profileInfo, 
+                address: {
+                    street: data.street,
+                    city: data.city,
+                    country: data.country,
+                    zip_code: data.zip_code,
+                }
+            });
+        }
+
+        setIsEditAddressModalOpen(false);
     }
 
     const fetchProfileInfo = async () => {
@@ -94,7 +111,6 @@ const Profile = () => {
             )
             
             setProfileInfo(response.data.data);
-            console.log(profileInfo);
         } catch (error) {
             console.log(error.response.data.message);
         }
@@ -138,7 +154,7 @@ const Profile = () => {
                     <Box
                         display={"flex"}
                     >
-                        <Avatar alt={profileInfo.first_name} src={profileInfo && baseUrl.concat(String(profileInfo.profile_picture).substring(1))} sx={{ width: 75, height: 75 }} />
+                        <Avatar alt={profileInfo.first_name} src={profileInfo.profile_picture && baseUrl.concat(String(profileInfo.profile_picture).substring(1))} sx={{ width: 75, height: 75 }} />
                         <Box
                             display={"flex"}
                             flexDirection={"column"}
@@ -172,7 +188,7 @@ const Profile = () => {
                             <EditProfilePicModal 
                                 isOpen={isProfilePicModalOpen}
                                 handleClose={handleEditProfilePicModalClose}
-                                profile_picture={String(profileInfo.profile_picture).substring(1)}
+                                profile_picture={profileInfo.profile_picture && String(profileInfo.profile_picture).substring(1)}
                             />
                         </Box>
                     </Box>
@@ -257,7 +273,16 @@ const Profile = () => {
                         <EditButton
                             variant="outlined"
                             size="small"
-                        >Edit <EditRoundedIcon fontSize="small" /> </EditButton>
+                            onClick={handleEditAddressModalOpen}
+                        >
+                            Edit 
+                            <EditRoundedIcon fontSize="small" /> 
+                        </EditButton>
+                        <EditAddressModal 
+                            isOpen={isEditAddressModalOpen}
+                            handleClose={handleEditAddressModalClose}
+                            address={profileInfo.address}
+                        />
                     </Box>
                     <Grid
                         container
@@ -278,7 +303,7 @@ const Profile = () => {
                         <Grid item xs={12} md={6}>
                             <StackField
                                 title="Street"
-                                value={profileInfo.address?.address}
+                                value={profileInfo.address?.street}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>

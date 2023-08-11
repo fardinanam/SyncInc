@@ -201,7 +201,6 @@ const  EditProfilePicModal = (props) => {
 
 const EditPersonalInfoModal = (props) => {
     const {user, authTokens} = useContext(AuthContext);
-    const username = user?.username;
     const [firstName, setFirstName] = useState(null);
     const [lastName, setLastName] = useState(null);
     const [phone, setPhone] = useState(null);
@@ -259,7 +258,7 @@ const EditPersonalInfoModal = (props) => {
                 onClose={() => props.handleClose()}
             >
                 <Box sx={style}>
-                    <Typography id="parent-modal-title" variant="h5" align="center">
+                    <Typography id="personal-info-modal-title" variant="h5" align="center">
                         Edit Personal Information
                     </Typography>
                     <Box
@@ -325,4 +324,118 @@ const EditPersonalInfoModal = (props) => {
         </>
     )
 }
-export {CreateOrgModal, EditProfilePicModal, EditPersonalInfoModal};
+
+const EditAddressModal = (props) => {
+    const {authTokens} = useContext(AuthContext);
+    const [country, setCountry] = useState(null);
+    const [city, setCity] = useState(null);
+    const [street, setStreet] = useState(null);
+    const [zipCode, setZipCode] = useState(null);
+
+    useEffect(() => {
+        setCountry(props.address?.country);
+        setCity(props.address?.city);
+        setStreet(props.address?.street);
+        setZipCode(props.address?.zip_code);
+    }, [props.address]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const body = JSON.stringify({
+            'country': country,
+            'city': city,
+            'street': street,
+            'zip_code': zipCode,
+        });
+
+        const config = {
+            headers:{
+                'Authorization': 'Bearer ' + authTokens?.access,
+                'content-type': 'application/json',
+            }
+        }
+
+        try {
+            const response = await axios.put(
+                `${baseUrl}accounts/profile_info/update_address/`,
+                body,
+                config
+            );
+
+            if (response.status === 200) {
+                props.handleClose(response.data.data);
+                alert("Address updated successfully!");
+            }
+        } catch (error) {
+            console.log(error.response.data.message);
+            props.handleClose();
+            alert(error.response.data.message);
+        }
+    }
+
+    return (
+        <Modal
+            open={props.isOpen}
+            onClose={() => props.handleClose()}
+        >
+            <Box sx={style}>
+                <Typography id="address-modal-title" variant="h5" align="center">
+                    Edit Address
+                </Typography>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <TextField
+                        defaultValue={country}
+                        margin="normal"
+                        fullWidth
+                        id="country"
+                        label="Country"
+                        name="country"
+                        autoFocus
+                        onChange={(e) => setCountry(e.target.value)}
+                    />
+                    <TextField
+                        defaultValue={city}
+                        margin="normal"
+                        fullWidth
+                        id="city"
+                        label="City"
+                        name="city"
+                        onChange={(e) => setCity(e.target.value)}
+                    />
+                    <TextField
+                        defaultValue={street}
+                        margin="normal"
+                        fullWidth
+                        id="street"
+                        label="Street"
+                        name="street"
+                        onChange={(e) => setStreet(e.target.value)}
+                    />
+                    <TextField
+                        defaultValue={zipCode}
+                        margin="normal"
+                        fullWidth
+                        id="zip_code"
+                        label="Zip Code"
+                        name="zip_code"
+                        onChange={(e) => setZipCode(e.target.value)}
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{ mt: 2 }}
+                    >
+                        Save
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+
+export {CreateOrgModal, EditProfilePicModal, EditPersonalInfoModal, EditAddressModal};

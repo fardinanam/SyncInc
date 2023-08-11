@@ -131,7 +131,7 @@ class ProfileInfoView(APIView):
                 'data': {}
             }, status=status.HTTP_400_BAD_REQUEST)
 
-class UpdateProfilePic(APIView):
+class UpdateProfilePicView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser,)
 
@@ -161,7 +161,7 @@ class UpdateProfilePic(APIView):
                 'data': {}
             }, status=status.HTTP_400_BAD_REQUEST)
         
-class UpdatePersonalInfo(APIView):
+class UpdatePersonalInfoView(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request):
@@ -184,3 +184,32 @@ class UpdatePersonalInfo(APIView):
                 'message': str(e),
                 'data': {}
             }, status=status.HTTP_400_BAD_REQUEST)
+    
+class UpdateUserAddressView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        user_id = get_data_from_token(request, 'user_id')
+        user = User.objects.get(id=user_id)
+        serializer = AddressSerializer(data=request.data)
+        
+        try:
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        except Exception as e:
+            print(e)
+            return Response({
+                'message': 'Something went wrong',
+                'data': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        if user.address:
+            user.address.delete()
+        
+        user.address = serializer.instance
+        user.save()
+
+        return Response({
+            'message': 'Address updated successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
