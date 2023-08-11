@@ -1,6 +1,6 @@
 import React from "react";
 import './App.css';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import RequireAuth from "./utils/RequireAuth";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { ThemeProvider } from '@mui/material/styles';
@@ -26,6 +26,7 @@ function App() {
                     <Routes>
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
+                        <Route path="/" element={<Navigate to={"/dashboard"} />} />
                         <Route path="*" element={
                             <RequireAuth>
                                 <MainLayout>

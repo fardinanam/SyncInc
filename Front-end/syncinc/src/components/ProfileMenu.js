@@ -68,7 +68,7 @@ const ProfileMenu = () => {
                     onClick={handleAccountSettings}
                 >
                     <AccountCircleIcon />
-                    <Typography textAlign="center" ml={1}>Account Settings</Typography>
+                    <Typography textAlign="center" ml={1}>Account</Typography>
                 </MenuItem>
                 <MenuItem 
                     key="logout" 

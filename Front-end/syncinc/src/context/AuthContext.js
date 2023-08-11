@@ -20,7 +20,6 @@ const AuthProvider = ({ children }) => {
         );
     
     let [loading, setLoading] = useState(false);
-    let isPageLoading = false;
 
     let navigate = useNavigate();
 
@@ -93,14 +92,13 @@ const AuthProvider = ({ children }) => {
     }
 
     useEffect(() => {
-        if (isPageLoading) {
-            updateToken();
-            isPageLoading = false;
-        }
-
         const interval = setInterval(updateToken, refreshTokenDelay);
         return () => clearInterval(interval);
     }, [authTokens]);
+
+    useEffect(() => {
+        updateToken();
+    }, []);
 
     return (
         <AuthContext.Provider value={contextData}>

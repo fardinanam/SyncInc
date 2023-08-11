@@ -70,3 +70,35 @@ class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
         fields = '__all__'
+
+class ChangePasswordSerializer(serializers.Serializer):
+    model = User
+
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+class ForgotPasswordSerializer(serializers.ModelSerializer):
+    # a serializer to update the email token if the email exists in the database
+    # or raise an error if the email does not exist
+    class Meta:
+        model = User
+        fields = ['email', 'email_token']
+
+    # create a new email token and save it to the database
+    def update(self, instance, validated_data):
+        instance.email_token = str(uuid.uuid4())
+        instance.save()
+        return instance
+
+class ResetPasswordSerializer(serializers.ModelSerializer):
+    # a serializer to update the password if the email token is in the user's database
+    # or raise an error if the email token does not exist
+    class Meta:
+        model = User
+        fields = ['username', 'email_token', 'password']
+
+    # update the password and save it to the database
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data['password'])
+        instance.save()
+        return instance

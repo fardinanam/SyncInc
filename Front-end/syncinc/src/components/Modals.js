@@ -105,6 +105,7 @@ const  EditProfilePicModal = (props) => {
     const {user, authTokens} = useContext(AuthContext);
     const username = user?.username;
     const [selectedFile, setSelectedFile] = useState('');
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -133,10 +134,13 @@ const  EditProfilePicModal = (props) => {
             props.handleClose();
             alert(error.response.data.message);
         }
+
+        setIsSubmitDisabled(true);
     }
 
     const handleFileChange = (e) => {
         setSelectedFile(e.target.files[0]);
+        setIsSubmitDisabled(false);
     }
 
     
@@ -190,6 +194,7 @@ const  EditProfilePicModal = (props) => {
                     variant="outlined" 
                     color="success"
                     sx={{ mt: 1 }}
+                    disabled={isSubmitDisabled}
                 >
                     Save
                 </Button>
@@ -205,6 +210,7 @@ const EditPersonalInfoModal = (props) => {
     const [lastName, setLastName] = useState(null);
     const [phone, setPhone] = useState(null);
     const [birthDate, setBirthDate] = useState(null);
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
     
     useEffect(() => {
         setFirstName(user.first_name);
@@ -215,7 +221,7 @@ const EditPersonalInfoModal = (props) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(birthDate, dayjs(birthDate).format('YYYY-MM-DD'));
+
         const body = JSON.stringify({
             'first_name': firstName,
             'last_name': lastName,
@@ -250,6 +256,41 @@ const EditPersonalInfoModal = (props) => {
 
     }
 
+    const handleFirstNameChange = (e) => {
+        if (e.target.value !== user.first_name) {
+            setFirstName(e.target.value);
+            setIsSubmitDisabled(false);
+        } else {
+            setIsSubmitDisabled(true);
+        }
+    }
+
+    const handleLastNameChange = (e) => {
+        if (e.target.value !== user.last_name) {
+            setLastName(e.target.value);
+            setIsSubmitDisabled(false);
+        } else {
+            setIsSubmitDisabled(true);
+        }
+    }
+
+    const handlePhoneChange = (e) => {
+        if (e.target.value !== props.phone) {
+            setPhone(e.target.value);
+            setIsSubmitDisabled(false);
+        } else {
+            setIsSubmitDisabled(true);
+        }
+    }
+
+    const handleBirthDateChange = (date) => {
+        if (date !== props.birthDate) {
+            setBirthDate(date);
+            setIsSubmitDisabled(false);
+        } else {
+            setIsSubmitDisabled(true);
+        }
+    }
 
     return (
         <>
@@ -273,7 +314,7 @@ const EditPersonalInfoModal = (props) => {
                             label="First Name"
                             name="first_name"
                             autoFocus
-                            onChange={(e) => setFirstName(e.target.value)}
+                            onChange={handleFirstNameChange}
                         />
                         <TextField
                             defaultValue={lastName}
@@ -282,7 +323,7 @@ const EditPersonalInfoModal = (props) => {
                             id="last_name"
                             label="Last Name"
                             name="last_name"
-                            onChange={(e) => setLastName(e.target.value)}
+                            onChange={handleLastNameChange}
                         />
                         <TextField
                             value={phone}
@@ -291,7 +332,7 @@ const EditPersonalInfoModal = (props) => {
                             id="phone"
                             label="Phone Number"
                             name="phone"
-                            onChange={(e) => setPhone(e.target.value)}
+                            onChange={handlePhoneChange}
                         />
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DemoContainer 
@@ -302,7 +343,7 @@ const EditPersonalInfoModal = (props) => {
                                     fullWidth
                                     id="birth_date"
                                     name="birth_date"
-                                    onChange={(date) => setBirthDate(date)}
+                                    onChange={handleBirthDateChange}
                                     sx={{
                                         width: '100%',
                                     }}
@@ -315,6 +356,7 @@ const EditPersonalInfoModal = (props) => {
                             variant="outlined"
                             color="success"
                             sx={{ mt: 2 }}
+                            disabled={isSubmitDisabled}
                         >
                             Save
                         </Button>
@@ -331,6 +373,7 @@ const EditAddressModal = (props) => {
     const [city, setCity] = useState(null);
     const [street, setStreet] = useState(null);
     const [zipCode, setZipCode] = useState(null);
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
 
     useEffect(() => {
         setCountry(props.address?.country);
@@ -367,9 +410,43 @@ const EditAddressModal = (props) => {
                 alert("Address updated successfully!");
             }
         } catch (error) {
-            console.log(error.response.data.message);
-            props.handleClose();
-            alert(error.response.data.message);
+            props.handleClose(error.response.data.message);
+        }
+    }
+
+    const handleCountryChange = (e) => {
+        if (e.target.value !== props.address.country) {
+            setCountry(e.target.value);
+            setIsSubmitDisabled(false);
+        } else {
+            setIsSubmitDisabled(true);
+        }
+    }
+
+    const handleCityChange = (e) => {
+        if (e.target.value !== props.address.city) {
+            setCity(e.target.value);
+            setIsSubmitDisabled(false);
+        } else {
+            setIsSubmitDisabled(true);
+        }
+    }
+
+    const handleStreetChange = (e) => {
+        if (e.target.value !== props.address.street) {
+            setStreet(e.target.value);
+            setIsSubmitDisabled(false);
+        } else {
+            setIsSubmitDisabled(true);
+        }
+    }
+
+    const handleZipCodeChange = (e) => {
+        if (e.target.value !== props.address.zip_code) {
+            setZipCode(e.target.value);
+            setIsSubmitDisabled(false);
+        } else {
+            setIsSubmitDisabled(true);
         }
     }
 
@@ -394,7 +471,7 @@ const EditAddressModal = (props) => {
                         label="Country"
                         name="country"
                         autoFocus
-                        onChange={(e) => setCountry(e.target.value)}
+                        onChange={handleCountryChange}
                     />
                     <TextField
                         defaultValue={city}
@@ -403,7 +480,7 @@ const EditAddressModal = (props) => {
                         id="city"
                         label="City"
                         name="city"
-                        onChange={(e) => setCity(e.target.value)}
+                        onChange={handleCityChange}
                     />
                     <TextField
                         defaultValue={street}
@@ -412,7 +489,7 @@ const EditAddressModal = (props) => {
                         id="street"
                         label="Street"
                         name="street"
-                        onChange={(e) => setStreet(e.target.value)}
+                        onChange={handleStreetChange}
                     />
                     <TextField
                         defaultValue={zipCode}
@@ -421,7 +498,7 @@ const EditAddressModal = (props) => {
                         id="zip_code"
                         label="Zip Code"
                         name="zip_code"
-                        onChange={(e) => setZipCode(e.target.value)}
+                        onChange={handleZipCodeChange}
                     />
                     <Button
                         type="submit"
@@ -429,6 +506,7 @@ const EditAddressModal = (props) => {
                         variant="outlined"
                         color="success"
                         sx={{ mt: 2 }}
+                        disabled={isSubmitDisabled}
                     >
                         Save
                     </Button>
@@ -438,4 +516,123 @@ const EditAddressModal = (props) => {
     )
 }
 
-export {CreateOrgModal, EditProfilePicModal, EditPersonalInfoModal, EditAddressModal};
+const ChangePasswordModal = (props) => {
+    const {authTokens} = useContext(AuthContext);
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
+    const [oldPassword, setOldPassword] = useState(null);
+    const [newPassword, setNewPassword] = useState(null);
+    const [confirmNewPassword, setConfirmNewPassword] = useState(null);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const body = JSON.stringify({
+            'old_password': oldPassword,
+            'new_password': newPassword
+        });
+
+        const config = {
+            headers:{
+                'Authorization': 'Bearer ' + authTokens?.access,
+                'content-type': 'application/json',
+            }
+        };
+
+        try {
+            const response = await axios.put(
+                `${baseUrl}accounts/profile_info/update_password/`,
+                body,
+                config
+            );
+
+            if (response.status === 200) {
+                props.handleClose();
+                alert("Password changed successfully!");
+            }
+        } catch (error) {
+            props.handleClose(error.response.data);
+        }
+
+    }
+
+    const handleChange = (e) => {
+        if (!oldPassword || !newPassword || !confirmNewPassword 
+            || newPassword !== confirmNewPassword) {
+            setIsSubmitDisabled(true);
+        } else {
+            setIsSubmitDisabled(false);
+        }
+    }
+
+    const handleOldPasswordChange = (e) => {
+        setOldPassword(e.target.value);
+    }
+
+    const handleNewPasswordChange = (e) => {
+        setNewPassword(e.target.value);
+        
+    }
+
+    const handleConfirmNewPasswordChange = (e) => {
+        setConfirmNewPassword(e.target.value);
+    }
+
+    useEffect(() => {
+        handleChange();
+    }, [oldPassword, newPassword, confirmNewPassword])
+
+    return (
+        <Modal
+            open={props.isOpen}
+            onClose={() => props.handleClose()}
+        >
+            <Box sx={style}>
+                <Typography id="change-password-modal-title" variant="h5" align="center">
+                    Change Password
+                </Typography>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        id="old_password"
+                        label="Old Password"
+                        name="old_password"
+                        type="password"
+                        onChange={handleOldPasswordChange}
+                    />
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        id="new_password"
+                        label="New Password"
+                        name="new_password"
+                        type="password"
+                        onChange={handleNewPasswordChange}
+                    />
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        id="confirm_new_password"
+                        label="Confirm New Password"
+                        name="confirm_new_password"
+                        type="password"
+                        onChange={handleConfirmNewPasswordChange}
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{ mt: 2 }}
+                        disabled={isSubmitDisabled}
+                    >
+                        Save
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+export {CreateOrgModal, EditProfilePicModal, EditPersonalInfoModal, EditAddressModal, ChangePasswordModal};

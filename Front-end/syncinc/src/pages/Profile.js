@@ -9,12 +9,12 @@ import AuthContext from "../context/AuthContext"
 import { useTheme } from "@mui/material/styles"
 
 import EditButton from "../components/EditButton"
-import { EditProfilePicModal, EditPersonalInfoModal, EditAddressModal } from "../components/Modals"
+import { EditProfilePicModal, EditPersonalInfoModal, EditAddressModal, ChangePasswordModal } from "../components/Modals"
 
 const sectionStyle = {
     borderRadius: 2,
     border: 0.5,
-    borderColor: "grey.200",
+    borderColor: "grey.300",
     p: 2
 }
 
@@ -39,10 +39,11 @@ const Profile = () => {
     const { authTokens } = useContext(AuthContext);
     const theme = useTheme();
     const mainColor = theme.palette.main
-    let [profileInfo, setProfileInfo] = useState({});
-    let [isProfilePicModalOpen, setIsProfilePicModalOpen] = useState(false);
-    let [isEditPersonalInfoModalOpen, setIsEditPersonalInfoModalOpen] = useState(false);
-    let [isEditAddressModalOpen, setIsEditAddressModalOpen] = useState(false);
+    const [profileInfo, setProfileInfo] = useState({});
+    const [isProfilePicModalOpen, setIsProfilePicModalOpen] = useState(false);
+    const [isEditPersonalInfoModalOpen, setIsEditPersonalInfoModalOpen] = useState(false);
+    const [isEditAddressModalOpen, setIsEditAddressModalOpen] = useState(false);
+    const [isChangePassModalOpen, setIsChangePassModalOpen] = useState(false);
 
     const handleEditProfilePicModalOpen = () => {
         setIsProfilePicModalOpen(true);
@@ -54,6 +55,10 @@ const Profile = () => {
 
     const handleEditAddressModalOpen = () => {
         setIsEditAddressModalOpen(true);
+    }
+
+    const handleChangePassModalOpen = () => {
+        setIsChangePassModalOpen(true);
     }
 
     const handleEditProfilePicModalClose = (data) => {
@@ -96,6 +101,14 @@ const Profile = () => {
         setIsEditAddressModalOpen(false);
     }
 
+    const handleChangePassModalClose = (data) => {
+        setIsChangePassModalOpen(false);
+
+        if (data) {
+            alert(data.message);
+        }
+    }
+
     const fetchProfileInfo = async () => {
         try {
             const response = await axios.get(
@@ -113,6 +126,11 @@ const Profile = () => {
             setProfileInfo(response.data.data);
         } catch (error) {
             console.log(error.response.data.message);
+
+            if (error.response.status === 401) {
+                localStorage.removeItem("tokens");
+                window.location.reload();
+            }
         }
     }
 
@@ -313,6 +331,40 @@ const Profile = () => {
                             />
                         </Grid>
                     </Grid>
+                </Box>
+                <Typography
+                    variant="h6"
+                    fontWeight="bold"
+                >
+                    Security
+                </Typography>
+                <Box
+                    display={"flex"}
+                    flexDirection={"column"}
+                    sx={sectionStyle}
+                >
+                    <Box
+                        display={"flex"}
+                    >
+                        <Typography
+                            fontWeight={"bold"}
+                            flexGrow={1}
+                        >
+                            Change Password
+                        </Typography>
+                        <EditButton
+                            variant="outlined"
+                            size="small"
+                            onClick={handleChangePassModalOpen}
+                        >
+                            Edit
+                            <EditRoundedIcon fontSize="small" />
+                        </EditButton>
+                        <ChangePasswordModal
+                            isOpen={isChangePassModalOpen}
+                            handleClose={handleChangePassModalClose}
+                        />
+                    </Box>
                 </Box>
             </Stack>
         </>
