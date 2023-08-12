@@ -1,4 +1,6 @@
-import { createTheme } from "@mui/material/styles";
+import { createContext, useState, useMemo, useEffect } from "react";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 const baseTheme = {
     palette: {
@@ -18,16 +20,49 @@ const baseTheme = {
     },
 };
 
-const theme = (mode) => {
-    return createTheme({
-        palette: {
-            ...(baseTheme.palette),
-            mode: mode,
-        }
-    })
+const ColorModeContext = createContext({ toggleColorMode: () => {} });
+
+const ToggleColorMode = ({children}) => {
+    let prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+    const savedThemePreference = localStorage.getItem("theme");
+
+    if (savedThemePreference) {
+        prefersDarkMode = savedThemePreference === "dark";
+    } 
+    
+    const [mode, setMode] = useState(prefersDarkMode ? "dark" : "light");
+    const colorMode = useMemo(
+        () => ({
+            toggleColorMode: () => {
+                setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
+            },
+        }),
+        [],
+    );
+
+    useEffect(() => {
+        localStorage.setItem("theme", mode);
+    }, [mode]);
+
+    const theme = useMemo(
+        () =>
+            createTheme({
+                palette: {
+                    mode,
+                    ...(baseTheme.palette)
+                },
+            }),
+        [mode],
+    );
+
+    return (
+        <ColorModeContext.Provider value={colorMode}>
+            <ThemeProvider theme={theme}>
+                {children}
+            </ThemeProvider>
+        </ColorModeContext.Provider>
+    )
 }
 
-
-
-
-export default theme;
+export default ToggleColorMode;
+export { ColorModeContext };

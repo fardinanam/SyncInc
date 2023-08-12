@@ -1,4 +1,5 @@
 import { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
@@ -17,6 +18,8 @@ import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 const ProfileMenu = () => {
     let {user, logoutUser} = useContext(AuthContext);
     const [anchorElUser, setAnchorElUser] = useState(null);
+    
+    const navigate = useNavigate();
 
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
@@ -31,9 +34,9 @@ const ProfileMenu = () => {
         handleCloseUserMenu();
     };
 
-    const handleAccountSettings = () => {
+    const handleAccount = () => {
         handleCloseUserMenu();
-        window.location.href = "/profile";
+        navigate('/profile');
     }
 
     return (
@@ -64,8 +67,8 @@ const ProfileMenu = () => {
                 onClose={handleCloseUserMenu}
             >
                 <MenuItem 
-                    key="account-settings" 
-                    onClick={handleAccountSettings}
+                    key="account" 
+                    onClick={handleAccount}
                 >
                     <AccountCircleIcon />
                     <Typography textAlign="center" ml={1}>Account</Typography>

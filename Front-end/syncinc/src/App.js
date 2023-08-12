@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import './App.css';
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import RequireAuth from "./utils/RequireAuth";
-import useMediaQuery from '@mui/material/useMediaQuery';
-import { ThemeProvider } from '@mui/material/styles';
 
 import { AuthProvider } from './context/AuthContext';
 import Profile from "./pages/Profile";
@@ -12,25 +10,23 @@ import Projects from "./pages/Projects";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import theme from "./context/ThemeContext";
 import AddProject from "./pages/AddProject";
 import OrganizationDetails from "./pages/OrganizationDetails";
 import MainLayout from "./components/MainLayout";
-import ErrorPage from "./pages/ErrorPage";
-import {Button} from "@mui/material";
+import ToggleColorMode from "./context/ThemeContext";
 
 
 function App() {
-    const [mode, setMode] = useState('light');
+    // const [mode, setMode] = useState('light');
 
-    const [appTheme, setAppTheme] = useState(theme(mode));
+    // const [appTheme, setAppTheme] = useState(theme(mode));
 
-    useEffect(() => {
-        setAppTheme(theme(mode));
-    }, [mode]);
+    // useEffect(() => {
+    //     setAppTheme(theme(mode));
+    // }, [mode]);
 
     return (
-        <ThemeProvider theme={appTheme}>
+        <ToggleColorMode>
             <BrowserRouter>
                 <AuthProvider>
                     <Routes>
@@ -40,11 +36,11 @@ function App() {
                         <Route path="*" element={
                             <RequireAuth>
                                 <MainLayout>
-                                    <Button
+                                    {/* <Button
                                         value={mode}
                                         onClick={() => setMode(mode === "light" ? "dark" : "light")}
                                     >Change Mode</Button>
-                                    {mode === "light" ? <h1>Light Mode</h1> : <h1>Dark Mode</h1>}
+                                    {mode === "light" ? <h1>Light Mode</h1> : <h1>Dark Mode</h1>} */}
                                     <Routes>
                                         <Route path="/profile" element={<Profile />} exact />
                                         <Route path="/dashboard" element={<Home />} exact />
@@ -61,7 +57,7 @@ function App() {
                     </Routes>
                 </AuthProvider>
             </BrowserRouter>
-        </ThemeProvider>
+        </ToggleColorMode>
     );
 }
 
