@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import Header from '../components/Header';
@@ -30,7 +30,7 @@ const MainLayout = (props) => {
                     backgroundColor: background,
                     overflow: 'auto',
                     height: '100vh',
-                    borderRadius: '0 3rem 3rem 0',
+                    borderRadius: '0 3rem 0 0',
                 }}
             >
                 <Toolbar position='fixed'/>

@@ -10,6 +10,8 @@ import { useTheme } from "@mui/material/styles"
 
 import EditButton from "../components/EditButton"
 import { EditProfilePicModal, EditPersonalInfoModal, EditAddressModal, ChangePasswordModal } from "../components/Modals"
+import notifyWithToast from "../utils/toast"
+import { useLoading } from "../context/LoadingContext"
 
 const sectionStyle = {
     borderRadius: 2,
@@ -44,6 +46,7 @@ const Profile = () => {
     const [isEditPersonalInfoModalOpen, setIsEditPersonalInfoModalOpen] = useState(false);
     const [isEditAddressModalOpen, setIsEditAddressModalOpen] = useState(false);
     const [isChangePassModalOpen, setIsChangePassModalOpen] = useState(false);
+    const { setLoading } = useLoading();
 
     const handleEditProfilePicModalOpen = () => {
         setIsProfilePicModalOpen(true);
@@ -101,15 +104,18 @@ const Profile = () => {
         setIsEditAddressModalOpen(false);
     }
 
-    const handleChangePassModalClose = (data) => {
+    const handleChangePassModalClose = (type, data) => {
         setIsChangePassModalOpen(false);
 
-        if (data) {
-            alert(data.message);
+        if (type === "error") {
+            notifyWithToast(type, data.message);
+        } else {
+            notifyWithToast(type, data);
         }
     }
 
     const fetchProfileInfo = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(
                 `${baseUrl}accounts/profile_info/`,  
@@ -132,6 +138,7 @@ const Profile = () => {
                 window.location.reload();
             }
         }
+        setLoading(false);
     }
 
     useEffect(() => {
@@ -263,13 +270,15 @@ const Profile = () => {
                         <Grid item xs={12} md={6}>
                             <StackField
                                 title="Phone Number"
-                                value={profileInfo.phone}
+                                value={profileInfo.phone ? profileInfo.phone : "Not Set"}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <StackField
                                 title="Birth Date"
-                                value={String(new Date(profileInfo.birth_date).toLocaleDateString())}
+                                value={profileInfo.birth_date 
+                                    ? String(new Date(profileInfo.birth_date).toLocaleDateString()) 
+                                    : "Not Set"}
                             />
                         </Grid>
                     </Grid>
@@ -309,25 +318,33 @@ const Profile = () => {
                         <Grid item xs={12} md={6}>
                             <StackField
                                 title="Country"
-                                value={profileInfo.address?.country}
+                                value={profileInfo.address?.country 
+                                    ? profileInfo.address.country
+                                    : "Not Set"}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <StackField
                                 title="City"
-                                value={profileInfo.address?.city}
+                                value={profileInfo.address?.city
+                                    ? profileInfo.address.city
+                                    : "Not Set"}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <StackField
                                 title="Street"
-                                value={profileInfo.address?.street}
+                                value={profileInfo.address?.street 
+                                    ? profileInfo.address.street
+                                    : "Not Set"}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <StackField
                                 title="Zip Code"
-                                value={profileInfo.address?.zip_code}
+                                value={profileInfo.address?.zip_code
+                                    ? profileInfo.address.zip_code
+                                    : "Not Set"}
                             />
                         </Grid>
                     </Grid>
