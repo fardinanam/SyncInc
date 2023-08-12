@@ -5,7 +5,7 @@ from django.core.validators import RegexValidator
 import os
 
 class Address(models.Model):
-    address = models.CharField(max_length=254)
+    street = models.CharField(max_length=254)
     city = models.CharField(max_length=50)
     country = models.CharField(max_length=50)
     zip_code = models.CharField(max_length=10)

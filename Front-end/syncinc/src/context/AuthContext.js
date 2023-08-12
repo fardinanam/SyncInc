@@ -38,16 +38,17 @@ const AuthProvider = ({ children }) => {
         });
         
         let data = await response.json();
-        console.log('data:', data);
+
         if (response.status === 200) {
             setAuthTokens(data);
             setUser(jwt_decode(data.access)); // decode the JWT token
             localStorage.setItem('authTokens', JSON.stringify(data));
             navigate('/dashboard');
         } else {
-            window.location = '/login';
+            navigate('/login');
             alert(data.message);
         }
+
         setLoading(false);
     }
 
@@ -59,9 +60,8 @@ const AuthProvider = ({ children }) => {
     }
 
     const updateToken = async () => {
-        if (authTokens?.refresh) {
+        if (authTokens && authTokens.refresh) {
             setLoading(true);   
-            console.log('Update Token Called with authTokens:', authTokens?.refresh);
             let response = await fetch(baseUrl + 'accounts/token/refresh/', {
                 method: 'POST',
                 headers: {
@@ -71,7 +71,6 @@ const AuthProvider = ({ children }) => {
             })
 
             let data = await response.json();
-            // console.log('updateToken data:', data);
 
             if (response.status === 200) {
                 setAuthTokens(data);
@@ -93,12 +92,12 @@ const AuthProvider = ({ children }) => {
     }
 
     useEffect(() => {
-        if (loading) {
-            updateToken();
-        }
-
         const interval = setInterval(updateToken, refreshTokenDelay);
         return () => clearInterval(interval);
+    }, [authTokens]);
+
+    useEffect(() => {
+        updateToken();
     }, []);
 
     return (

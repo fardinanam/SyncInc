@@ -5,6 +5,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from .serializer import *
+from .models import *
 from .utils import send_email_token
 from project_api.utils import get_data_from_token
 
@@ -131,7 +132,7 @@ class ProfileInfoView(APIView):
                 'data': {}
             }, status=status.HTTP_400_BAD_REQUEST)
 
-class UpdateProfilePic(APIView):
+class UpdateProfilePicView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser,)
 
@@ -161,7 +162,7 @@ class UpdateProfilePic(APIView):
                 'data': {}
             }, status=status.HTTP_400_BAD_REQUEST)
         
-class UpdatePersonalInfo(APIView):
+class UpdatePersonalInfoView(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request):
@@ -178,6 +179,117 @@ class UpdatePersonalInfo(APIView):
                 'data': serializer.data
             }, status=status.HTTP_200_OK)
             
+        except Exception as e:
+            print(e)
+            return Response({
+                'message': str(e),
+                'data': {}
+            }, status=status.HTTP_400_BAD_REQUEST)
+    
+class UpdateUserAddressView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        user_id = get_data_from_token(request, 'user_id')
+        user = User.objects.get(id=user_id)
+        serializer = AddressSerializer(data=request.data)
+        
+        try:
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        except Exception as e:
+            print(e)
+            return Response({
+                'message': 'Something went wrong',
+                'data': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        if user.address:
+            user.address.delete()
+        
+        user.address = serializer.instance
+        user.save()
+
+        return Response({
+            'message': 'Address updated successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+
+class UpdatePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+    model = User
+    serializer_class = ChangePasswordSerializer
+
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
+    
+    def put(self, request):
+        self.object = self.get_object()
+        serializer = self.serializer_class(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+            
+            if not self.object.check_password(serializer.data.get('old_password')):
+                return Response({
+                    'message': 'Old password is incorrect',
+                    'data': {}
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            self.object.set_password(serializer.data.get('new_password'))
+            self.object.save()
+            return Response({
+                'message': 'Password updated successfully',
+                'data': {}
+            }, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            print(e)
+            return Response({
+                'message': str(e),
+                'data': {}
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+class ForgotPasswordView(APIView):
+    def post(self, request):
+        try:
+            data = request.data
+            email = data['email']
+            user = User.objects.get(email=email)
+            serializer = ForgotPasswordSerializer(instance=user, data=data)
+
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            
+            token = user.email_token
+            send_email_token(email, token)
+            return Response({
+                'message': 'Email sent successfully',
+                'data': {}
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            print(e)
+            return Response({
+                'message': str(e),
+                'data': {}
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+class ResetPasswordView(APIView):
+    def post(self, request, email_token):
+        try:
+            user = User.objects.get(email_token=email_token)
+            serializer = ResetPasswordSerializer(instance=user, data=request.data)
+
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            return Response({
+                'message': 'Password reset successfully',
+                'data': {}
+            }, status=status.HTTP_200_OK)
+
         except Exception as e:
             print(e)
             return Response({

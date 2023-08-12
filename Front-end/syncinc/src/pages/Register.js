@@ -13,13 +13,7 @@ import { Link } from "react-router-dom";
 import Copyright from "../components/Copyright";
 import { baseUrl } from "../utils/config";
 
-const isValidEmail = (email) => {
-    return /\S+@\S+\.\S+/.test(email);
-}
-
-const isValidPassword = (password) => {           
-    return /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[#?!_@$%^&*-])(?=.{8,})/.test(password);
-}
+import { isValidEmail } from "../utils/validators";
 
 const Register = () => {
     const handleSubmit = async (e) => {
