@@ -8,35 +8,42 @@ import { CreateOrgModal } from '../components/Modals';
 import { Grid, Typography } from '@mui/material';
 import SummaryCard from '../components/SummaryCard';
 import WorkIcon from '@mui/icons-material/Work';
-import MainLayout from '../components/MainLayout';
+import notifyWithToast from '../utils/toast';
 
 import { baseUrl } from '../utils/config';
 import AuthContext from '../context/AuthContext';
+import { useLoading } from '../context/LoadingContext';
 
 const Organizations = () => {
     const navigate = useNavigate();
     const {authTokens} = useContext(AuthContext);
     const [organizations, setOrganizations] = useState([]);
-
+    const {setLoading} = useLoading();
     useEffect(() => {
         fetchOrganizations();
     }, []);
 
-    // TODO: Use Toasts instead of alerts
     let [isOpen, setIsOpen] = useState(false);
 
     const handleOpen = () => {
         setIsOpen(true);
     }
-    const handleClose = (organization) => {
-        if (organization) {
-            setOrganizations([...organizations, organization]);
+    const handleClose = (type, data) => {
+        if (type === 'success') {
+            setOrganizations([...organizations, data]);
+            setIsOpen(false);
+            notifyWithToast(type, `${data.name} created successfully`);
+        } else if (type === 'error') {
+            setIsOpen(false);
+            notifyWithToast(type, data.message);
+        } else {
+            setIsOpen(false);
         }
-        setIsOpen(false);
     }
 
     // call the api to get the list of organizations
     const fetchOrganizations = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(
                 `${baseUrl}get_organizations/`,  
@@ -55,6 +62,7 @@ const Organizations = () => {
         } catch (error) {
             console.log(error.response.data.message);
         }
+        setLoading(false);
     }
 
     return (
