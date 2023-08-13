@@ -17,6 +17,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 
 import OrganizationMembers from "./OrganizationMembers";
 import OrganizationProjects from "./OrganizationProjects";
+import { AddMemberModal } from "../components/Modals";
 
 const OrganizationDetails = (props) => {
     const { authTokens } = useContext(AuthContext);
@@ -25,19 +26,26 @@ const OrganizationDetails = (props) => {
     
     const location = useLocation();
     const locationData = location.state.organization;
-    console.log("sth",locationData);
+   
 
     const [selectedValue, setSelectedValue] = useState('projects');
     const [organization, setOrganization] = useState(locationData);
 
     const handleToggleChange = (event, newValue) => {
-        console.log(id)
+        console.log("Something is happening")
         if(newValue != null) {
             setSelectedValue(newValue);
         }
     }
 
-
+    let [memberModalOpen, setMemberModalOpen] = useState(false);
+    const handleAddMemberModalOpen = () => {
+        console.log("handle Member modal open")
+        setMemberModalOpen(true);
+    }
+    const handleClose = () => {
+        setMemberModalOpen(false);
+    }
     return (
         <>
             <Grid 
@@ -98,15 +106,25 @@ const OrganizationDetails = (props) => {
                     alignItems={'center'}
                     justifyContent={'flex-end'}
                 >
-                    <Button variant='contained' onClick={() => selectedValue === 'projects'? navigate('/add_projects') : navigate('/add_members')}>
+                    <Button variant='contained' 
+                        onClick={() => selectedValue === 'projects'? 
+                        navigate(`/organization/${organization.id}/add-project`) 
+                        : 
+                        handleAddMemberModalOpen()} >
                         <AddRoundedIcon />
-                        {selectedValue}
+                        {selectedValue === 'projects'? 'Project' : 'Member'}
                     </Button>
+                    <AddMemberModal
+                        open={memberModalOpen}
+                        id={id}
+                        handleClose={handleClose}
+                    />
 
                 </Grid>
             
             </Grid>
             { selectedValue === 'projects' ? <OrganizationProjects id={id} /> : <OrganizationMembers id={id} /> }
+            
         </>
     );
 };
