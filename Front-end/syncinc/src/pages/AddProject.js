@@ -20,16 +20,6 @@ const AddProject = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(e.target.contact_email.value);
-        if(isValidEmail(e.target.contact_email.value) === false) {
-            alert("Please enter a valid email address.");
-            return;
-        }
-
-        if(isValidNumber(e.target.contact_number.value) === false) {
-            alert("Please enter a valid contact no.");
-            return;
-        }
 
         try {
             console.log(e.target.project_name.value);
@@ -39,8 +29,6 @@ const AddProject = () => {
                     body: {
                         'project_name': e.target.project_name.value,
                         'client_name': e.target.client_name.value,
-                        'client_email': e.target.contact_email.value,
-                        'client_contact_number': e.target.contact_number.value,
                         'project_description': e.target.description.value,
 
                     }
@@ -98,7 +86,7 @@ const AddProject = () => {
                                             verticalAlign: 'middle',
                                         }}
                                     >
-                                        <Button color="error" onClick={() => navigate('/projects')}>
+                                        <Button color="error" onClick={() => navigate(`/organization/${id}`)}>
                                             <CloseRoundedIcon />
                                         </Button>
                                     </Box>
@@ -121,24 +109,6 @@ const AddProject = () => {
                                     required
                                     fullWidth
                                     id="client_name"
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    name="contact_number"
-                                    label="Contact Number"
-                                    required
-                                    fullWidth
-                                    id="contact_number"
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    name="contact_email"
-                                    label="Contact Email"
-                                    required
-                                    fullWidth
-                                    id="contact_email"
                                 />
                             </Grid>
                             <Grid item sm={12}>

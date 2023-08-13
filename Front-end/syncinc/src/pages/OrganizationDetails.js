@@ -24,12 +24,37 @@ const OrganizationDetails = (props) => {
     const navigate = useNavigate();
     const { id } = useParams();
     
-    const location = useLocation();
-    const locationData = location.state.organization;
+    // const location = useLocation();
+    // const locationData = location.state.organization;
    
 
     const [selectedValue, setSelectedValue] = useState('projects');
-    const [organization, setOrganization] = useState(locationData);
+    const [organization, setOrganization] = useState();
+
+    const fetchOrganizationData = async () => {
+        try {
+            const response = await axios.get(
+                `${baseUrl}get_organizations/${id}`,  
+                {
+                    headers: {
+                        'Authorization': 'Bearer ' + authTokens?.access,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                }  
+
+            )
+            
+            setOrganization(response.data.data);
+            
+        } catch (error) {
+            console.log(error.response.data.message);
+        }
+    }
+
+    useEffect(() => {
+        fetchOrganizationData();
+    }, []);
 
     const handleToggleChange = (event, newValue) => {
         console.log("Something is happening")
@@ -108,7 +133,7 @@ const OrganizationDetails = (props) => {
                 >
                     <Button variant='contained' 
                         onClick={() => selectedValue === 'projects'? 
-                        navigate(`/organization/${organization.id}/add-project`) 
+                        navigate(`/organization/${organization?.id}/add-project`) 
                         : 
                         handleAddMemberModalOpen()} >
                         <AddRoundedIcon />
