@@ -8,4 +8,5 @@ urlpatterns = [
     path('create_project/<int:organization_id>/', views.create_project, name='create_project'),
     path('organization_projects/<int:organization_id>/', views.get_organization_projects, name='organization_projects'),
     path('organization_members/<int:organization_id>/', views.get_organization_members, name='organization_members'),
+    # path('invite_member/<int:organization_id>/', views.invite_member, name='invite_member'),
 ]

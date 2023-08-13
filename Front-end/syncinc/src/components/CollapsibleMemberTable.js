@@ -20,9 +20,12 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import Rating from '@mui/material/Rating';
 import Chip from "@mui/material/Chip";
 import NameAvatar from "./NameAvatar";
+import ListItem from '@mui/material/ListItem';
+import ListChips from "./ListChips";
 
 const CollapsibleMemberTable = ({title, members}) => {
     const [open, setOpen] = useState(true);
+    console.log(members);
     
     return (
         <Paper sx={{marginTop: '2rem'}}>
@@ -54,10 +57,12 @@ const CollapsibleMemberTable = ({title, members}) => {
                         sx={{alignItems:"flex-start"}}
                         >   
                             <TableCell width="25%">{member.name}</TableCell>
-                            <TableCell width="25%"><Chip label={member.expertise} color="primary" /></TableCell>
-                            <TableCell width="20%">{member.completedTasks}</TableCell>
-                            <TableCell width="15%"><Rating name="average_rating" value={member.averageRating} precision={0.25} readOnly/></TableCell>
-                            <TableCell width="15%">{member.averageTime} days</TableCell>
+                            <TableCell width="25%">
+                                <ListChips chipData={member.expertise} />
+                            </TableCell>
+                            <TableCell width="20%">{member.completed_tasks}</TableCell>
+                            <TableCell width="15%"><Rating name="average_rating" value={member.avg_rating} precision={0.25} readOnly/></TableCell>
+                            <TableCell width="15%">{member.avg_time} days</TableCell>
                         </TableRow>
                         ))}
                     </TableBody>
