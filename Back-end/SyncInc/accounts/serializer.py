@@ -97,9 +97,16 @@ class ResetPasswordSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'email_token', 'password']
 
-    # def validate(self, data):
-    #     username = self.initial_data.get("username")
+    def validate(self, data):
+        valid_data = super().validate(data)
+        username = self.initial_data.get("username")
+        given_email_token = self.initial_data.get("email_token")
+        user = User.objects.get(username=username)
 
+        if user.email_token != given_email_token:
+            raise serializers.ValidationError("Email token does not match")
+        
+        return valid_data
 
     # update the password and save it to the database
     def update(self, instance, validated_data):
