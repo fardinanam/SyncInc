@@ -20,7 +20,7 @@ import { useLoading } from "../context/LoadingContext";
 
 const Register = () => {
     const navigate = useNavigate();
-    const {setIsLoading} = useLoading();
+    const {setLoading} = useLoading();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -36,7 +36,7 @@ const Register = () => {
             return;
         }
 
-        setIsLoading(true);
+        setLoading(true);
         let response = await fetch(baseUrl + 'accounts/register/', {
             method: 'POST',
             headers: {
@@ -52,7 +52,7 @@ const Register = () => {
             })
         });
         
-        setIsLoading(false);
+        setLoading(false);
         let data = await response.json();
 
         if (response.status === 200) {

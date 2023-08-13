@@ -100,25 +100,25 @@ WSGI_APPLICATION = 'SyncInc.wsgi.application'
 
 # render.com database with internal connection
 # postgres://syncinc:Ik27r3IF3h6aFJKutbuUnCdrNrhSkCCN@dpg-cjbpra3bq8nc73f1h6dg-a/syncinc
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'syncinc',
-        'USER': 'syncinc',
-        'PASSWORD': 'Ik27r3IF3h6aFJKutbuUnCdrNrhSkCCN',
-        'HOST': 'dpg-cjbpra3bq8nc73f1h6dg-a',
-        'PORT': '5432',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'syncinc',
+#         'USER': 'syncinc',
+#         'PASSWORD': 'Ik27r3IF3h6aFJKutbuUnCdrNrhSkCCN',
+#         'HOST': 'dpg-cjbpra3bq8nc73f1h6dg-a',
+#         'PORT': '5432',
+#     }
+# }
 
 # local database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 
 # Password validation
