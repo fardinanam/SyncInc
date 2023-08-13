@@ -14,22 +14,29 @@ import Copyright from "../components/Copyright";
 import { baseUrl } from "../utils/config";
 
 import { isValidEmail } from "../utils/validators";
+import notifyWithToast from "../utils/toast";
+import { useNavigate } from "react-router-dom";
+import { useLoading } from "../context/LoadingContext";
 
 const Register = () => {
+    const navigate = useNavigate();
+    const {setLoading} = useLoading();
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         
         console.log(e.target.email.value);
         if(isValidEmail(e.target.email.value) === false) {
-            alert("Please enter a valid email address.");
+            notifyWithToast("info", "Please enter a valid email address.");
             return;
         }
 
         if (e.target.password.value !== e.target.confirmPassword.value) {
-            alert("Passwords do not match.");
+            notifyWithToast("info", "Passwords do not match.");
             return;
         }
 
+        setLoading(true);
         let response = await fetch(baseUrl + 'accounts/register/', {
             method: 'POST',
             headers: {
@@ -44,16 +51,17 @@ const Register = () => {
                 password: e.target.password.value,
             })
         });
-
+        
+        setLoading(false);
         let data = await response.json();
-        console.log(data);
 
         if (response.status === 200) {
-            alert("We have sent you an email. Please verify your email address to login.");
-            window.location.href = "/login";
+            notifyWithToast("description", "Registration successful! We have sent you an email. Please verify your email address to login.");
+            navigate('/login');
         } else {
-            console.log(data.message);
+            notifyWithToast("error", data.message);
         }
+
     };
 
     return (

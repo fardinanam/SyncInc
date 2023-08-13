@@ -12,7 +12,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
-import SearchBar from "./SearchBar";
+import notifyWithToast from "../utils/toast";
+import { useLoading } from "../context/LoadingContext";
 
 const yesterday = dayjs().subtract(10 * 365, 'day');
 
@@ -112,7 +113,9 @@ const AddMemberModal = (props) => {
     };
 
 const CreateOrgModal = (props) => {
-    const {authTokens} = useContext(AuthContext);
+    const { authTokens } = useContext(AuthContext);
+    const { setLoading } = useLoading();
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const body = JSON.stringify({
@@ -127,6 +130,7 @@ const CreateOrgModal = (props) => {
             }
         };
         
+        setLoading(true);
         try {
             const response = await axios.post(
                 `${baseUrl}create_organization/`,
@@ -134,19 +138,17 @@ const CreateOrgModal = (props) => {
                 config
             )
 
-            props.handleClose(response.data.data);
-            alert("Organization created successfully!");
+            props.handleClose("success", response.data.data);
         } catch (error) {
-            console.log(error.response.data.message);
-            props.handleClose();
-            alert(error.response.data.message)
+            props.handleClose("error", error.response.data);
         }
+        setLoading(false);
     }
     return (
         <>
             <Modal
                 open={props.open}
-                onClose={() => props.handleClose()}
+                onClose={() => props.handleClose("close")}
             >
             <Box 
                 sx={{ 
@@ -188,6 +190,7 @@ const  EditProfilePicModal = (props) => {
     const username = user?.username;
     const [selectedFile, setSelectedFile] = useState('');
     const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
+    const { setLoading } = useLoading();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -202,6 +205,7 @@ const  EditProfilePicModal = (props) => {
             }
         };
 
+        setLoading(true);
         try {
             const response = await axios.put(
                 `${baseUrl}accounts/profile_info/update_profile_pic/`,
@@ -210,12 +214,13 @@ const  EditProfilePicModal = (props) => {
             );
             
             props.handleClose(response.data.data);
-            alert("Profile picture updated successfully!");
+            notifyWithToast("success", "Profile picture updated successfully");
         } catch (error) {
             console.log(error.response.data.message);
             props.handleClose();
-            alert(error.response.data.message);
+            notifyWithToast("error", error.response.data.message);
         }
+        setLoading(false);
 
         setIsSubmitDisabled(true);
     }
@@ -293,7 +298,8 @@ const EditPersonalInfoModal = (props) => {
     const [phone, setPhone] = useState(null);
     const [birthDate, setBirthDate] = useState(null);
     const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
-    
+    const { setLoading } = useLoading();
+
     useEffect(() => {
         setFirstName(user.first_name);
         setLastName(user.last_name);
@@ -318,6 +324,7 @@ const EditPersonalInfoModal = (props) => {
             }
         }
 
+        setLoading(true);
         try {
             const response = await axios.put(
                 `${baseUrl}accounts/profile_info/update_personal_info/`,
@@ -327,14 +334,14 @@ const EditPersonalInfoModal = (props) => {
 
             if (response.status === 200) {
                 props.handleClose(response.data.data);
-                alert("Personal information updated successfully!");
+                notifyWithToast("success", "Personal information updated successfully!");
             }
         } catch (error) {
             console.log(error.response.data.message);
             props.handleClose();
-            alert(error.response.data.message);
+            notifyWithToast("error", error.response.data.message);
         }
-
+        setLoading(false);
 
     }
 
@@ -456,6 +463,7 @@ const EditAddressModal = (props) => {
     const [street, setStreet] = useState(null);
     const [zipCode, setZipCode] = useState(null);
     const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
+    const { setLoading } = useLoading();
 
     useEffect(() => {
         setCountry(props.address?.country);
@@ -478,8 +486,9 @@ const EditAddressModal = (props) => {
                 'Authorization': 'Bearer ' + authTokens?.access,
                 'content-type': 'application/json',
             }
-        }
+        }   
 
+        setLoading(true);
         try {
             const response = await axios.put(
                 `${baseUrl}accounts/profile_info/update_address/`,
@@ -489,15 +498,16 @@ const EditAddressModal = (props) => {
 
             if (response.status === 200) {
                 props.handleClose(response.data.data);
-                alert("Address updated successfully!");
+                notifyWithToast("success", "Address updated successfully!");
             }
         } catch (error) {
             props.handleClose(error.response.data.message);
         }
+        setLoading(false);
     }
 
     const handleCountryChange = (e) => {
-        if (e.target.value !== props.address.country) {
+        if (!props.address?.country || e.target.value !== props.address?.country) {
             setCountry(e.target.value);
             setIsSubmitDisabled(false);
         } else {
@@ -506,7 +516,7 @@ const EditAddressModal = (props) => {
     }
 
     const handleCityChange = (e) => {
-        if (e.target.value !== props.address.city) {
+        if (!props.address?.city || e.target.value !== props.address.city) {
             setCity(e.target.value);
             setIsSubmitDisabled(false);
         } else {
@@ -515,7 +525,7 @@ const EditAddressModal = (props) => {
     }
 
     const handleStreetChange = (e) => {
-        if (e.target.value !== props.address.street) {
+        if (!props.address?.street || e.target.value !== props.address.street) {
             setStreet(e.target.value);
             setIsSubmitDisabled(false);
         } else {
@@ -524,7 +534,7 @@ const EditAddressModal = (props) => {
     }
 
     const handleZipCodeChange = (e) => {
-        if (e.target.value !== props.address.zip_code) {
+        if (!props.address?.zip_code || e.target.value !== props.address.zip_code) {
             setZipCode(e.target.value);
             setIsSubmitDisabled(false);
         } else {
@@ -604,6 +614,7 @@ const ChangePasswordModal = (props) => {
     const [oldPassword, setOldPassword] = useState(null);
     const [newPassword, setNewPassword] = useState(null);
     const [confirmNewPassword, setConfirmNewPassword] = useState(null);
+    const { setLoading } = useLoading();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -619,6 +630,7 @@ const ChangePasswordModal = (props) => {
             }
         };
 
+        setLoading(true);
         try {
             const response = await axios.put(
                 `${baseUrl}accounts/profile_info/update_password/`,
@@ -627,13 +639,12 @@ const ChangePasswordModal = (props) => {
             );
 
             if (response.status === 200) {
-                props.handleClose();
-                alert("Password changed successfully!");
+                props.handleClose("success", "Password changed successfully!");
             }
         } catch (error) {
-            props.handleClose(error.response.data);
+            props.handleClose("error", error.response.data);
         }
-
+        setLoading(false);
     }
 
     const handleChange = (e) => {

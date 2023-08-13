@@ -1,13 +1,17 @@
 import * as React from 'react';
-import Box from '@mui/material/Box';
-import LinearProgress from '@mui/material/LinearProgress';
+import { useLoading } from '../context/LoadingContext';
+import Backdrop from '@mui/material/Backdrop';
+import { CircularProgress } from '@mui/material';
 
 const Load = () => {
+    const {loading} = useLoading();
     return (
-        <Box 
-            sx={{ width: '100%' }}>
-            <LinearProgress />
-        </Box>
+        <Backdrop
+            sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1000 }}
+            open={loading}
+            >
+            <CircularProgress color='inherit'/>
+        </Backdrop>
     );
 }
 

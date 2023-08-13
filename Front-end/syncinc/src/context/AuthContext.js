@@ -4,6 +4,8 @@ import { baseUrl } from '../utils/config';
 import { useNavigate } from 'react-router-dom';
 import { refreshTokenDelay } from '../utils/config';
 import Load from '../components/Load';
+import notifyWithToast from '../utils/toast';
+import { useLoading } from './LoadingContext';
 
 const AuthContext = createContext();
 
@@ -19,7 +21,7 @@ const AuthProvider = ({ children }) => {
             : null
         );
     
-    let [loading, setLoading] = useState(false);
+    const {setLoading} = useLoading();
 
     let navigate = useNavigate();
 
@@ -46,7 +48,7 @@ const AuthProvider = ({ children }) => {
             navigate('/dashboard');
         } else {
             navigate('/login');
-            alert(data.message);
+            notifyWithToast("error", data.message);
         }
 
         setLoading(false);
@@ -61,7 +63,7 @@ const AuthProvider = ({ children }) => {
 
     const updateToken = async () => {
         if (authTokens && authTokens.refresh) {
-            setLoading(true);   
+            // setLoading(true);   
             let response = await fetch(baseUrl + 'accounts/token/refresh/', {
                 method: 'POST',
                 headers: {
@@ -80,7 +82,7 @@ const AuthProvider = ({ children }) => {
                 logoutUser();
             }
 
-            setLoading(false);
+            // setLoading(false);
         }
     }
 
@@ -97,12 +99,14 @@ const AuthProvider = ({ children }) => {
     }, [authTokens]);
 
     useEffect(() => {
+        setLoading(true);
         updateToken();
+        setLoading(false);
     }, []);
 
     return (
         <AuthContext.Provider value={contextData}>
-            {loading ? <Load /> : children}
+            {children}
         </AuthContext.Provider>
     )
 }
