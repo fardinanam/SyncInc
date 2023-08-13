@@ -9,6 +9,7 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /app
 
 # Install dependencies
+RUN apt-get update && apt-get -y install libpq-dev gcc && pip install psycopg2
 COPY requirements.txt /app/
 RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
