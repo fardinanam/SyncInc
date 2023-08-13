@@ -14,8 +14,11 @@ import Register from "./pages/Register";
 import AddProject from "./pages/AddProject";
 import OrganizationDetails from "./pages/OrganizationDetails";
 import MainLayout from "./components/MainLayout";
+import ErrorPage from "./pages/ErrorPage";
+import ForgotPassword from "./pages/ForgotPassword";
 import ToggleColorMode from "./context/ThemeContext";
 import { LoadingProvider } from "./context/LoadingContext";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
     return (
@@ -26,11 +29,14 @@ function App() {
                     <Routes>
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route path="/reset-password/:username/:token" element={<ResetPassword />} />
                         <Route path="/" element={<Navigate to={"/dashboard"} />} />
                         <Route path="*" element={
                             <RequireAuth>
                                 <MainLayout>
                                     <Routes>
+                                        <Route path="*" element={<ErrorPage />} />
                                         <Route path="/profile" element={<Profile />} exact />
                                         <Route path="/dashboard" element={<Home />} exact />
                                         <Route path="/projects" element={<Projects />} exact />

@@ -97,6 +97,10 @@ class ResetPasswordSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'email_token', 'password']
 
+    # def validate(self, data):
+    #     username = self.initial_data.get("username")
+
+
     # update the password and save it to the database
     def update(self, instance, validated_data):
         instance.set_password(validated_data['password'])
