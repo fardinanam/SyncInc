@@ -4,13 +4,63 @@ import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import MainLayout from "../components/MainLayout";
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { isValidEmail, isValidNumber } from "../utils/validators";
+import { baseUrl } from "../utils/config";
+import AuthContext from '../context/AuthContext';
+import axios from "axios";
 
 const AddProject = () => {
+    const { authTokens } = useContext(AuthContext);
     const navigate = useNavigate();
+    const { id } = useParams(); 
+    console.log(id);
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        console.log(e.target.contact_email.value);
+        if(isValidEmail(e.target.contact_email.value) === false) {
+            alert("Please enter a valid email address.");
+            return;
+        }
+
+        if(isValidNumber(e.target.contact_number.value) === false) {
+            alert("Please enter a valid contact no.");
+            return;
+        }
+
+        try {
+            console.log(e.target.project_name.value);
+            const response = await axios.post(
+                `${baseUrl}create_project/${id}/`,
+                {
+                    body: {
+                        'project_name': e.target.project_name.value,
+                        'client_name': e.target.client_name.value,
+                        'client_email': e.target.contact_email.value,
+                        'client_contact_number': e.target.contact_number.value,
+                        'project_description': e.target.description.value,
+
+                    }
+                } ,
+                {
+                    headers: {
+                        'Authorization': 'Bearer ' + authTokens?.access,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                }
+
+            )
+            alert("Project created successfully");
+            
+        } catch (error) {
+            alert(error.response.data.message);
+        }
+
+    };
     return(
         <>
             <Box
@@ -21,6 +71,7 @@ const AddProject = () => {
                     flexDirection: "column",
                     alignItems: "center",
                 }}
+                onSubmit={handleSubmit}
                 >
                 <Grid container mt={10}>
                     <Grid item xs={0} sm={3} />
@@ -108,7 +159,7 @@ const AddProject = () => {
                                         justifyContent: 'end',
                                     }}
                                 >
-                                    <Button variant="contained" color="success">Save</Button>
+                                    <Button variant="contained" color="success" type="submit">Save</Button>
                                     {/* <Button variant="contained" color="secondary">Cancel</Button> */}
                                 </Box>
                             </Grid>

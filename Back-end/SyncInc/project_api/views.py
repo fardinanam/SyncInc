@@ -139,6 +139,7 @@ def create_organization(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_project(request):
+    print(request.data)
     try:
         username = get_data_from_token(request, 'username')
         

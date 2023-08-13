@@ -3,7 +3,7 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Typography from "@mui/material/Typography";
-import { Avatar, Input, TextField } from "@mui/material";
+import { Avatar, Input, Autocomplete, TextField } from "@mui/material";
 import { baseUrl } from '../utils/config';
 import AuthContext from '../context/AuthContext';
 import axios from "axios";
@@ -30,6 +30,87 @@ const style = {
     px: 4,
     pb: 3,
 };
+
+const options = ['Apple', 'Banana', 'Cherry', 'Date', 'Fig', 'Grape', 'Lemon', 'Mango', 'Orange'];
+
+const AddMemberModal = (props) => {
+    const [id, setId] = useState()
+    useEffect(() => {
+        setId(props.id)
+    }, [props.id])
+    const {authTokens} = useContext(AuthContext);
+    useEffect(() => {
+        fetchAllAccounts();
+    }, []);
+
+    const [filteredOptions, setFilteredOptions] = useState(options);
+    
+  const handleSearchChange = (event, newValue) => {
+    setFilteredOptions(
+      options.filter(option => option.toLowerCase().includes(newValue.toLowerCase()))
+    );
+  };
+    
+    const fetchAllAccounts = async () => {
+        // try {
+        //     const response = await axios.get(
+        //         `${baseUrl}get_all_accounts/`,  
+        //         {
+        //             headers: {
+        //                 'Authorization': 'Bearer ' + authTokens?.access,
+        //                 'Accept': 'application/json',
+        //                 'Content-Type': 'application/json',
+        //             }
+        //         }  
+
+        //     )
+        //     console.log(response);
+        // } catch (error) {
+        //     console.log(error.response.data.message);
+        //     // window.location.href = '/organizations';
+        // }
+    }
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        props.handleClose();
+    }
+        return (
+            <>
+                <Modal
+                    open={props.open}
+                    onClose={() => props.handleClose()}
+                >
+                <Box 
+                    sx={{ 
+                        ...style,
+                        width: 400 
+                    }}
+                    
+                >
+                    <Typography id="parent-modal-title" variant="h5" align="center">
+                        Add Member
+                    </Typography>
+                    <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    noValidate
+                    sx={{ mt: 1 }}
+                >
+                    {/* <SearchBar /> */}
+                    <Autocomplete
+                        options={filteredOptions}
+                        freeSolo
+                        renderInput={params => <TextField {...params} label="Search" variant="outlined" />}
+                    />
+                    <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+                        Invite
+                    </Button>
+                    </Box>
+                </Box>
+                </Modal>
+            </>
+        )
+    };
 
 const CreateOrgModal = (props) => {
     const { authTokens } = useContext(AuthContext);
@@ -647,4 +728,4 @@ const ChangePasswordModal = (props) => {
         </Modal>
     )
 }
-export {CreateOrgModal, EditProfilePicModal, EditPersonalInfoModal, EditAddressModal, ChangePasswordModal};
+export {CreateOrgModal, AddMemberModal, EditProfilePicModal, EditPersonalInfoModal, EditAddressModal, ChangePasswordModal};
