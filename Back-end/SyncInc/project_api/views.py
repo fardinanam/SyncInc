@@ -222,3 +222,31 @@ def create_project(request):
 #             'message': 'Something went wrong',
 #             'data': None
 #         }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_project(request, project_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        project = Project.objects.get(id=project_id)
+        
+        if project.project_leader != user:
+            return Response({
+                'message': 'You are not authorized to view this project',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        serializer = ProjectDetailsSerializer(project)
+
+        return Response({
+            'message': 'Project details',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)

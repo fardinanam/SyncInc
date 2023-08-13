@@ -1,5 +1,5 @@
 import {useParams, useNavigate} from 'react-router-dom';
-import { Box, Container, TextField, Typography, Button, Grid } from '@mui/material';
+import { Box, Container, TextField, Typography, Button, Grid, CssBaseline } from '@mui/material';
 import notifyWithToast from '../utils/toast';
 import axios from 'axios';
 import { baseUrl } from '../utils/config';
@@ -48,6 +48,7 @@ const ResetPassword = () => {
 
     return (
         <Container component="main" maxWidth="xs">
+            <CssBaseline />
             <Box
                 sx={{
                     marginTop: 8,

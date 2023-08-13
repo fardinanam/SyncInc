@@ -118,5 +118,9 @@ class ProjectSerializer(serializers.ModelSerializer):
             client.save()
             
             return project
-            
-            
+        
+class ProjectDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = ['name', 'organization', 'client', 'description']
+        depth = 1

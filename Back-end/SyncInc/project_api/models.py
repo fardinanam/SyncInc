@@ -145,7 +145,7 @@ class Project(models.Model):
     
     name = models.CharField(max_length=254)
     description = models.TextField(blank=True, null=True)
-    start_time = models.DateTimeField(auto_now_add=True)
+    start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
     deadline = models.DateTimeField(blank=True, null=True)
 
@@ -157,7 +157,7 @@ class Project(models.Model):
         super().clean()
 
     def __str__(self):
-        return self.name
+        return self.name + ' - ' + self.organization.__str__()
     
 class AbstractTask(models.Model):
     project = models.ForeignKey(
@@ -171,11 +171,12 @@ class AbstractTask(models.Model):
         Tag, 
         related_name='%(class)ss',
         related_query_name='%(class)s',
-        blank=True
+        blank=True,
+        null=True
     )
 
     name = models.CharField(max_length=127)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True)
     
     previous_task = models.ForeignKey(
         'self', 
@@ -197,7 +198,7 @@ class AbstractTask(models.Model):
         super().clean()
 
     def __str__(self):
-        return self.name
+        return self.name + self.project.__str__()
 
     class Meta:
         abstract = True
