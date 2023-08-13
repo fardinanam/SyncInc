@@ -96,7 +96,7 @@ const Organizations = () => {
                             title={organization.name}
                             count={organization.num_projects}
                             name="Projects"
-                            onClick={() => navigate(`/organization/${organization.id}`, { state: {organization: organization } } ) }  
+                            onClick={() => navigate(`/organization/${organization.id}` ) }  
                         >
                             <WorkIcon fontSize='large' color='primary' />
                         </SummaryCard>

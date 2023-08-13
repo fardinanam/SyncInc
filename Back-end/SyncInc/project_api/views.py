@@ -28,6 +28,29 @@ def get_organizations(request):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
+        
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_organization(request, organization_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        designations = user.designations.all()
+        organization = Organization.objects.get(id=organization_id)
+        serializer = OrganizationSerializer(organization)
+        
+        return Response({
+            'message': f'Organization {organization.name} fetched successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
