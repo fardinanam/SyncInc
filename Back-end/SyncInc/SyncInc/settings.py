@@ -106,7 +106,7 @@ DATABASES = {
         'NAME': 'syncinc',
         'USER': 'syncinc',
         'PASSWORD': 'Ik27r3IF3h6aFJKutbuUnCdrNrhSkCCN',
-        'HOST': 'dpg-cjbpra3bq8nc73f1h6dg-a/syncinc',
+        'HOST': 'dpg-cjbpra3bq8nc73f1h6dg-a',
         'PORT': '5432',
     }
 }
