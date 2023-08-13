@@ -8,8 +8,8 @@ const LoadingProvider = ({ children }) => {
 
     return (
         <LoadingContext.Provider value={{loading, setLoading}}>
-            {children}
             {loading && <Load />}
+            {children}
         </LoadingContext.Provider>
     )
 }

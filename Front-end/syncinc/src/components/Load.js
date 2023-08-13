@@ -1,25 +1,17 @@
 import * as React from 'react';
-import Box from '@mui/material/Box';
-import LinearProgress from '@mui/material/LinearProgress';
-import { heIL } from '@mui/x-date-pickers';
+import { useLoading } from '../context/LoadingContext';
+import Backdrop from '@mui/material/Backdrop';
+import { CircularProgress } from '@mui/material';
 
 const Load = () => {
+    const {loading} = useLoading();
     return (
-        <Box 
-            sx={{
-                zIndex: 1000,
-                backgroundColor: 'black',
-                opacity: "0.3",
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-
-            }}
-        >
-            <LinearProgress color='primary'/>
-        </Box>
+        <Backdrop
+            sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1000 }}
+            open={loading}
+            >
+            <CircularProgress color='inherit'/>
+        </Backdrop>
     );
 }
 

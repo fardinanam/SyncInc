@@ -270,7 +270,7 @@ const Profile = () => {
                         <Grid item xs={12} md={6}>
                             <StackField
                                 title="Phone Number"
-                                value={profileInfo.phone ? profileInfo.phone : "Not Set"}
+                                value={profileInfo.phone ? profileInfo.phone : "-"}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
@@ -278,7 +278,7 @@ const Profile = () => {
                                 title="Birth Date"
                                 value={profileInfo.birth_date 
                                     ? String(new Date(profileInfo.birth_date).toLocaleDateString()) 
-                                    : "Not Set"}
+                                    : "-"}
                             />
                         </Grid>
                     </Grid>
@@ -320,7 +320,7 @@ const Profile = () => {
                                 title="Country"
                                 value={profileInfo.address?.country 
                                     ? profileInfo.address.country
-                                    : "Not Set"}
+                                    : "-"}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
@@ -328,7 +328,7 @@ const Profile = () => {
                                 title="City"
                                 value={profileInfo.address?.city
                                     ? profileInfo.address.city
-                                    : "Not Set"}
+                                    : "-"}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
@@ -336,7 +336,7 @@ const Profile = () => {
                                 title="Street"
                                 value={profileInfo.address?.street 
                                     ? profileInfo.address.street
-                                    : "Not Set"}
+                                    : "-"}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
@@ -344,7 +344,7 @@ const Profile = () => {
                                 title="Zip Code"
                                 value={profileInfo.address?.zip_code
                                     ? profileInfo.address.zip_code
-                                    : "Not Set"}
+                                    : "-"}
                             />
                         </Grid>
                     </Grid>
