@@ -21,14 +21,13 @@ const Login = () => {
 
     return (
         <Container component="main" maxWidth="xs">
-            <CssBaseline />
             <Box
-            sx={{
-                marginTop: 8,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center"
-            }}
+                sx={{
+                    marginTop: 8,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center"
+                }}
             >
             <Avatar sx={{ m: 1, bgcolor: "secondary" }}>
                 <LockOutlinedIcon />
@@ -76,7 +75,7 @@ const Login = () => {
                 </Button>
                 <Grid container>
                 <Grid item xs>
-                    <Link to="#">
+                    <Link to="/forgot-password">
                         Forgot password?
                     </Link>
                 </Grid>

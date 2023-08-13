@@ -1,10 +1,11 @@
 from django.conf import settings
 from django.core.mail import send_mail
 
-def send_email_token(email, token):
+front_end_url = 'http://localhost:3000'
+
+def send_email_token(email, subject, message):
     try:
-        subject = 'SyncInc. Email Verification'
-        message = f'Hi, \n\nPlease click on the link below to verify your email address. \n\nhttp://127.0.0.1:8000/accounts/verify-email/{token} \n\nThanks, \nSyncInc.'
+        
         email_from = settings.EMAIL_HOST_USER
         recipient_list = [email]
         send_mail(subject, message, email_from, recipient_list)
@@ -13,3 +14,14 @@ def send_email_token(email, token):
         return False
     
     return True
+
+def send_verification_email(email, token):
+    subject = 'SyncInc. Email Verification'
+    message = f'Hi, \n\nPlease click on the link below to verify your email address. \n\nhttp://127.0.0.1:8000/accounts/verify-email/{token} \n\nThanks, \nSyncInc.'
+    send_email_token(email, subject, message)
+
+def send_reset_password_email(username, email, token):
+    subject = 'SyncInc. Reset Password'
+    message = f'Hi, \n\nPlease click on the link below to reset your password.\n\nhttp://{front_end_url}/reset-password/{username}/{token} \n\nThanks, \nSyncInc.'
+    send_email_token(email, subject, message)
+
