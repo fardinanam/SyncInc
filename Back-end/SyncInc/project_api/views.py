@@ -101,9 +101,7 @@ def get_organization_members(request, organization_id):
 
         organization = Organization.objects.get(id=organization_id)
         serializer = OrganizationMembersSerializer(organization)
-
         print(serializer.data)
-
         # check if the user is an admin of the organization
         designation = user.designations.filter(organization=organization).first()
         # for designation in designations:
@@ -161,25 +159,30 @@ def create_organization(request):
         
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def create_project(request):
-    print(request.data)
+def create_project(request, organization_id):
     try:
         username = get_data_from_token(request, 'username')
         
         data = request.data
         data['username'] = username
-        
+        #client only has client name, not its id
+        organization = Organization.objects.get(id=organization_id)
+        client, created = Client.objects.get_or_create(
+            organization=organization,
+            name=data['client']
+        )
+        data['client'] = client.id
         serializer = ProjectSerializer(data=data)
         
         if not serializer.is_valid():
-            print(serializer.errors)
+            print("x",serializer.errors)
             return Response({
                 'message': serializer.errors.get('non_field_errors')[0],
                 'data': serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
             
         project = serializer.save()
-        
+        print(serializer.data)
         return Response({
             'message': 'Project created successfully',
             'data': serializer.data
@@ -192,7 +195,9 @@ def create_project(request):
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
         
-        
+# @api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+# def invite_member(request, organization_id):
     
     
 # @api_view(['POST'])
