@@ -12,13 +12,14 @@ import { baseUrl } from "../utils/config";
 
 const OrganizationProjects = (props) => {
     const { authTokens } = useContext(AuthContext);
-    const id= props.id;
+    
+    const id = props.id;
 
     const [organization, setOrganization] = useState({});
 
     useEffect(() => {
         fetchOrganizationProjectDetails();
-    }, []);
+    }, [id]);
 
     // use axios to get organization details
     const fetchOrganizationProjectDetails = async () => {

@@ -21,26 +21,26 @@ const AddProject = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        const config = {
+            headers: {
+                'Authorization': 'Bearer ' + authTokens?.access,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+        };
+
+        const body = JSON.stringify({
+            'name': e.target.project_name.value,
+            'organization': id,
+            'client': e.target.client_name.value,
+            'description': e.target.description.value,
+        })
         try {
             console.log(e.target.project_name.value);
             const response = await axios.post(
                 `${baseUrl}create_project/${id}/`,
-                {
-                    body: {
-                        'project_name': e.target.project_name.value,
-                        'client_name': e.target.client_name.value,
-                        'project_description': e.target.description.value,
-
-                    }
-                } ,
-                {
-                    headers: {
-                        'Authorization': 'Bearer ' + authTokens?.access,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    }
-                }
-
+                body ,
+                config
             )
             alert("Project created successfully");
             
