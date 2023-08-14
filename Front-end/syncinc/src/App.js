@@ -19,6 +19,9 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ToggleColorMode from "./context/ThemeContext";
 import { LoadingProvider } from "./context/LoadingContext";
 import ResetPassword from "./pages/ResetPassword";
+import Tasks from "./pages/Tasks";
+import ProjectDetails from "./pages/ProjectDetails";
+import AddTask from "./pages/AddTask";
 
 function App() {
     return (
@@ -45,6 +48,9 @@ function App() {
                                         <Route path="/organization/:id" element={<OrganizationDetails />} exact />
                                         
                                         <Route path="/organization/:id/add-project" element={<AddProject />} exact />
+                                        <Route path="/project/:id" element={<ProjectDetails />} exact />
+                                        <Route path="/project/:id/add-task" element={<AddTask />} exact />
+                                        <Route path="/tasks" element={<Tasks />} exact />
                                     </Routes>
                                 </MainLayout>
                             </RequireAuth>

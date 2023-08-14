@@ -1,4 +1,4 @@
-import { Container } from "@mui/material"
+import { Container, CssBaseline } from "@mui/material"
 import { Box, Typography, TextField, Button } from "@mui/material";
 import axios from "axios";
 import notifyWithToast from "../utils/toast"
@@ -34,6 +34,7 @@ const ForgotPassword = () => {
     }
     return (
         <Container component="main" maxWidth="xs">
+        <CssBaseline />
             <Box
                 sx={{
                     marginTop: 8,

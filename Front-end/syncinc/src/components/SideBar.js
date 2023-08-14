@@ -95,7 +95,7 @@ const SideBar = (props) => {
 
                 <ListItem key="tasks" disablePadding>
                     <ListItemButton
-                        // onClick={() => navigate('/tasks')}
+                        onClick={() => navigate('/tasks')}
                         selected={location.pathname.startsWith('/task')}
                         sx={selectedStyle}
                     >
