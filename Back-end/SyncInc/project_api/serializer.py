@@ -161,3 +161,17 @@ class UserTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ['name']
+    
+class UserTaskSerializer(serializers.ModelSerializer):
+    # a serializer to create a task of a project
+    class Meta:
+        model = UserTask
+        fields = ['name', 'project', 'description', 'deadline', 'tags']
+    
+    def validate(self, data):
+        valid_data = super().validate(data)
+        project = valid_data['project']
+        name = valid_data['name']
+        if project.usertasks.filter(name=name).exists():
+            raise serializers.ValidationError(f'Task named {name} already exists for this project')
+        return valid_data

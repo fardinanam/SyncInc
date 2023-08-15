@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react"
 import axios from "axios"
 
-import { Avatar, Box, Typography, Chip, Grid, Button, Stack } from "@mui/material"
+import { Avatar, Box, Typography, Chip, Grid, Paper, Stack } from "@mui/material"
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 
 import { baseUrl } from "../utils/config"
@@ -125,7 +125,6 @@ const Profile = () => {
     }
 
     const handleAddTagModalClose = (tags) => {
-        console.log("handleAddTagModalClose called");
         setIsAddTagModalOpen(false);
         if (tags) {
             setProfileInfo({
@@ -151,7 +150,6 @@ const Profile = () => {
 
             )
             
-            console.log(response.data.data);
             setProfileInfo(response.data.data);
         } catch (error) {
             console.log(error.response.data.message);
@@ -175,6 +173,12 @@ const Profile = () => {
                     Account Settings
                 </Typography>
             </Box>
+            {/* <Paper 
+                elevation={0}
+                sx={{
+                    borderRadius: "0.5rem"
+                }}
+            > */}
             <Stack spacing={2}
                 bgcolor={mainColor}
                 sx={{
@@ -485,6 +489,7 @@ const Profile = () => {
                     </Grid>
                 </Box>
             </Stack>
+            {/* </Paper> */}
         </>
     )
 }

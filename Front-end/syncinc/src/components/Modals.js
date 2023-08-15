@@ -15,8 +15,6 @@ import dayjs from 'dayjs';
 import notifyWithToast from "../utils/toast";
 import { useLoading } from "../context/LoadingContext";
 
-const yesterday = dayjs().subtract(10 * 365, 'day');
-
 const style = {
     position: 'absolute',
     top: '50%',
@@ -161,23 +159,23 @@ const CreateOrgModal = (props) => {
                     Create Organization
                 </Typography>
                 <Box
-                component="form"
-                onSubmit={handleSubmit}
-                noValidate
-                sx={{ mt: 1 }}
-            >
-                <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    id="organization_name"
-                    label="Organization Name"
-                    name="name"
-                    autoFocus
-                />
-                <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-                    Create
-                </Button>
+                    component="form"
+                    onSubmit={handleSubmit}
+                    noValidate
+                    sx={{ mt: 1 }}
+                >
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="organization_name"
+                        label="Organization Name"
+                        name="name"
+                        autoFocus
+                    />
+                    <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+                        Create
+                    </Button>
                 </Box>
             </Box>
             </Modal>
@@ -429,6 +427,7 @@ const EditPersonalInfoModal = (props) => {
                             >
                                 <DatePicker label="Birth Date" 
                                     defaultValue={dayjs(birthDate)}
+                                    maxDate={dayjs().subtract(10, 'year')}
                                     fullWidth
                                     id="birth_date"
                                     name="birth_date"
@@ -734,7 +733,9 @@ const ChangePasswordModal = (props) => {
 const AddTagModal = ({tags, isOpen, onClose}) => {
     const [allTags, setAllTags] = useState([]);
     const [selectedTags, setSelectedTags] = useState([]);
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
     const {authTokens} = useContext(AuthContext);
+    const { setLoading } = useLoading();
 
     const fetchAllTags = async () => {
         const response = await axios.get(
@@ -747,12 +748,12 @@ const AddTagModal = ({tags, isOpen, onClose}) => {
         );
 
         setAllTags(response.data.data);
-        console.log(tags);
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         
+        console.log(selectedTags);
         const body = JSON.stringify({
             'tags': selectedTags
         });
@@ -764,6 +765,7 @@ const AddTagModal = ({tags, isOpen, onClose}) => {
             }
         };
 
+        setLoading(true);
         try {
             const response = await axios.post(
                 `${baseUrl}set_user_tags/`,
@@ -780,6 +782,13 @@ const AddTagModal = ({tags, isOpen, onClose}) => {
 
             notifyWithToast("error", error.response.data.message);
         }
+
+        setLoading(false);
+    }
+
+    const handleChange = (_, value) => {
+        setSelectedTags(value);
+        setIsSubmitDisabled(false);
     }
 
     useEffect(() => {
@@ -787,6 +796,10 @@ const AddTagModal = ({tags, isOpen, onClose}) => {
             fetchAllTags();
         }
     }, [isOpen]);
+
+    useEffect(() => {
+        setSelectedTags(tags);
+    }, [tags]);
 
     return (
         <Modal
@@ -807,7 +820,7 @@ const AddTagModal = ({tags, isOpen, onClose}) => {
                         name="tags"
                         options={allTags.map((option) => option.name)}
                         defaultValue={tags}
-                        onChange={(event, value) => setSelectedTags(value)}
+                        onChange={handleChange}
                         freeSolo
                         renderTags={(value, getTagProps) =>
                             value.map((option, index) => (
@@ -829,6 +842,7 @@ const AddTagModal = ({tags, isOpen, onClose}) => {
                         variant="outlined"
                         color="success"
                         sx={{ mt: 2 }}
+                        disabled={isSubmitDisabled}
                     >
                         Save
                     </Button>

@@ -12,4 +12,5 @@ urlpatterns = [
     # path('invite_member/<int:organization_id>/', views.invite_member, name='invite_member'),
     path('all_tags/', views.get_all_tags, name='all_tags'),
     path('set_user_tags/', views.set_or_create_user_tags, name='set_user_tags'),
+    path('create_task/<int:project_id>/', views.create_task, name='create_task'),
 ]

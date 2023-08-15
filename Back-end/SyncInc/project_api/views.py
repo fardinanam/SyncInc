@@ -308,4 +308,39 @@ def set_or_create_user_tags(request):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
-        
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_task(request, project_id):
+    # check if the user is the project leader
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        project = Project.objects.get(id=project_id)
+
+        if project.project_leader != user:
+            return Response({
+                'message': 'You are not authorized to create task for this project',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        data = request.data
+        data['project'] = project_id
+        serializer = UserTaskSerializer(data=data)
+
+        serializer.is_valid(raise_exception=True)
+
+        task = serializer.save()
+
+        return Response({
+            'message': 'Task created successfully',
+            'data': serializer.data
+        }, status=status.HTTP_201_CREATED)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': serializer.errors.get('non_field_errors')[0],
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
