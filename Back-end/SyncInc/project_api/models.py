@@ -35,7 +35,7 @@ class Vendor(models.Model):
         blank=True,
     )
 
-    tag = models.ManyToManyField(Tag, blank=True)
+    tags = models.ManyToManyField(Tag, blank=True)
 
     def __str__(self):
         return self.name
@@ -189,6 +189,7 @@ class AbstractTask(models.Model):
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
     deadline = models.DateTimeField()
+    rating = models.IntegerField(blank=True, null=True)
 
     def clean(self):
         if self.previous_task and self.previous_task.project != self.project:
@@ -214,7 +215,6 @@ class UserTask(AbstractTask):
     )
 
     file = models.FileField(upload_to='files/', blank=True)
-    rating = models.IntegerField(blank=True, null=True)
 
     def clean(self):
         if self.assignee and self.assignee not in self.project.organization.employees.all():

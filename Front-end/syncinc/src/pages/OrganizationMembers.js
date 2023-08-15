@@ -135,7 +135,7 @@ const OrganizationMembers = (props) => {
             <CollapsibleMemberTable
                 title={'All Vendors'}
                 members={vendors}
-            />    
+            />
         </>
     );
 };

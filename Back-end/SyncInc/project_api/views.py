@@ -101,7 +101,6 @@ def get_organization_members(request, organization_id):
 
         organization = Organization.objects.get(id=organization_id)
         serializer = OrganizationMembersSerializer(organization)
-        print(serializer.data)
         # check if the user is an admin of the organization
         designation = user.designations.filter(organization=organization).first()
         # for designation in designations:
@@ -195,11 +194,73 @@ def create_project(request, organization_id):
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
         
-# @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
-# def invite_member(request, organization_id):
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_member_suggestions(request, organization_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+        organization = Organization.objects.get(id=organization_id)
+        employees = User.objects.exclude(designation__organization=organization).values( 'id','username', 'email')
+        vendors = Vendor.objects.exclude(organization=organization).annotate(username=F('name')).values('id','username', 'email')
+
+        for employee in employees:
+            employee['member_type'] = 'employee'
+
+        for vendor in vendors:
+            vendor['member_type'] = 'vendor'
+        data = list(employees) + list(vendors)
+        
+        # check if the user is an admin of the organization
+        designation = user.designations.filter(organization=organization).first()
+        # for designation in designations:
+
+        if designation and designation.role != 'Admin':
+            return Response({
+                'message': 'You are not authorized to add member to this organization',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        return Response({
+            'message': f'New member suggestion for the organization {organization.name}',
+            'data': data
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
     
-    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_member(request, organization_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        organization = Organization.objects.get(id=organization_id)
+        data = request.data
+        member_id = data['id']
+
+        if(data['member_type'] == 'employee'):
+            pass
+        elif(data['member_type'] == 'vendor'):
+            pass
+        print(data)
+        return Response({
+            'message': f'Member added successfully to the {organization.name}',
+            'data': data
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+
 # @api_view(['POST'])
 # @permission_classes([IsAuthenticated])
 # def create_project(request):
@@ -237,11 +298,11 @@ def get_project(request, project_id):
 
         project = Project.objects.get(id=project_id)
         
-        if project.project_leader != user:
-            return Response({
-                'message': 'You are not authorized to view this project',
-                'data': None
-            }, status=status.HTTP_401_UNAUTHORIZED)
+        # if project.project_leader != user:
+        #     return Response({
+        #         'message': 'You are not authorized to view this project',
+        #         'data': None
+        #     }, status=status.HTTP_401_UNAUTHORIZED)
         
         serializer = ProjectDetailsSerializer(project)
 

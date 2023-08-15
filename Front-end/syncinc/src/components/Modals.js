@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
+import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import { Avatar, Chip, Autocomplete, TextField } from "@mui/material";
 import { baseUrl } from '../utils/config';
@@ -14,6 +15,12 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import notifyWithToast from "../utils/toast";
 import { useLoading } from "../context/LoadingContext";
+import NameAvatar from "./NameAvatar";
+import SearchSuggestion from "./SearchSuggestion";
+import { IconButton } from "@mui/material";
+import ClearIcon from '@mui/icons-material/Clear';
+
+
 
 const style = {
     position: 'absolute',
@@ -29,54 +36,108 @@ const style = {
     pb: 3,
 };
 
-const options = ['Apple', 'Banana', 'Cherry', 'Date', 'Fig', 'Grape', 'Lemon', 'Mango', 'Orange'];
+// const options = ['Apple', 'Banana', 'Cherry', 'Date', 'Fig', 'Grape', 'Lemon', 'Mango', 'Orange'];
 
 const AddMemberModal = (props) => {
-    const [id, setId] = useState()
-    useEffect(() => {
-        setId(props.id)
-    }, [props.id])
+    const { id } = props;
+    console.log(id);
     const {authTokens} = useContext(AuthContext);
-    useEffect(() => {
-        fetchAllAccounts();
-    }, []);
-
-    const [filteredOptions, setFilteredOptions] = useState(options);
+    const [filteredOptions, setFilteredOptions] = useState([]);
+    const [options, setOptions] = useState([]);
+    const [selectedOption, setSelectedOption] = useState(null);
     
-  const handleSearchChange = (event, newValue) => {
-    setFilteredOptions(
-      options.filter(option => option.toLowerCase().includes(newValue.toLowerCase()))
-    );
-  };
+    const handleSearchChange = (event) => {
+        const inputText = event.target.value;
+        console.log(inputText)
+        if (inputText.trim() !== '') {
+            console.log(options)
+            setFilteredOptions(
+                options.filter(option => option.username.toLowerCase().includes(inputText.toLowerCase()))
+            );
+        } else {
+            setFilteredOptions([])
+        }
+    };
     
-    const fetchAllAccounts = async () => {
-        // try {
-        //     const response = await axios.get(
-        //         `${baseUrl}get_all_accounts/`,  
-        //         {
-        //             headers: {
-        //                 'Authorization': 'Bearer ' + authTokens?.access,
-        //                 'Accept': 'application/json',
-        //                 'Content-Type': 'application/json',
-        //             }
-        //         }  
 
-        //     )
-        //     console.log(response);
-        // } catch (error) {
-        //     console.log(error.response.data.message);
-        //     // window.location.href = '/organizations';
-        // }
+    const handleClose = () => {
+        setSelectedOption(null)
+        setFilteredOptions([])
+        props.handleClose();
     }
+    
+    const handleSelectedOption = (event, value) => {
+        setSelectedOption(value);
+        setFilteredOptions([])
+    }
+    useEffect(() => {
+        console.log(selectedOption)
+    },[selectedOption])
+
+    const fetchSuggestedMembers = async () => {
+        try {
+            const response = await axios.get(
+                `${baseUrl}get_member_suggestions/${id}`,  
+                {
+                    headers: {
+                        'Authorization': 'Bearer ' + authTokens?.access,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                }  
+
+            )
+            console.log(response);
+            setOptions(response.data.data);
+        } catch (error) {
+            console.log(error.response.data.message);
+            // window.location.href = '/organizations';
+        }
+    }
+
+    const handleClear = () => {
+        setSelectedOption(null)
+        setFilteredOptions([])
+    }
+    useEffect(() => {
+        if (props.open)
+            fetchSuggestedMembers();
+    }, [props.open]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        props.handleClose();
+        if(selectedOption) {
+            const config = {
+                headers: {
+                    'Authorization': 'Bearer ' + authTokens?.access,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                }
+            };
+            const body = JSON.stringify({
+                'id': selectedOption.id,
+                'member_type': selectedOption.member_type,
+            })
+            try {
+                const response = await axios.post(
+                    `${baseUrl}add_member/${id}/`,
+                    body ,
+                    config
+                )
+                notifyWithToast("success","Member added successfully");
+            } catch (error) {
+                notifyWithToast("error","Something went wrong");
+            }
+        }
+            console.log(selectedOption);
+        
+        handleClose();
     }
         return (
             <>
                 <Modal
                     open={props.open}
-                    onClose={() => props.handleClose()}
+                    onClose={() => handleClose()}
                 >
                 <Box 
                     sx={{ 
@@ -93,16 +154,41 @@ const AddMemberModal = (props) => {
                     onSubmit={handleSubmit}
                     noValidate
                     sx={{ mt: 1 }}
-                >
+                    >
                     {/* <SearchBar /> */}
-                    <Autocomplete
-                        options={filteredOptions}
-                        freeSolo
-                        renderInput={params => <TextField {...params} label="Search" variant="outlined" />}
-                    />
-                    <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-                        Invite
-                    </Button>
+                        {selectedOption?
+                            <Grid container>
+                                <SearchSuggestion suggestion={selectedOption} />
+                                <Grid item md={1}>
+                                <IconButton onClick={handleClear} size="small">
+                                    <ClearIcon />
+                                </IconButton>
+                                </Grid>
+                            </Grid>
+                            :
+                            <Autocomplete
+                                options={filteredOptions}
+                                getOptionLabel={(option) => option.username}
+                                onChange={handleSelectedOption}
+                                renderOption={(props, option) => (
+                                    <Grid container component='li' {...props}>
+                                        <SearchSuggestion suggestion={option} />
+                                    </Grid>
+                                )}
+                                freeSolo
+                                renderInput={ (params) => {
+                                    return (<TextField 
+                                        {...params} 
+                                        label="Search Member" 
+                                        variant="outlined"
+                                        onChange={handleSearchChange}
+                                    />)
+                                } }
+                            />
+                        }
+                        <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+                            Invite
+                        </Button>
                     </Box>
                 </Box>
                 </Modal>
