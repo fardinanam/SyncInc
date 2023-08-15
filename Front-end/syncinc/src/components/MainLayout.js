@@ -33,7 +33,7 @@ const MainLayout = (props) => {
                     borderRadius: '0 3rem 0 0',
                 }}
             >
-                <Toolbar position='fixed'/>
+                <Toolbar position="fixed"/>
                 {children}
             </Box>
         </Box>

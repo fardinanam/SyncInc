@@ -255,3 +255,92 @@ def get_project(request, project_id):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_all_tags(request):
+    try:
+        tags = Tag.objects.all()
+        serializer = TagSerializer(tags, many=True)
+
+        return Response({
+            'message': 'Tags fetched successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def set_or_create_user_tags(request):
+    try:
+        # for every tag, see if the tag exists, if not create it, then add it to the user if not already added
+        # if there is a tag in the user that is not in the data, remove it from user
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        data = request.data
+        tags = data['tags']
+        
+        for tag in tags:
+            tag_obj, created = Tag.objects.get_or_create(name=tag)
+            user.tags.add(tag_obj)
+
+        # remove the tags that are not in the data
+        user_tags = user.tags.all()
+        for user_tag in user_tags:
+            if user_tag.name not in tags:
+                user.tags.remove(user_tag)
+
+        serializer = UserTagSerializer(user.tags, many=True)
+
+        return Response({
+            'message': 'Tags set successfully',
+            'data': serializer.data
+        }, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_task(request, project_id):
+    # check if the user is the project leader
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        project = Project.objects.get(id=project_id)
+
+        if project.project_leader != user:
+            return Response({
+                'message': 'You are not authorized to create task for this project',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        data = request.data
+        data['project'] = project_id
+        serializer = UserTaskSerializer(data=data)
+
+        serializer.is_valid(raise_exception=True)
+
+        task = serializer.save()
+
+        return Response({
+            'message': 'Task created successfully',
+            'data': serializer.data
+        }, status=status.HTTP_201_CREATED)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': serializer.errors.get('non_field_errors')[0],
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)

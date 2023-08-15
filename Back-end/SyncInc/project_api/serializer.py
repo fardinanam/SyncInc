@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Organization, Designation, Project, Client, Vendor
+from .models import *
 from accounts.models import User
 from django.db.models import Q, Avg, F
 
@@ -151,3 +151,27 @@ class ProjectDetailsSerializer(serializers.ModelSerializer):
         model = Project
         fields = ['name', 'organization', 'client', 'description']
         depth = 1
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['name']
+
+class UserTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['name']
+    
+class UserTaskSerializer(serializers.ModelSerializer):
+    # a serializer to create a task of a project
+    class Meta:
+        model = UserTask
+        fields = ['name', 'project', 'description', 'deadline', 'tags']
+    
+    def validate(self, data):
+        valid_data = super().validate(data)
+        project = valid_data['project']
+        name = valid_data['name']
+        if project.usertasks.filter(name=name).exists():
+            raise serializers.ValidationError(f'Task named {name} already exists for this project')
+        return valid_data
