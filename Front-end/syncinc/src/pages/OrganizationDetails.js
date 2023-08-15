@@ -68,7 +68,7 @@ const OrganizationDetails = (props) => {
         console.log("handle Member modal open")
         setMemberModalOpen(true);
     }
-    const handleClose = () => {
+    const handleAddMemberModalClose = () => {
         setMemberModalOpen(false);
     }
     return (
@@ -142,7 +142,7 @@ const OrganizationDetails = (props) => {
                     <AddMemberModal
                         open={memberModalOpen}
                         id={id}
-                        handleClose={handleClose}
+                        handleClose={handleAddMemberModalClose}
                     />
 
                 </Grid>

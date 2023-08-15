@@ -9,5 +9,6 @@ urlpatterns = [
     path('organization_projects/<int:organization_id>/', views.get_organization_projects, name='organization_projects'),
     path('organization_members/<int:organization_id>/', views.get_organization_members, name='organization_members'),
     path('get_project/<int:project_id>/', views.get_project, name='project_details'),
-    # path('invite_member/<int:organization_id>/', views.invite_member, name='invite_member'),
+    path('get_member_suggestions/<int:organization_id>/', views.get_member_suggestions, name='member_suggestions'),
+    path('add_member/<int:organization_id>/', views.add_member, name='add_member'),
 ]

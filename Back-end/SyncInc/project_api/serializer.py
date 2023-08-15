@@ -1,7 +1,8 @@
 from rest_framework import serializers
-from .models import Organization, Designation, Project, Client, Vendor
+from .models import *
 from accounts.models import User
 from django.db.models import Q, Avg, F
+
 
 class OrganizationSerializer(serializers.ModelSerializer):
     num_projects = serializers.SerializerMethodField()
@@ -64,7 +65,9 @@ class EmployeeSerializer(serializers.ModelSerializer):
     def get_name(self, obj):
         return obj.first_name + ' ' + obj.last_name
     def get_expertise(self, obj):
-        return obj.tags.all()
+        tags = Tag.objects.filter(users=obj)
+        tag_names = [tag.name for tag in tags]
+        return tag_names
     def get_completed_tasks(self, obj):
         return obj.usertasks.filter(end_time__isnull=False).count()
     def get_avg_rating(self, obj):
@@ -87,7 +90,10 @@ class VendorSerializer(serializers.ModelSerializer):
         model = Vendor
         fields = ['name', 'expertise', 'completed_tasks', 'avg_rating', 'avg_time']
     def get_expertise(self, obj):
-        return obj.tags.all()
+        tags = obj.tags.all()
+        tag_names = [tag.name for tag in tags]
+        return tag_names
+        
     def get_completed_tasks(self, obj):
         #get count of tasks that has finished using end_time. there is no status field
         return obj.vendortasks.filter(end_time__isnull=False).count()
@@ -111,7 +117,7 @@ class OrganizationMembersSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'employees', 'vendors']
         depth = 1
 
-    
+
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
