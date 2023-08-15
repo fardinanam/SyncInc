@@ -3,7 +3,7 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Typography from "@mui/material/Typography";
-import { Avatar, Input, Autocomplete, TextField } from "@mui/material";
+import { Avatar, Chip, Autocomplete, TextField } from "@mui/material";
 import { baseUrl } from '../utils/config';
 import AuthContext from '../context/AuthContext';
 import axios from "axios";
@@ -639,11 +639,13 @@ const ChangePasswordModal = (props) => {
             );
 
             if (response.status === 200) {
-                props.handleClose("success", "Password changed successfully!");
+                // props.handleClose();
+                notifyWithToast("success", "Password changed successfully!");
             }
         } catch (error) {
-            props.handleClose("error", error.response.data);
+            notifyWithToast("error", error.response.data.message);
         }
+        props.handleClose();
         setLoading(false);
     }
 
@@ -728,4 +730,112 @@ const ChangePasswordModal = (props) => {
         </Modal>
     )
 }
-export {CreateOrgModal, AddMemberModal, EditProfilePicModal, EditPersonalInfoModal, EditAddressModal, ChangePasswordModal};
+
+const AddTagModal = ({tags, isOpen, onClose}) => {
+    const [allTags, setAllTags] = useState([]);
+    const [selectedTags, setSelectedTags] = useState([]);
+    const {authTokens} = useContext(AuthContext);
+
+    const fetchAllTags = async () => {
+        const response = await axios.get(
+            `${baseUrl}all_tags/`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + authTokens?.access,
+                }
+            }
+        );
+
+        setAllTags(response.data.data);
+        console.log(tags);
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        const body = JSON.stringify({
+            'tags': selectedTags
+        });
+
+        const config = {
+            headers:{
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + authTokens?.access,
+            }
+        };
+
+        try {
+            const response = await axios.post(
+                `${baseUrl}set_user_tags/`,
+                body,
+                config
+            );
+
+            if (response.status === 201) {
+                onClose(selectedTags);
+                notifyWithToast("success", "Expertise updated successfully!");
+            }
+        } catch (error) {
+            onClose();
+
+            notifyWithToast("error", error.response.data.message);
+        }
+    }
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchAllTags();
+        }
+    }, [isOpen]);
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={() => onClose()}
+        >
+            <Box sx={style}>
+                <Typography id="add-tag-modal-title" variant="h5" align="center">
+                    Edit Tags
+                </Typography>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <Autocomplete
+                        multiple
+                        id="tags"
+                        name="tags"
+                        options={allTags.map((option) => option.name)}
+                        defaultValue={tags}
+                        onChange={(event, value) => setSelectedTags(value)}
+                        freeSolo
+                        renderTags={(value, getTagProps) =>
+                            value.map((option, index) => (
+                            <Chip
+                                variant="outlined"
+                                label={option}
+                                {...getTagProps({ index })}
+                            />
+                            ))
+                        }
+                        renderInput={(params) => (
+                            <TextField {...params} label="Tags" placeholder="Add Tags" />
+                        )}
+                    />
+
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{ mt: 2 }}
+                    >
+                        Save
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+
+export {CreateOrgModal, AddMemberModal, EditProfilePicModal, EditPersonalInfoModal, EditAddressModal, ChangePasswordModal, AddTagModal};

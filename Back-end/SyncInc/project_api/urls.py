@@ -10,4 +10,6 @@ urlpatterns = [
     path('organization_members/<int:organization_id>/', views.get_organization_members, name='organization_members'),
     path('get_project/<int:project_id>/', views.get_project, name='project_details'),
     # path('invite_member/<int:organization_id>/', views.invite_member, name='invite_member'),
+    path('all_tags/', views.get_all_tags, name='all_tags'),
+    path('set_user_tags/', views.set_or_create_user_tags, name='set_user_tags'),
 ]

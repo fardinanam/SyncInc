@@ -1,4 +1,4 @@
-import { Grid, Box, Typography, Button } from "@mui/material";
+import { Grid, Box, Typography, Button, IconButton } from "@mui/material";
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 
 const AddItemLayout = ({ title, onSubmit, onClose, children }) => {
@@ -39,9 +39,12 @@ const AddItemLayout = ({ title, onSubmit, onClose, children }) => {
                                                 verticalAlign: 'middle',
                                             }}
                                         >
-                                            <Button color="error" onClick={onClose}>
+                                            <IconButton 
+                                                color="error" 
+                                                onClick={onClose}
+                                            >
                                                 <CloseRoundedIcon />
-                                            </Button>
+                                            </IconButton>
                                         </Box>
                                     </Grid>
                                 </Grid>

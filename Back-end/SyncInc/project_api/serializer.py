@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Organization, Designation, Project, Client, Vendor
+from .models import *
 from accounts.models import User
 from django.db.models import Q, Avg, F
 
@@ -151,3 +151,13 @@ class ProjectDetailsSerializer(serializers.ModelSerializer):
         model = Project
         fields = ['name', 'organization', 'client', 'description']
         depth = 1
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['name']
+
+class UserTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['name']
