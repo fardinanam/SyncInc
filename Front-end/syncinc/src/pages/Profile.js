@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react"
 import axios from "axios"
 
-import { Avatar, Box, Typography, Drawer, Grid, Button, Stack } from "@mui/material"
+import { Avatar, Box, Typography, Chip, Grid, Paper, Stack } from "@mui/material"
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 
 import { baseUrl } from "../utils/config"
@@ -9,8 +9,8 @@ import AuthContext from "../context/AuthContext"
 import { useTheme } from "@mui/material/styles"
 
 import EditButton from "../components/EditButton"
-import { EditProfilePicModal, EditPersonalInfoModal, EditAddressModal, ChangePasswordModal } from "../components/Modals"
-import notifyWithToast from "../utils/toast"
+import { EditProfilePicModal, EditPersonalInfoModal, EditAddressModal, ChangePasswordModal, AddTagModal } from "../components/Modals"
+import AddRounded from '@mui/icons-material/AddRounded';
 import { useLoading } from "../context/LoadingContext"
 
 const sectionStyle = {
@@ -38,7 +38,7 @@ const StackField = (props) => {
 }
 
 const Profile = () => {
-    const { authTokens } = useContext(AuthContext);
+    const { user, setUser, authTokens } = useContext(AuthContext);
     const theme = useTheme();
     const mainColor = theme.palette.main
     const [profileInfo, setProfileInfo] = useState({});
@@ -46,6 +46,7 @@ const Profile = () => {
     const [isEditPersonalInfoModalOpen, setIsEditPersonalInfoModalOpen] = useState(false);
     const [isEditAddressModalOpen, setIsEditAddressModalOpen] = useState(false);
     const [isChangePassModalOpen, setIsChangePassModalOpen] = useState(false);
+    const [isAddTagModalOpen, setIsAddTagModalOpen] = useState(false);
     const { setLoading } = useLoading();
 
     const handleEditProfilePicModalOpen = () => {
@@ -64,10 +65,19 @@ const Profile = () => {
         setIsChangePassModalOpen(true);
     }
 
+    const handleAddTagModalOpen = () => {
+        setIsAddTagModalOpen(true);
+    }
+
     const handleEditProfilePicModalClose = (data) => {
         if (data) {
             setProfileInfo({
                 ...profileInfo, 
+                profile_picture: data.profile_picture
+            });
+
+            setUser({
+                ...user,
                 profile_picture: data.profile_picture
             });
         }
@@ -82,6 +92,12 @@ const Profile = () => {
                 last_name: data.last_name,
                 phone_number: data.phone_number,
                 birth_date: data.birth_date,
+            });
+
+            setUser({
+                ...user,
+                first_name: data.first_name,
+                last_name: data.last_name,
             });
         }
 
@@ -104,15 +120,20 @@ const Profile = () => {
         setIsEditAddressModalOpen(false);
     }
 
-    const handleChangePassModalClose = (type, data) => {
+    const handleChangePassModalClose = () => {
         setIsChangePassModalOpen(false);
+    }
 
-        if (type === "error") {
-            notifyWithToast(type, data.message);
-        } else {
-            notifyWithToast(type, data);
+    const handleAddTagModalClose = (tags) => {
+        setIsAddTagModalOpen(false);
+        if (tags) {
+            setProfileInfo({
+                ...profileInfo,
+                tags: tags
+            });
         }
     }
+
 
     const fetchProfileInfo = async () => {
         setLoading(true);
@@ -152,6 +173,12 @@ const Profile = () => {
                     Account Settings
                 </Typography>
             </Box>
+            {/* <Paper 
+                elevation={0}
+                sx={{
+                    borderRadius: "0.5rem"
+                }}
+            > */}
             <Stack spacing={2}
                 bgcolor={mainColor}
                 sx={{
@@ -261,12 +288,6 @@ const Profile = () => {
                                 value={profileInfo.last_name}
                             />
                         </Grid>
-                        {/* <Grid item xs={12} md={6}>
-                            <StackField
-                                title="Email"
-                                value={profileInfo.email}
-                            />
-                        </Grid> */}
                         <Grid item xs={12} md={6}>
                             <StackField
                                 title="Phone Number"
@@ -282,6 +303,49 @@ const Profile = () => {
                             />
                         </Grid>
                     </Grid>
+                </Box>
+                <Box 
+                    display={"flex"}
+                    flexDirection={"column"}
+                    sx={sectionStyle}
+                >
+                    <Box
+                        display={"flex"}
+                    >
+                        <Typography
+                            fontWeight={"bold"}
+                            flexGrow={1}
+                        >
+                            Expertise
+                        </Typography>
+                        <EditButton
+                            variant="outlined"
+                            size="small"
+                            onClick={handleAddTagModalOpen}
+                        >
+                            Edit
+                            <EditRoundedIcon fontSize="small" />
+                        </EditButton>
+                        <AddTagModal 
+                            tags={profileInfo.tags}
+                            isOpen={isAddTagModalOpen}
+                            onClose={handleAddTagModalClose}
+                        />
+                    </Box>
+                    <Stack spacing={{ xs: 1, sm: 1 }} direction="row" useFlexGap flexWrap="wrap"
+                    >
+                        {profileInfo.tags?.length === 0 
+                            ? <Typography>No tag</Typography>
+                            : profileInfo.tags?.map((tag, index) => (
+                                <Chip 
+                                    key={`{tag}-${index}`}
+                                    variant="outlined"
+                                    color="success"
+                                    label={tag}                   
+                                />
+                            ))
+                        }
+                    </Stack>
                 </Box>
                 <Box 
                     display={"flex"}
@@ -353,7 +417,7 @@ const Profile = () => {
                     variant="h6"
                     fontWeight="bold"
                 >
-                    Security
+                    My Account
                 </Typography>
                 <Box
                     display={"flex"}
@@ -367,7 +431,37 @@ const Profile = () => {
                             fontWeight={"bold"}
                             flexGrow={1}
                         >
-                            Change Password
+                            Account Information
+                        </Typography>
+                    </Box>
+                    <Grid container rowSpacing={2}>
+                        <Grid item xs={12} md={6}>
+                            <StackField
+                                title="Email"
+                                value={profileInfo.email}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <StackField
+                                title="Username"
+                                value={profileInfo.username}
+                            />
+                        </Grid>
+                    </Grid>
+                </Box>
+                <Box 
+                    display={"flex"}
+                    flexDirection={"column"}
+                    sx={sectionStyle}
+                >
+                    <Box
+                        display={"flex"}
+                    >
+                        <Typography
+                            fontWeight={"bold"}
+                            flexGrow={1}
+                        >
+                            Account Security
                         </Typography>
                         <EditButton
                             variant="outlined"
@@ -382,8 +476,20 @@ const Profile = () => {
                             handleClose={handleChangePassModalClose}
                         />
                     </Box>
+                    <Grid
+                        container
+                        rowSpacing={2}
+                    >
+                        <Grid item xs={12} md={6}>
+                            <StackField
+                                title="Password"
+                                value={"********"}
+                            />
+                        </Grid>
+                    </Grid>
                 </Box>
             </Stack>
+            {/* </Paper> */}
         </>
     )
 }

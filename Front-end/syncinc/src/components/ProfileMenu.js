@@ -14,6 +14,8 @@ import { Toolbar } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 
+import { baseUrl } from '../utils/config';
+
 
 const ProfileMenu = () => {
     let {user, logoutUser} = useContext(AuthContext);
@@ -41,7 +43,7 @@ const ProfileMenu = () => {
 
     return (
         <Toolbar sx={{ flexGrow: 0 }}>
-            <Avatar alt={user.first_name + ' ' + user.last_name} src="/static/images/avatar/2.jpg" />
+            <Avatar alt={user.first_name + ' ' + user.last_name} src={user.profile_picture && baseUrl.concat(String(user.profile_picture).substring(1))} />
             <Typography ml={1}>
                 {user.first_name + " " + user.last_name}
             </Typography>
@@ -71,7 +73,7 @@ const ProfileMenu = () => {
                     onClick={handleAccount}
                 >
                     <AccountCircleIcon />
-                    <Typography textAlign="center" ml={1}>Account</Typography>
+                    <Typography textAlign="center" ml={1}>Profile</Typography>
                 </MenuItem>
                 <MenuItem 
                     key="logout" 

@@ -9,7 +9,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
 
         token['username'] = user.username
-        token['email'] = user.email
+        token['profile_picture'] = user.profile_picture.url
         token['first_name'] = user.first_name
         token['last_name'] = user.last_name
 
@@ -44,6 +44,7 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=254)
 
 class ProfileInfoSerializer(serializers.ModelSerializer):
+    tags = serializers.StringRelatedField(many=True)
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name', 'last_name', 'phone', 'birth_date', 'address', 'profile_picture', 'tags']
@@ -53,6 +54,9 @@ class ProfileInfoSerializer(serializers.ModelSerializer):
             'email_token': {'write_only': True},
             'is_email_verified': {'read_only': True},    
         }
+
+    def get_tags(self, obj):
+        return obj.tags.values_list('name', flat=True)
 
 class ProfilePicSerializer(serializers.ModelSerializer):
     class Meta:

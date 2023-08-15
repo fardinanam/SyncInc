@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import { Avatar, Input, Autocomplete, TextField } from "@mui/material";
+import { Avatar, Chip, Autocomplete, TextField } from "@mui/material";
 import { baseUrl } from '../utils/config';
 import AuthContext from '../context/AuthContext';
 import axios from "axios";
@@ -21,8 +21,6 @@ import { IconButton } from "@mui/material";
 import ClearIcon from '@mui/icons-material/Clear';
 
 
-
-const yesterday = dayjs().subtract(10 * 365, 'day');
 
 const style = {
     position: 'absolute',
@@ -247,23 +245,23 @@ const CreateOrgModal = (props) => {
                     Create Organization
                 </Typography>
                 <Box
-                component="form"
-                onSubmit={handleSubmit}
-                noValidate
-                sx={{ mt: 1 }}
-            >
-                <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    id="organization_name"
-                    label="Organization Name"
-                    name="name"
-                    autoFocus
-                />
-                <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-                    Create
-                </Button>
+                    component="form"
+                    onSubmit={handleSubmit}
+                    noValidate
+                    sx={{ mt: 1 }}
+                >
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="organization_name"
+                        label="Organization Name"
+                        name="name"
+                        autoFocus
+                    />
+                    <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+                        Create
+                    </Button>
                 </Box>
             </Box>
             </Modal>
@@ -515,6 +513,7 @@ const EditPersonalInfoModal = (props) => {
                             >
                                 <DatePicker label="Birth Date" 
                                     defaultValue={dayjs(birthDate)}
+                                    maxDate={dayjs().subtract(10, 'year')}
                                     fullWidth
                                     id="birth_date"
                                     name="birth_date"
@@ -725,11 +724,13 @@ const ChangePasswordModal = (props) => {
             );
 
             if (response.status === 200) {
-                props.handleClose("success", "Password changed successfully!");
+                // props.handleClose();
+                notifyWithToast("success", "Password changed successfully!");
             }
         } catch (error) {
-            props.handleClose("error", error.response.data);
+            notifyWithToast("error", error.response.data.message);
         }
+        props.handleClose();
         setLoading(false);
     }
 
@@ -814,4 +815,127 @@ const ChangePasswordModal = (props) => {
         </Modal>
     )
 }
-export {CreateOrgModal, AddMemberModal, EditProfilePicModal, EditPersonalInfoModal, EditAddressModal, ChangePasswordModal};
+
+const AddTagModal = ({tags, isOpen, onClose}) => {
+    const [allTags, setAllTags] = useState([]);
+    const [selectedTags, setSelectedTags] = useState([]);
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
+    const {authTokens} = useContext(AuthContext);
+    const { setLoading } = useLoading();
+
+    const fetchAllTags = async () => {
+        const response = await axios.get(
+            `${baseUrl}all_tags/`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + authTokens?.access,
+                }
+            }
+        );
+
+        setAllTags(response.data.data);
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        console.log(selectedTags);
+        const body = JSON.stringify({
+            'tags': selectedTags
+        });
+
+        const config = {
+            headers:{
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + authTokens?.access,
+            }
+        };
+
+        setLoading(true);
+        try {
+            const response = await axios.post(
+                `${baseUrl}set_user_tags/`,
+                body,
+                config
+            );
+
+            if (response.status === 201) {
+                onClose(selectedTags);
+                notifyWithToast("success", "Expertise updated successfully!");
+            }
+        } catch (error) {
+            onClose();
+
+            notifyWithToast("error", error.response.data.message);
+        }
+
+        setLoading(false);
+    }
+
+    const handleChange = (_, value) => {
+        setSelectedTags(value);
+        setIsSubmitDisabled(false);
+    }
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchAllTags();
+        }
+    }, [isOpen]);
+
+    useEffect(() => {
+        setSelectedTags(tags);
+    }, [tags]);
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={() => onClose()}
+        >
+            <Box sx={style}>
+                <Typography id="add-tag-modal-title" variant="h5" align="center">
+                    Edit Tags
+                </Typography>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <Autocomplete
+                        multiple
+                        id="tags"
+                        name="tags"
+                        options={allTags.map((option) => option.name)}
+                        defaultValue={tags}
+                        onChange={handleChange}
+                        freeSolo
+                        renderTags={(value, getTagProps) =>
+                            value.map((option, index) => (
+                            <Chip
+                                variant="outlined"
+                                label={option}
+                                {...getTagProps({ index })}
+                            />
+                            ))
+                        }
+                        renderInput={(params) => (
+                            <TextField {...params} label="Tags" placeholder="Add Tags" />
+                        )}
+                    />
+
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{ mt: 2 }}
+                        disabled={isSubmitDisabled}
+                    >
+                        Save
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+
+export {CreateOrgModal, AddMemberModal, EditProfilePicModal, EditPersonalInfoModal, EditAddressModal, ChangePasswordModal, AddTagModal};
