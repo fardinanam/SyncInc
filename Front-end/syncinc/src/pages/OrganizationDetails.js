@@ -79,7 +79,7 @@ const OrganizationDetails = (props) => {
                 <Grid 
                     item
                     display={'flex'}
-                    xs={12} md={3}
+                    xs={12} md={4}
                     alignItems={"center"}
                     justifyContent={"flex-start"}
                 >
@@ -87,14 +87,14 @@ const OrganizationDetails = (props) => {
                         variant='h5'
                         sx={{ fontWeight: 'bold' }}
                         flexGrow={1}
-                        >
+                    >
                         {organization?.name}
                     </Typography>
                 </Grid>
                 <Grid 
                     item 
                     display={'flex'}
-                    xs={12} md={6}
+                    xs={12} md={4}
                     alignItems={"center"}
                     justifyContent={"center"}
                 >
@@ -108,7 +108,7 @@ const OrganizationDetails = (props) => {
                     >
                         <ToggleButton value="projects">
                             <Typography
-                                variant='h6'
+                                variant='button'
                                 flexGrow={1}
                             >
                                 projects
@@ -116,7 +116,7 @@ const OrganizationDetails = (props) => {
                         </ToggleButton>
                         <ToggleButton value="members">
                             <Typography
-                                variant='h6'
+                                variant='button'
                                 flexGrow={1}
                             >
                                 members
@@ -127,7 +127,7 @@ const OrganizationDetails = (props) => {
                 <Grid 
                     item
                     display={'flex'}
-                    xs={12} md={3}
+                    xs={12} md={4}
                     alignItems={'center'}
                     justifyContent={'flex-end'}
                 >
