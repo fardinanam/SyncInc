@@ -9,9 +9,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
 
         token['username'] = user.username
-        token['profile_picture'] = user.profile_picture.url
         token['first_name'] = user.first_name
         token['last_name'] = user.last_name
+
+        try:
+            token['profile_picture'] = user.profile_picture.url 
+        except Exception as e:
+            print(e)           
 
         return token
 

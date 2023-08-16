@@ -161,6 +161,18 @@ def create_organization(request):
 def create_project(request, organization_id):
     try:
         username = get_data_from_token(request, 'username')
+
+        user = User.objects.get(username=username)
+
+        # check if the user is an admin of the organization
+        designation = user.designations.filter(organization=organization).first()
+        # for designation in designations:
+
+        if designation and designation.role != 'Admin':
+            return Response({
+                'message': 'You are not authorized to add new project to this organization',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
         
         data = request.data
         data['username'] = username
@@ -200,7 +212,19 @@ def get_member_suggestions(request, organization_id):
     try:
         username = get_data_from_token(request, 'username')
         user = User.objects.get(username=username)
+
+        # check if the user is an admin of the organization
         organization = Organization.objects.get(id=organization_id)
+        designation = user.designations.filter(organization=organization).first()
+        # for designation in designations:
+
+        if designation and designation.role != 'Admin':
+            return Response({
+                'message': 'You are not authorized to add new member to this organization',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        
         employees = User.objects.exclude(designation__organization=organization).values( 'id','username', 'email')
         vendors = Vendor.objects.exclude(organization=organization).annotate(username=F('name')).values('id','username', 'email')
 
@@ -210,16 +234,7 @@ def get_member_suggestions(request, organization_id):
         for vendor in vendors:
             vendor['member_type'] = 'vendor'
         data = list(employees) + list(vendors)
-        
-        # check if the user is an admin of the organization
-        designation = user.designations.filter(organization=organization).first()
-        # for designation in designations:
-
-        if designation and designation.role != 'Admin':
-            return Response({
-                'message': 'You are not authorized to add member to this organization',
-                'data': None
-            }, status=status.HTTP_401_UNAUTHORIZED)
+        print(data)
 
         return Response({
             'message': f'New member suggestion for the organization {organization.name}',
@@ -241,13 +256,32 @@ def add_member(request, organization_id):
         user = User.objects.get(username=username)
 
         organization = Organization.objects.get(id=organization_id)
+        designation = user.designations.filter(organization=organization).first()
+        # for designation in designations:
+
+        if designation and designation.role != 'Admin':
+            return Response({
+                'message': 'You are not authorized to add new member to this organization',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
         data = request.data
         member_id = data['id']
 
         if(data['member_type'] == 'employee'):
-            pass
+            employee = User.objects.get(id=member_id)
+            designation = Designation.objects.create(
+                employee=employee,
+                organization=organization,
+                role='Employee'
+            )
+            designation.save()
+
         elif(data['member_type'] == 'vendor'):
-            pass
+            vendor = Vendor.objects.get(id=member_id)
+            vendor.organizations.add(organization)
+            vendor.save()
+
         print(data)
         return Response({
             'message': f'Member added successfully to the {organization.name}',
