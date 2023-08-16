@@ -12,20 +12,19 @@ import { baseUrl } from "../utils/config";
 
 const OrganizationProjects = (props) => {
     const { authTokens } = useContext(AuthContext);
-    
-    const id = props.id;
+    const navigate = useNavigate();
 
     const [organization, setOrganization] = useState({});
 
     useEffect(() => {
         fetchOrganizationProjectDetails();
-    }, [id]);
+    }, [props.id]);
 
     // use axios to get organization details
     const fetchOrganizationProjectDetails = async () => {
         try {
             const response = await axios.get(
-                `${baseUrl}organization_projects/${id}/`,  
+                `${baseUrl}organization_projects/${props.id}/`,  
                 {
                     headers: {
                         'Authorization': 'Bearer ' + authTokens?.access,
@@ -64,6 +63,7 @@ const OrganizationProjects = (props) => {
                         title={project.name}
                         count={0}
                         name="Tasks"
+                        onClick={() => navigate(`/project/${props.id}`)}
                     >
                         <WorkIcon fontSize='large' color='primary' />
                         {/* <ListItemIcon fontSize='small' color='primary' /> */}

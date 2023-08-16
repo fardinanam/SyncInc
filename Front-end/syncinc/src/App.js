@@ -49,7 +49,7 @@ function App() {
                                         
                                         <Route path="/organization/:id/add-project" element={<AddProject />} exact />
                                         <Route path="/project/:id" element={<ProjectDetails />} exact />
-                                        <Route path="/project/:id/add-task" element={<AddTask />} exact />
+                                        {/* <Route path="/project/:id/add-task" element={<AddTask />} exact /> */}
                                         <Route path="/tasks" element={<Tasks />} exact />
                                     </Routes>
                                 </MainLayout>

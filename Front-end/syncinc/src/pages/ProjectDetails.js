@@ -7,6 +7,8 @@ import notifyWithToast from "../utils/toast";
 import axios from "axios";
 import { Box, Button, CssBaseline, Paper, Typography } from "@mui/material";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import CollapsibleTaskTable from "../components/CollapsibleTaskTable";
+import { AddTaskModal } from "../components/Modals";
 
 const ProjectDetails = () => {
     const { id } = useParams();
@@ -14,7 +16,22 @@ const ProjectDetails = () => {
     const { authTokens } = useContext(AuthContext);
     const navigate = useNavigate();
 
+    const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
     const [project, setProject] = useState({});
+    const [userTasks, setUserTasks] = useState([]);
+    const [vendorTasks, setVendorTasks] = useState([]);
+    const [role, setRole] = useState("");
+
+    const handleAddTaskModalClose = (newTask) => {
+        setIsAddTaskModalOpen(false);
+        if (newTask) {
+            newTask["tags"] = newTask.tags_details;
+            setUserTasks(prevState => ([
+                ...prevState,
+                newTask
+            ]));
+        }
+    }
 
     const fetchProjectDetails = async () => {
         const config = {
@@ -27,15 +44,29 @@ const ProjectDetails = () => {
         setLoading(true);
 
         try {
-            const response = await axios.get(
+            let response = await axios.get(
                 `${baseUrl}get_project/${id}`,
                 config
             )
 
-            setProject(response.data.data);
-            console.log(project);
+            setProject(response.data.data.project);
+            setRole(response.data.data.role);
+
+            response = await axios.get(
+                `${baseUrl}user_tasks/${id}`,
+                config,
+            )
+            
+            setUserTasks(response.data.data);
+
+            response = await axios.get(
+                `${baseUrl}vendor_tasks/${id}`,
+                config,
+            )
+
+            setVendorTasks(response.data.data);
         } catch (error) {
-            console.log(error.response.data.message);
+            navigate(-1);
             notifyWithToast("error", error.response.data.message);
         }
 
@@ -54,9 +85,9 @@ const ProjectDetails = () => {
                     p: 2,
                     display: 'flex',
                     flexDirection: 'row',
-                    boxShadow: 0,
                     borderRadius: "0.5rem"
                 }}
+                elevation={0}
             >
                 <Box
                     sx={{
@@ -80,16 +111,27 @@ const ProjectDetails = () => {
                     display={"flex"}
                     alignItems={"center"}
                 >
-                    <Button
-                        variant="outlined"
-                        color="primary"
-                        onClick={() => navigate(`/project/${id}/add-task`)}
-                    >
-                        <AddRoundedIcon />
-                        Add Task
-                    </Button>
+                    { !project.has_ended && role === "Project Leader" && 
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={() => setIsAddTaskModalOpen(true)}
+                        >
+                            <AddRoundedIcon />
+                            Add Task
+                        </Button>
+                    }
+                    <AddTaskModal 
+                        isOpen={isAddTaskModalOpen}
+                        onClose={handleAddTaskModalClose}
+                        taskType={"User"}
+                    />
                 </Box>
             </Paper>
+            <CollapsibleTaskTable 
+                title="User Tasks"
+                tasks={userTasks}
+            />
         </>
     );
 }

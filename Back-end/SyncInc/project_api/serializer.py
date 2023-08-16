@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import *
 from accounts.models import User
 from django.db.models import Q, Avg, F
+from datetime import datetime
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
@@ -153,26 +154,52 @@ class ProjectSerializer(serializers.ModelSerializer):
         return project
         
 class ProjectDetailsSerializer(serializers.ModelSerializer):
+    has_ended = serializers.SerializerMethodField()
     class Meta:
         model = Project
-        fields = ['name', 'organization', 'client', 'description']
+        fields = ['name', 'organization', 'client', 'description', 'has_ended']
         depth = 1
 
+    def get_has_ended(self, obj):
+        if obj.end_time and obj.end_time < datetime.now():
+            return True
+        return False
+    
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ['name']
+    
+class GetUserTaskSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True)
+
+    class Meta:
+        model = UserTask
+        fields = ['id', 'name', 'tags', 'assignee', 'deadline']
+        depth = 1
+
+class VendorTaskSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True)
+
+    class Meta:
+        model = VendorTask
+        fields = ['id', 'name', 'tags', 'assignee', 'deadline']
+        depth = 1
+
 
 class UserTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ['name']
     
-class UserTaskSerializer(serializers.ModelSerializer):
+class CreateUserTaskSerializer(serializers.ModelSerializer):
     # a serializer to create a task of a project
+    tags = serializers.ListField(write_only=True)
+    tags_details = TagSerializer(source='tags', many=True, read_only=True)
+    
     class Meta:
         model = UserTask
-        fields = ['name', 'project', 'description', 'deadline', 'tags']
+        fields = '__all__'
     
     def validate(self, data):
         valid_data = super().validate(data)
@@ -181,3 +208,35 @@ class UserTaskSerializer(serializers.ModelSerializer):
         if project.usertasks.filter(name=name).exists():
             raise serializers.ValidationError(f'Task named {name} already exists for this project')
         return valid_data
+    
+    # def validate_tags(self, tags):
+    #     # get or create tags
+    #     tag_objs = []
+    #     for tag in tags:
+    #         tag_obj, created = Tag.objects.get_or_create(name=tag)
+    #         tag_objs.append(tag_obj)
+        
+    #     return tag_objs
+                
+    
+    # def create(self, validated_data):
+    #     task = super().create(validated_data)
+    #     # add or create tags
+    #     tags = self.initial_data.get('tags')
+    #     if tags:
+    #         for tag in tags:
+    #             tag_obj, created = Tag.objects.get_or_create(name=tag)
+    #             task.tags.add(tag_obj)
+
+    #     task.save()
+    #     return task
+    
+    def create(self, validated_data):
+        tags_data = validated_data.pop('tags')
+        task = UserTask.objects.create(**validated_data)
+
+        for tag_name in tags_data:
+            tag, _ = Tag.objects.get_or_create(name=tag_name)
+            task.tags.add(tag)
+
+        return task
