@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
@@ -940,4 +941,166 @@ const AddTagModal = ({tags, isOpen, onClose}) => {
     )
 }
 
-export {CreateOrgModal, AddMemberModal, EditProfilePicModal, EditPersonalInfoModal, EditAddressModal, ChangePasswordModal, AddTagModal};
+const AddTaskModal = ({isOpen, onClose, taskType}) => {
+    const {id} = useParams();
+    const {authTokens} = useContext(AuthContext);
+    const {setLoading} = useLoading();
+    const [deadline, setDeadline] = useState('');
+    const [allTags, setAllTags] = useState([]);
+    const [selectedTags, setSelectedTags] = useState([]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        console.log(selectedTags);
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`
+            }
+        }
+
+        const body = JSON.stringify({
+            name: e.target.task_name.value,
+            description: e.target.task_description.value,
+            tags: selectedTags,
+            deadline: deadline,
+        });
+
+        setLoading(true);
+
+        try {
+            const response = await axios.post(
+                `${baseUrl}create_task/${id}/`, 
+                body, 
+                config
+            );
+
+            if (response.status === 201) {
+                onClose(response.data.data);
+                notifyWithToast('success', 'Task created successfully');
+            }
+        } catch (error) {
+            onClose();
+            notifyWithToast('error', error.response.data.message);
+        }
+        
+        
+        setLoading(false);
+    }
+
+    const fetchAllTags = async () => {
+        console.log("fetching tags");
+        const response = await axios.get(
+            `${baseUrl}all_tags/`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + authTokens?.access,
+                }
+            }
+        );
+
+        setAllTags(response.data.data);
+    }
+
+    const handleDeadlineChange = (date) => {
+        setDeadline(date);
+    }
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchAllTags();
+        }
+    }, [isOpen]);
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={() => onClose()}
+        >
+            <Box sx={style}>
+                <Typography id="add-task-modal-title" variant="h5" align="center">
+                    Add {taskType} Task
+                </Typography>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        id="task_name"
+                        label="Task Name"
+                        name="task_name"
+                        required
+                        autoFocus
+                    />
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>    
+                        <DatePicker 
+                            label="Deadline" 
+                            minDate={dayjs().add(1, 'day')}
+                            id="deadline"
+                            name="deadline"
+                            onChange={handleDeadlineChange}
+                            sx={{
+                                width: '100%',
+                            }}
+                            required
+                        />
+                    </LocalizationProvider>
+
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        id="task_description"
+                        label="Task Description"
+                        name="task_description"
+                        multiline
+                        required
+                    />
+                    <Autocomplete
+                        multiple
+                        id="tags"
+                        name="tags"
+                        options={allTags.map((option) => option.name)}
+                        freeSolo
+                        onChange={(_, value) => setSelectedTags(value)}
+                        renderTags={(value, getTagProps) =>
+                            value.map((option, index) => (
+                            <Chip
+                                variant="outlined"
+                                label={option}
+                                {...getTagProps({ index })}
+                            />
+                            ))
+                        }
+                        renderInput={(params) => (
+                            <TextField {...params} label="Tags" placeholder="Add Tags" />
+                        )}
+                    />
+
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{ mt: 2 }}
+                    >
+                        Save
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+
+    )
+}
+
+export {
+    CreateOrgModal, 
+    AddMemberModal, 
+    EditProfilePicModal, 
+    EditPersonalInfoModal, 
+    EditAddressModal, 
+    ChangePasswordModal, 
+    AddTagModal,
+    AddTaskModal,
+};

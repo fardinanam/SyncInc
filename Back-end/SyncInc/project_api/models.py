@@ -199,7 +199,7 @@ class AbstractTask(models.Model):
         super().clean()
 
     def __str__(self):
-        return self.name + self.project.__str__()
+        return self.name + '-' + self.project.__str__()
 
     class Meta:
         abstract = True
@@ -238,7 +238,7 @@ class VendorTask(AbstractTask):
         return super().clean()
 
     def __str__(self):
-        return self.vendor.name + ' - ' + self.task.name
+        return self.vendor.name + '-' + self.task.name
     
 class Message(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)

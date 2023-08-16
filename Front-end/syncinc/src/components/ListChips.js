@@ -1,17 +1,23 @@
 import React from 'react';
 import Chip from '@mui/material/Chip';
+import { Stack } from '@mui/material';
 
 const ListChips = ({ chipData }) => {
   return (
-    <>
-      {chipData.map((chip, index) => (
+    <Stack
+      spacing={1}  
+      direction="row"
+    >
+      {chipData?.map((chip, index) => (
         <Chip
           key={index}
           label={chip}
-          color='primary'
+          color='success'
+          variant='outlined'
+          fontSize='small'
         />
       ))}
-    </>
+    </Stack>
   );
 };
 

@@ -295,34 +295,6 @@ def add_member(request, organization_id):
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
 
-# @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
-# def create_project(request):
-#     try:
-#         # process the project data
-#         data = request.data
-#         serializer = ProjectSerializer(data=data)
-
-#         if not serializer.is_valid():
-#             return Response({
-#                 'message': 'Invalid data',
-#                 'data': serializer.errors
-#             }, status=status.HTTP_400_BAD_REQUEST)
-        
-#         project = serializer.save()
-
-#         return Response({
-#             'message': 'Project created successfully',
-#             'data': serializer.data
-#         }, status=status.HTTP_200_OK)
-
-#     except Exception as e:
-#         print(e)
-#         return Response({
-#             'message': 'Something went wrong',
-#             'data': None
-#         }, status=status.HTTP_400_BAD_REQUEST)
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_project(request, project_id):
@@ -331,18 +303,35 @@ def get_project(request, project_id):
         user = User.objects.get(username=username)
 
         project = Project.objects.get(id=project_id)
+
+        if not project:
+            raise Exception('Project not found')
+
+        # check if the user is an admin of the organization
+        designation = user.designations.filter(organization=project.organization).first()
         
-        # if project.project_leader != user:
-        #     return Response({
-        #         'message': 'You are not authorized to view this project',
-        #         'data': None
-        #     }, status=status.HTTP_401_UNAUTHORIZED)
+        project_role = ''
+
+        if project.project_leader == user:
+            project_role = 'Project Leader'
+        elif designation and designation.role == 'Admin':
+            project_role = 'Admin'
+        else:
+            return Response({
+                'message': 'You are not authorized to view this project',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
         
         serializer = ProjectDetailsSerializer(project)
+        serializer.data['project_role'] = project_role
 
         return Response({
             'message': 'Project details',
-            'data': serializer.data
+            'data': {
+                'project': serializer.data, 
+                'role': project_role
+            }
+
         }, status=status.HTTP_200_OK)
     except Exception as e:
         print(e)
@@ -404,6 +393,78 @@ def set_or_create_user_tags(request):
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_tasks(request, project_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        project = Project.objects.get(id=project_id)
+
+        if not project:
+            raise Exception('Project not found')
+
+        # check if the user is an admin of the organization or project leader
+        designation = user.designations.filter(organization=project.organization).first()
+        
+        if not designation or not (designation.role == 'Admin' or project.project_leader == user):
+            return Response({
+                'message': 'You are not authorized to view this project',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        tasks = UserTask.objects.filter(project=project)
+        serializer = GetUserTaskSerializer(tasks, many=True)
+
+        return Response({
+            'message': 'User tasks fetched successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_vendor_tasks(request, project_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        project = Project.objects.get(id=project_id)
+
+        if not project:
+            raise Exception('Project not found')
+
+        # check if the user is an admin of the organization or project leader
+        designation = user.designations.filter(organization=project.organization).first()
+        
+        if not designation or not (designation.role == 'Admin' or project.project_leader == user):
+            return Response({
+                'message': 'You are not authorized to view this project',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        tasks = VendorTask.objects.filter(project=project)
+        serializer = VendorTaskSerializer(tasks, many=True)
+
+        return Response({
+            'message': 'Vendor tasks fetched successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_task(request, project_id):
@@ -422,11 +483,11 @@ def create_task(request, project_id):
 
         data = request.data
         data['project'] = project_id
-        serializer = UserTaskSerializer(data=data)
+        serializer = CreateUserTaskSerializer(data=data)
 
         serializer.is_valid(raise_exception=True)
 
-        task = serializer.save()
+        serializer.save()
 
         return Response({
             'message': 'Task created successfully',
@@ -439,3 +500,4 @@ def create_task(request, project_id):
             'message': serializer.errors.get('non_field_errors')[0],
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
+    
