@@ -61,9 +61,9 @@ const AddMemberModal = (props) => {
     
 
     const handleClose = () => {
+        props.handleClose();
         setSelectedOption(null)
         setFilteredOptions([])
-        props.handleClose();
     }
     
     const handleSelectedOption = (event, value) => {
@@ -124,14 +124,16 @@ const AddMemberModal = (props) => {
                     body ,
                     config
                 )
+                handleClose(selectedOption);
                 notifyWithToast("success","Member added successfully");
             } catch (error) {
+                handleClose();
                 notifyWithToast("error","Something went wrong");
+                
             }
         }
-            console.log(selectedOption);
+        console.log(selectedOption);
         
-        handleClose();
     }
         return (
             <>
