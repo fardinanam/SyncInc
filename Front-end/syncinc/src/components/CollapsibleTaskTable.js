@@ -1,22 +1,48 @@
-import {  useState } from 'react';
+import {  useEffect, useState } from 'react';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import BorderColorRoundedIcon from '@mui/icons-material/BorderColorRounded';
-import { Collapse, Divider, IconButton, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography, Button } from '@mui/material';
+import { Collapse, Divider, IconButton, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography, Button, Avatar, Stack, Box } from '@mui/material';
 import { AssignTaskModal } from './Modals';
 import ListChips from './ListChips';
 import dayjs from 'dayjs';
+import { baseUrl } from '../utils/config';
 
-const CollapsibleTaskTable = ({title, tasks, role, organization_id}) => {
+const CollapsibleTaskTable = ({title, initialTasks, role, organization_id}) => {
     const [open, setOpen] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
     const [modalData, setModalData] = useState({});
+    const [tasks, setTasks] = useState([]);
 
     const handleAssignTask = (task) => {
         setModalData(task);
         setModalOpen(true);
     }
+
+    const handleModalClose = (updatedTask) => {
+        setModalData({});
+        setModalOpen(false);
+
+        if (updatedTask) {
+            const taskIdx = tasks.findIndex(task => task.id === updatedTask.id);
+
+            if (taskIdx !== -1) {
+                const updatedTasks = [...tasks];
+                updatedTasks[taskIdx] = updatedTask;
+                setTasks(updatedTasks);
+            } else {
+                setTasks(prevState => ([
+                    ...prevState,
+                    updatedTask
+                ]));
+            }
+        }
+    }
+
+    useEffect(() => {
+        setTasks(initialTasks);
+    }, [initialTasks]);
 
     return (
         <Paper 
@@ -71,7 +97,33 @@ const CollapsibleTaskTable = ({title, tasks, role, organization_id}) => {
                                 <ListChips chipData={task.tags?.map((value, _) => value.name)} />
                             </TableCell>
                             <TableCell >
-                                {task.assignee? task.assignee.first_name + " " + task.assignee.last_name 
+                                {task.assignee? 
+                                    <Stack 
+                                        direction="row"
+                                    >
+                                        <Avatar 
+                                            sx={{
+                                                width: '2rem',
+                                                height: '2rem'
+                                            }}
+                                            alt={task.assignee.name}
+                                            src={task.assignee.profile_picture && baseUrl.concat(String(task.assignee.profile_picture).substring(1))}
+                                        />
+                                        <Box 
+                                            display='flex'
+                                            flexDirection='column'
+                                            justifyContent='center'
+                                        >
+                                            <Typography variant="subtitle2" 
+                                                sx={{
+                                                    fontWeight: 'bold',
+                                                    textHeight: "100%",
+                                                    ml: '0.5rem'
+                                                }}
+                                            >
+                                            {task.assignee.name}
+                                        </Typography></Box>
+                                    </Stack>
                                     : <Button 
                                         variant="outlined" 
                                         size="small"
@@ -100,6 +152,7 @@ const CollapsibleTaskTable = ({title, tasks, role, organization_id}) => {
                     isOpen={modalOpen}
                     task={modalData}
                     organization_id={organization_id}
+                    onClose={handleModalClose}
                 />
                 </Collapse>
             </Paper> 

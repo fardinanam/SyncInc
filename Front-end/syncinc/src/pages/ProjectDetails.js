@@ -131,7 +131,7 @@ const ProjectDetails = () => {
             </TitleBar>
             <CollapsibleTaskTable 
                 title="User Tasks"
-                tasks={userTasks}
+                initialTasks={userTasks}
                 role={role}
                 organization_id={project?.organization?.id}
             />

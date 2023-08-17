@@ -1026,11 +1026,9 @@ const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
 
     const handleSearchChange = (event) => {
         const inputText = event.target.value;
-        console.log(inputText)
         if (inputText.trim() !== '') {
-            console.log(options)
             setFilteredOptions(
-                options.filter(option => option.username.toLowerCase().includes(inputText.toLowerCase()))
+                options.filter(option => option.name.toLowerCase().includes(inputText.toLowerCase()))
             );
         } else {
             setFilteredOptions([])
@@ -1042,11 +1040,21 @@ const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
         setFilteredOptions([])
     }
 
+    const handleClear = () => {
+        setSelectedOption(null)
+        setFilteredOptions([])
+    }
+
+    const handleClose = (data) => {
+        onClose(data);
+        handleClear();
+    }
+
     const fetchMembers = async () => {
         setLoading(true);
 
         try {
-            const response = axios.get(`${baseUrl}organization_employees/${organization_id}/`, {
+            const response = await axios.get(`${baseUrl}organization_employees/${organization_id}/`, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${authTokens?.access}`
@@ -1054,9 +1062,8 @@ const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
                 }
             );
 
-            console.log(response.data);
             if (response.status === 200) {
-                setOptions(response.data.data);
+                setOptions(response.data.data.employees);
             }
         } catch (error) {
             notifyWithToast('error', error.response.data?.message);
@@ -1066,6 +1073,38 @@ const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`
+            }
+        }
+
+        const body = JSON.stringify({
+            'id': task.id,
+            'assignee': selectedOption.id,
+        });
+
+        setLoading(true);
+
+        try {
+            const response = await axios.put(
+                `${baseUrl}assign_user_task/`,
+                body,
+                config
+            );
+
+            if (response.status === 200) {
+                handleClose(response.data.data);
+                notifyWithToast('success', 'Task assigned successfully');
+            }
+        } catch (error) {
+            handleClose();
+            notifyWithToast('error', error.response.data.message);
+        }
+
+        setLoading(false);
     }
 
     useEffect(() => {
@@ -1077,43 +1116,59 @@ const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
     return (
         <Modal
             open={isOpen}
-            onClose={() => onClose()}
+            onClose={() => handleClose()}
         >
             <Box sx={style}
-                component="form"
-                onSubmit={handleSubmit}
             >
                 <Typography id="assign-task-modal-title" variant="h5" align="center">
                     Assign Task
                 </Typography>
-                <Autocomplete
-                    options={filteredOptions}
-                    getOptionLabel={(option) => option.username}
-                    onChange={handleSelectedOption}
-                    renderOption={(props, option) => (
-                        <Grid container component='li' {...props}>
-                            <SearchSuggestion suggestion={option} />
-                        </Grid>
-                    )}
-                    freeSolo
-                    renderInput={ (params) => {
-                        return (<TextField 
-                            {...params} 
-                            label="Search Member" 
-                            variant="outlined"
-                            onChange={handleSearchChange}
-                        />)
-                    } }
-                />
-                <Button
-                    type="submit"
-                    fullWidth
-                    variant="outlined"
-                    color="success"
-                    sx={{ mt: 2 }}
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    noValidate
+                    sx={{ mt: 1 }}
                 >
-                    Assign
-                </Button>
+                    {selectedOption?
+                        <Grid container>
+                            <SearchSuggestion suggestion={selectedOption} />
+                            <Grid item md={1}>
+                            <IconButton onClick={handleClear} size="small">
+                                <ClearIcon />
+                            </IconButton>
+                            </Grid>
+                        </Grid>
+                        :
+                        <Autocomplete
+                            options={filteredOptions}
+                            getOptionLabel={(option) => option.username}
+                            onChange={handleSelectedOption}
+                            renderOption={(props, option) => (
+                                <Grid container component='li' {...props}>
+                                    <SearchSuggestion suggestion={option} />
+                                </Grid>
+                            )}
+                            freeSolo
+                            renderInput={ (params) => {
+                                return (<TextField 
+                                    {...params} 
+                                    label="Search Member" 
+                                    variant="outlined"
+                                    onChange={handleSearchChange}
+                                />)
+                            } }
+                        />
+                    }
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{ mt: 2 }}
+                    >
+                        Assign
+                    </Button>
+                </Box>
             </Box>
         </Modal>
     )

@@ -61,7 +61,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
     avg_time = serializers.SerializerMethodField()
     class Meta:
         model = User
-        fields = ['name', 'expertise','completed_tasks', 'avg_rating', 'avg_time']
+        fields = ['id', 'username',  'name', 'email', 'profile_picture', 'expertise','completed_tasks', 'avg_rating', 'avg_time']
 
     def get_name(self, obj):
         return obj.first_name + ' ' + obj.last_name
@@ -189,11 +189,12 @@ class TagSerializer(serializers.ModelSerializer):
     
 class GetUserTaskSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
+    assignee = EmployeeSerializer()
 
     class Meta:
         model = UserTask
         fields = ['id', 'name', 'tags', 'assignee', 'deadline']
-        depth = 1
+
 
 class VendorTaskSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
