@@ -63,7 +63,7 @@ const OrganizationProjects = (props) => {
                         title={project.name}
                         count={0}
                         name="Tasks"
-                        onClick={() => navigate(`/project/${props.id}`)}
+                        onClick={() => navigate(`/project/${project.id}`)}
                     >
                         <WorkIcon fontSize='large' color='primary' />
                         {/* <ListItemIcon fontSize='small' color='primary' /> */}

@@ -11,6 +11,7 @@ import { isValidEmail, isValidNumber } from "../utils/validators";
 import { baseUrl } from "../utils/config";
 import AuthContext from '../context/AuthContext';
 import axios from "axios";
+import AddItemLayout from "../components/AddItemLayout";
 
 const AddProject = () => {
     const { authTokens } = useContext(AuthContext);
@@ -50,95 +51,57 @@ const AddProject = () => {
 
     };
     return(
-        <>
-            <Box
-                component="form"
-                noValidate
-                sx={{ 
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                }}
-                onSubmit={handleSubmit}
-                >
-                <Grid container mt={10}>
-                    <Grid item xs={0} sm={3} />
-                    <Grid item xs={12} sm={6}>
-                        <Grid container spacing={4}>
-                            <Grid item xs={12} sm={12}>
-                            <Grid container>
-                                <Grid item xs={1} sm={2} />
-                                <Grid item xs={10} sm={8} >
-                                    <Typography 
-                                        sx = {{
-                                            fontWeight: 'bold'
-                                        }} 
-                                        align="center"
-                                        variant="h5" 
-                                    >
-                                    Add a New Project
-                                    </Typography>
-                                </Grid>
-                                <Grid item xs={1} sm={2}>
-                                    <Box 
-                                        sx={{
-                                            textAlign: 'right',
-                                            verticalAlign: 'middle',
-                                        }}
-                                    >
-                                        <Button color="error" onClick={() => navigate(`/organization/${id}`)}>
-                                            <CloseRoundedIcon />
-                                        </Button>
-                                    </Box>
-                                </Grid>
-                            </Grid>
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    name="project_name"
-                                    label="Project Name"
-                                    required
-                                    fullWidth
-                                    id="project_name"
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    name="client_name"
-                                    label="Client Name"
-                                    required
-                                    fullWidth
-                                    id="client_name"
-                                />
-                            </Grid>
-                            <Grid item sm={12}>
-                                <TextField
-                                    name="description"
-                                    label="Description"
-                                    required
-                                    fullWidth
-                                    multiline
-                                    rows={10}
-                                    id="description"
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={12}>
-                                <Box 
-                                    sx={{
-                                        display: 'flex',
-                                        justifyContent: 'end',
-                                    }}
-                                >
-                                    <Button variant="contained" color="success" type="submit">Save</Button>
-                                    {/* <Button variant="contained" color="secondary">Cancel</Button> */}
-                                </Box>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                    <Grid item xs={0} sm={3} />
+        <AddItemLayout
+            title="Add Project"
+            onClose={() => navigate(`/organization/${id}`)}
+        >
+            <Grid container
+                    spacing={2}
+                    component="form"
+                    onSubmit={handleSubmit}
+            >
+                <Grid item xs={12} sm={6}>
+                    <TextField
+                        name="project_name"
+                        label="Project Name"
+                        required
+                        fullWidth
+                        id="project_name"
+                    />
                 </Grid>
-            </Box>
-        </>
+                <Grid item xs={12} sm={6}>
+                    <TextField
+                        name="client_name"
+                        label="Client Name"
+                        required
+                        fullWidth
+                        id="client_name"
+                    />
+                </Grid>
+                <Grid item sm={12}>
+                    <TextField
+                        name="description"
+                        label="Description"
+                        required
+                        fullWidth
+                        multiline
+                        rows={10}
+                        id="description"
+                    />
+                </Grid>
+                <Grid item xs={12} sm={12}>
+                    <Box 
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'end',
+                        }}
+                    >
+                        <Button variant="contained" color="success" type="submit">Save</Button>
+                        {/* <Button variant="contained" color="secondary">Cancel</Button> */}
+                    </Box>
+                </Grid>
+            </Grid>
+        </AddItemLayout>
     )
 }
 
