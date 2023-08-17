@@ -20,6 +20,7 @@ import NameAvatar from "./NameAvatar";
 import SearchSuggestion from "./SearchSuggestion";
 import { IconButton } from "@mui/material";
 import ClearIcon from '@mui/icons-material/Clear';
+import AutocompleteTagInput from "./AutocompleteTagInput";
 
 
 
@@ -51,7 +52,6 @@ const AddMemberModal = (props) => {
         const inputText = event.target.value;
         console.log(inputText)
         if (inputText.trim() !== '') {
-            console.log(options)
             setFilteredOptions(
                 options.filter(option => option.username.toLowerCase().includes(inputText.toLowerCase()))
             );
@@ -71,9 +71,6 @@ const AddMemberModal = (props) => {
         setSelectedOption(value);
         setFilteredOptions([])
     }
-    useEffect(() => {
-        console.log(selectedOption)
-    },[selectedOption])
 
     const fetchSuggestedMembers = async () => {
         try {
@@ -88,7 +85,7 @@ const AddMemberModal = (props) => {
                 }  
 
             )
-            console.log(response);
+
             setOptions(response.data.data);
         } catch (error) {
             console.log(error.response.data.message);
@@ -820,24 +817,10 @@ const ChangePasswordModal = (props) => {
 }
 
 const AddTagModal = ({tags, isOpen, onClose}) => {
-    const [allTags, setAllTags] = useState([]);
     const [selectedTags, setSelectedTags] = useState([]);
     const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
     const {authTokens} = useContext(AuthContext);
     const { setLoading } = useLoading();
-
-    const fetchAllTags = async () => {
-        const response = await axios.get(
-            `${baseUrl}all_tags/`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + authTokens?.access,
-                }
-            }
-        );
-
-        setAllTags(response.data.data);
-    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -881,12 +864,6 @@ const AddTagModal = ({tags, isOpen, onClose}) => {
     }
 
     useEffect(() => {
-        if (isOpen) {
-            fetchAllTags();
-        }
-    }, [isOpen]);
-
-    useEffect(() => {
         setSelectedTags(tags);
     }, [tags]);
 
@@ -903,26 +880,10 @@ const AddTagModal = ({tags, isOpen, onClose}) => {
                     component="form"
                     onSubmit={handleSubmit}
                 >
-                    <Autocomplete
-                        multiple
-                        id="tags"
-                        name="tags"
-                        options={allTags.map((option) => option.name)}
-                        defaultValue={tags}
+                    <AutocompleteTagInput 
+                        defaultTags={tags}
+                        isLoaded={isOpen}
                         onChange={handleChange}
-                        freeSolo
-                        renderTags={(value, getTagProps) =>
-                            value.map((option, index) => (
-                            <Chip
-                                variant="outlined"
-                                label={option}
-                                {...getTagProps({ index })}
-                            />
-                            ))
-                        }
-                        renderInput={(params) => (
-                            <TextField {...params} label="Tags" placeholder="Add Tags" />
-                        )}
                     />
 
                     <Button
@@ -946,7 +907,6 @@ const AddTaskModal = ({isOpen, onClose, taskType}) => {
     const {authTokens} = useContext(AuthContext);
     const {setLoading} = useLoading();
     const [deadline, setDeadline] = useState('');
-    const [allTags, setAllTags] = useState([]);
     const [selectedTags, setSelectedTags] = useState([]);
 
     const handleSubmit = async (e) => {
@@ -988,29 +948,9 @@ const AddTaskModal = ({isOpen, onClose, taskType}) => {
         setLoading(false);
     }
 
-    const fetchAllTags = async () => {
-        console.log("fetching tags");
-        const response = await axios.get(
-            `${baseUrl}all_tags/`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + authTokens?.access,
-                }
-            }
-        );
-
-        setAllTags(response.data.data);
-    }
-
     const handleDeadlineChange = (date) => {
         setDeadline(date);
     }
-
-    useEffect(() => {
-        if (isOpen) {
-            fetchAllTags();
-        }
-    }, [isOpen]);
 
     return (
         <Modal
@@ -1057,27 +997,10 @@ const AddTaskModal = ({isOpen, onClose, taskType}) => {
                         multiline
                         required
                     />
-                    <Autocomplete
-                        multiple
-                        id="tags"
-                        name="tags"
-                        options={allTags.map((option) => option.name)}
-                        freeSolo
+                    <AutocompleteTagInput
+                        isLoaded={isOpen}
                         onChange={(_, value) => setSelectedTags(value)}
-                        renderTags={(value, getTagProps) =>
-                            value.map((option, index) => (
-                            <Chip
-                                variant="outlined"
-                                label={option}
-                                {...getTagProps({ index })}
-                            />
-                            ))
-                        }
-                        renderInput={(params) => (
-                            <TextField {...params} label="Tags" placeholder="Add Tags" />
-                        )}
                     />
-
                     <Button
                         type="submit"
                         fullWidth
@@ -1094,6 +1017,108 @@ const AddTaskModal = ({isOpen, onClose, taskType}) => {
     )
 }
 
+const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
+    const {authTokens} = useContext(AuthContext);
+    const [filteredOptions, setFilteredOptions] = useState([]);
+    const [options, setOptions] = useState([]);
+    const [selectedOption, setSelectedOption] = useState(null);
+    const {setLoading} = useLoading();
+
+    const handleSearchChange = (event) => {
+        const inputText = event.target.value;
+        console.log(inputText)
+        if (inputText.trim() !== '') {
+            console.log(options)
+            setFilteredOptions(
+                options.filter(option => option.username.toLowerCase().includes(inputText.toLowerCase()))
+            );
+        } else {
+            setFilteredOptions([])
+        }
+    };
+
+    const handleSelectedOption = (_, value) => {
+        setSelectedOption(value);
+        setFilteredOptions([])
+    }
+
+    const fetchMembers = async () => {
+        setLoading(true);
+
+        try {
+            const response = axios.get(`${baseUrl}organization_employees/${organization_id}/`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authTokens?.access}`
+                    }
+                }
+            );
+
+            console.log(response.data);
+            if (response.status === 200) {
+                setOptions(response.data.data);
+            }
+        } catch (error) {
+            notifyWithToast('error', error.response.data?.message);
+        }
+        setLoading(false);
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+    }
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchMembers();
+        }
+    }, [isOpen]);
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={() => onClose()}
+        >
+            <Box sx={style}
+                component="form"
+                onSubmit={handleSubmit}
+            >
+                <Typography id="assign-task-modal-title" variant="h5" align="center">
+                    Assign Task
+                </Typography>
+                <Autocomplete
+                    options={filteredOptions}
+                    getOptionLabel={(option) => option.username}
+                    onChange={handleSelectedOption}
+                    renderOption={(props, option) => (
+                        <Grid container component='li' {...props}>
+                            <SearchSuggestion suggestion={option} />
+                        </Grid>
+                    )}
+                    freeSolo
+                    renderInput={ (params) => {
+                        return (<TextField 
+                            {...params} 
+                            label="Search Member" 
+                            variant="outlined"
+                            onChange={handleSearchChange}
+                        />)
+                    } }
+                />
+                <Button
+                    type="submit"
+                    fullWidth
+                    variant="outlined"
+                    color="success"
+                    sx={{ mt: 2 }}
+                >
+                    Assign
+                </Button>
+            </Box>
+        </Modal>
+    )
+}
+
 export {
     CreateOrgModal, 
     AddMemberModal, 
@@ -1103,4 +1128,5 @@ export {
     ChangePasswordModal, 
     AddTagModal,
     AddTaskModal,
+    AssignTaskModal,
 };

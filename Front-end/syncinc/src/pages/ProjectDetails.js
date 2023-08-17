@@ -5,7 +5,7 @@ import { baseUrl } from "../utils/config";
 import AuthContext from "../context/AuthContext";
 import notifyWithToast from "../utils/toast";
 import axios from "axios";
-import { Box, Button, CssBaseline, Paper, Typography } from "@mui/material";
+import { Avatar, Box, Button, CssBaseline, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/material";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import CollapsibleTaskTable from "../components/CollapsibleTaskTable";
 import { AddTaskModal } from "../components/Modals";
@@ -49,7 +49,8 @@ const ProjectDetails = () => {
                 `${baseUrl}get_project/${id}`,
                 config
             )
-
+            
+            console.log(response.data.data.project);
             setProject(response.data.data.project);
             setRole(response.data.data.role);
 
@@ -59,7 +60,6 @@ const ProjectDetails = () => {
             )
             
             setUserTasks(response.data.data);
-
             response = await axios.get(
                 `${baseUrl}vendor_tasks/${id}`,
                 config,
@@ -89,15 +89,38 @@ const ProjectDetails = () => {
                     display={"flex"}
                     alignItems={"center"}
                 >
-                    { !project.has_ended && role === "Project Leader" && 
-                        <Button
-                            variant="outlined"
-                            color="primary"
+                    { !project.has_ended && role === "Project Leader" ? 
+                        <Tooltip title="Add Task">
+                        <IconButton
+                            color="success"
                             onClick={() => setIsAddTaskModalOpen(true)}
                         >
                             <AddRoundedIcon />
-                            Add Task
-                        </Button>
+                        </IconButton>
+                        </Tooltip>
+                        :
+                        project.project_leader &&
+                        <Stack direction="row" spacing={1}>
+                            <Box 
+                                display="flex"
+                                flexDirection="column"
+                                alignItems="center"
+                                justifyContent="center"
+                            >
+                            <Avatar 
+                                alt={project.project_leader.first_name + ' ' + project.project_leader.last_name} 
+                                src={project.project_leader.profile_pic && baseUrl.concat(String(project.project_leader.profile_pic).substring(1))}     
+                            />
+                            </Box>
+                            <Stack direction="column" spacing={0}>
+                                <Typography fontWeight="light">
+                                    Project Leader
+                                </Typography>
+                                <Typography variant="subtitle2">
+                                    @{project.project_leader.username}
+                                </Typography>
+                            </Stack>
+                        </Stack>
                     }
                     <AddTaskModal 
                         isOpen={isAddTaskModalOpen}
@@ -109,6 +132,8 @@ const ProjectDetails = () => {
             <CollapsibleTaskTable 
                 title="User Tasks"
                 tasks={userTasks}
+                role={role}
+                organization_id={project?.organization?.id}
             />
         </>
     );

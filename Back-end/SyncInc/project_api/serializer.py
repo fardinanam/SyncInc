@@ -110,14 +110,20 @@ class VendorSerializer(serializers.ModelSerializer):
         if avg_time is None:
             return 'N/A'
 
-class OrganizationMembersSerializer(serializers.ModelSerializer):
+class OrganizationEmployeeSerializer(serializers.ModelSerializer):
     employees = EmployeeSerializer(many=True)
-    vendors = VendorSerializer(many=True)
+    
     class Meta:
         model = Organization
-        fields = ['id', 'name', 'employees', 'vendors']
-        depth = 1
+        fields = ['id', 'name', 'employees']
 
+
+class OrganizationVendorSerializer(serializers.ModelSerializer):
+    vendors = VendorSerializer(many=True)
+
+    class Meta:
+        model = Organization
+        fields = ['id', 'name', 'vendors']
 
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -155,15 +161,26 @@ class ProjectSerializer(serializers.ModelSerializer):
         
 class ProjectDetailsSerializer(serializers.ModelSerializer):
     has_ended = serializers.SerializerMethodField()
+    project_leader = serializers.SerializerMethodField()
     class Meta:
         model = Project
-        fields = ['name', 'organization', 'client', 'description', 'has_ended']
+        fields = ['name', 'organization', 'project_leader', 'client', 'description', 'has_ended']
         depth = 1
 
     def get_has_ended(self, obj):
         if obj.end_time and obj.end_time < datetime.now():
             return True
         return False
+    
+    def get_project_leader(self, obj):
+        project_leader = obj.project_leader
+        # return username, first_name, last_name, profile_pic url
+        return {
+            'username': project_leader.username,
+            'first_name': project_leader.first_name,
+            'last_name': project_leader.last_name,
+            'profile_pic': project_leader.profile_picture.url if project_leader.profile_picture else None
+        } 
     
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
