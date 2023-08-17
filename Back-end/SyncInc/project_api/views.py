@@ -163,6 +163,7 @@ def create_project(request, organization_id):
         username = get_data_from_token(request, 'username')
 
         user = User.objects.get(username=username)
+        organization = Organization.objects.get(id=organization_id)
 
         # check if the user is an admin of the organization
         designation = user.designations.filter(organization=organization).first()
@@ -177,7 +178,6 @@ def create_project(request, organization_id):
         data = request.data
         data['username'] = username
         #client only has client name, not its id
-        organization = Organization.objects.get(id=organization_id)
         client, created = Client.objects.get_or_create(
             organization=organization,
             name=data['client']

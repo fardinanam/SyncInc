@@ -9,6 +9,7 @@ import { Box, Button, CssBaseline, Paper, Typography } from "@mui/material";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import CollapsibleTaskTable from "../components/CollapsibleTaskTable";
 import { AddTaskModal } from "../components/Modals";
+import TitleBar from "../components/TitleBar";
 
 const ProjectDetails = () => {
     const { id } = useParams();
@@ -80,33 +81,10 @@ const ProjectDetails = () => {
     return (
         <>
             <CssBaseline />
-            <Paper
-                sx={{
-                    p: 2,
-                    display: 'flex',
-                    flexDirection: 'row',
-                    borderRadius: "0.5rem"
-                }}
-                elevation={0}
+            <TitleBar 
+                title={project?.name}
+                subtitle={project?.organization?.name}
             >
-                <Box
-                    sx={{
-                        flexGrow: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'left',
-                    }}
-                >
-                    <Typography variant="h5" fontWeight="bold">
-                        {project?.name}
-                    </Typography>
-                    <Typography 
-                        variant="h6"
-                        color="primary"
-                    >
-                        {project?.organization?.name}
-                    </Typography>
-                </Box>
                 <Box
                     display={"flex"}
                     alignItems={"center"}
@@ -127,7 +105,7 @@ const ProjectDetails = () => {
                         taskType={"User"}
                     />
                 </Box>
-            </Paper>
+            </TitleBar>
             <CollapsibleTaskTable 
                 title="User Tasks"
                 tasks={userTasks}

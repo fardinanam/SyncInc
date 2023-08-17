@@ -136,7 +136,7 @@ const OrganizationDetails = (props) => {
                         navigate(`/organization/${organization?.id}/add-project`) 
                         : 
                         handleAddMemberModalOpen()} >
-                        <AddRoundedIcon />
+                        <AddRoundedIcon />             
                         {selectedValue === 'projects'? 'Project' : 'Member'}
                     </Button>
                     <AddMemberModal
