@@ -23,6 +23,10 @@ import TitleBar from "../components/TitleBar";
 import NavMenu from "../components/NavMenu";
 import {Toolbar} from "@mui/material";
 import { useLoading } from "../context/LoadingContext";
+import { Autocomplete, TextField } from '@mui/material'
+import AddIcon from '@mui/icons-material/Add';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import { AddMemberModal } from "../components/Modals";
 
 const OrganizationEmployees = (props) => {
    
@@ -39,17 +43,23 @@ const OrganizationEmployees = (props) => {
             navigate(`/organization/${id}/vendors`);
     }
     
-    let [memberModalOpen, setMemberModalOpen] = useState(false);
+    let [addModalOpen, setAddModalOpen] = useState(false);
     
-    const handleAddMemberModalOpen = () => {
+    const handleAddModalOpen = () => {
         console.log("handle Member modal open")
-        setMemberModalOpen(true);
+        setAddModalOpen(true);
     }
-    const handleAddMemberModalClose = () => {
-        setMemberModalOpen(false);
+    const handleAddModalClose = (employee) => {
+        if(employee) {
+            setEmployees([...employees, employee]);
+        }
+        setAddModalOpen(false);
     }
 
+    const [organizationName, setOrganizationName] = useState();
+    const [role, setRole] = useState()
     const [employees, setEmployees] = useState([]);
+    const [filteredEmployees, setFilteredEmployees] = useState([]);
 
     useEffect(() => {
         fetchOrganizationEmployees();
@@ -70,8 +80,10 @@ const OrganizationEmployees = (props) => {
                 }  
 
             )
-            console.log(response.data.data);
+            setRole(response.data.data.role);
+            setOrganizationName(response.data.data.name);
             setEmployees(response.data.data.employees);
+            setFilteredEmployees(response.data.data.employees)
         } catch (error) {
             console.log(error.response.data.message);
             // window.location.href = '/organizations';
@@ -127,35 +139,47 @@ const OrganizationEmployees = (props) => {
         //   ]
     // const [members, setMembers] = useState([]);
     useEffect(() => {
-        // console.log(members);
     }, [nameSort, numTasksSort, ratingSort, timeSort]);
     
     return (
         <>
             <TitleBar 
-                title="organization name"
+                title={organizationName}
                 subtitle="Employees"
             >
                 <NavMenu menuItems={menuItems} handleMenuSelect={handleMenuSelect}/>
             </TitleBar>
-        <Paper 
-            sx={{
-                marginTop: '1.5rem',
-                borderRadius: '0.5rem'
-            }} 
-            elevation={0}
-        >
-            <Toolbar>
-                <Typography >
-                    {/* write me a search bar using Autocomplete */}
-                    Add search by name to the left and filter by tags to the right
-                </Typography>
-            </Toolbar>
-            <MemberTable
-                pageName="Employee"
-                members={employees}
-            />
-        </Paper>
+            <Paper 
+                sx={{
+                    marginTop: '1.5rem',
+                    borderRadius: '0.5rem'
+                }} 
+                elevation={0}
+            >
+                <Grid container spacing={2} >
+                    <Grid item xs={12} md={8}>
+                        <Typography variant="h6">
+                            Search option here
+                        </Typography>
+                    </Grid >
+                    {
+                    role === 'Admin' &&
+                    <Grid item display={'flex'} xs={12} md={4} sx={{justifyContent: 'flex-end'}}>
+                        
+                        <Button color="primary" onClick={() => handleAddModalOpen()}>
+                            <AddCircleOutlineIcon />
+                                Employee
+                        </Button>
+                        <AddMemberModal id={id} memberType={'employee'} open={addModalOpen} handleClose={handleAddModalClose}/>
+                    </Grid>
+                    }
+                </ Grid>
+
+                <MemberTable
+                    pageName="Employee"
+                    members={employees}
+                />
+            </Paper>
             
         </>
     );

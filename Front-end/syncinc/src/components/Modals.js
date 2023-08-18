@@ -23,7 +23,6 @@ import ClearIcon from '@mui/icons-material/Clear';
 import AutocompleteTagInput from "./AutocompleteTagInput";
 
 
-
 const style = {
     position: 'absolute',
     top: '50%',
@@ -38,11 +37,12 @@ const style = {
     pb: 3,
 };
 
-// const options = ['Apple', 'Banana', 'Cherry', 'Date', 'Fig', 'Grape', 'Lemon', 'Mango', 'Orange'];
 
-const AddMemberModal = (props) => {
-    const { id } = props;
-    console.log(id);
+const AddMemberModal = ( props ) => {
+
+    const { id } = props
+    const { memberType } = props
+
     const {authTokens} = useContext(AuthContext);
     const [filteredOptions, setFilteredOptions] = useState([]);
     const [options, setOptions] = useState([]);
@@ -50,8 +50,7 @@ const AddMemberModal = (props) => {
     
     const handleSearchChange = (event) => {
         const inputText = event.target.value;
-        console.log(inputText)
-        if (inputText.trim() !== '') {
+        if (inputText?.trim() !== '') {
             setFilteredOptions(
                 options.filter(option => option.username.toLowerCase().includes(inputText.toLowerCase()))
             );
@@ -61,10 +60,10 @@ const AddMemberModal = (props) => {
     };
     
 
-    const handleClose = () => {
-        props.handleClose();
+    const handleClose = (member) => {
         setSelectedOption(null)
         setFilteredOptions([])
+        props.handleClose(member);
     }
     
     const handleSelectedOption = (event, value) => {
@@ -74,8 +73,9 @@ const AddMemberModal = (props) => {
 
     const fetchSuggestedMembers = async () => {
         try {
+            console.log("link",`${baseUrl}get_${memberType}_suggestions/${id}`)
             const response = await axios.get(
-                `${baseUrl}get_member_suggestions/${id}`,  
+                `${baseUrl}get_${memberType}_suggestions/${id}`,  
                 {
                     headers: {
                         'Authorization': 'Bearer ' + authTokens?.access,
@@ -88,7 +88,7 @@ const AddMemberModal = (props) => {
 
             setOptions(response.data.data);
         } catch (error) {
-            console.log(error.response.data.message);
+            console.log("error",error.response.data.message);
             // window.location.href = '/organizations';
         }
     }
@@ -114,16 +114,18 @@ const AddMemberModal = (props) => {
             };
             const body = JSON.stringify({
                 'id': selectedOption.id,
-                'member_type': selectedOption.member_type,
             })
             try {
                 const response = await axios.post(
-                    `${baseUrl}add_member/${id}/`,
+                    `${baseUrl}add_${memberType}/${id}/`,
                     body ,
                     config
                 )
-                handleClose(selectedOption);
-                notifyWithToast("success","Member added successfully");
+                console.log(response.data.data);
+                handleClose(response.data.data);
+                console.log(memberType)
+                console.log(memberType+" added successfully")
+                notifyWithToast("success",memberType+" added successfully");
             } catch (error) {
                 handleClose();
                 notifyWithToast("error","Something went wrong");
@@ -168,7 +170,7 @@ const AddMemberModal = (props) => {
                             :
                             <Autocomplete
                                 options={filteredOptions}
-                                getOptionLabel={(option) => option.id}
+                                getOptionLabel={(option) => option.username}
                                 onChange={handleSelectedOption}
                                 renderOption={(props, option) => (
                                     <Grid container component='li' {...props}>
