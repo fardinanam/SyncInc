@@ -12,7 +12,6 @@ const SummaryCard = (props) => {
         <Card 
             sx={{ 
                 borderRadius: 2,
-                boxShadow: 0,
                 width: 200,
                 '&:hover': {
                     cursor: 'pointer',
@@ -20,6 +19,7 @@ const SummaryCard = (props) => {
                 backgroundColor: backgroundColor,
             }}
             onClick={props.onClick}
+            elevation={0}
         >
             <CardContent>
                 {children}

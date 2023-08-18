@@ -2,11 +2,14 @@ import React from 'react';
 import Chip from '@mui/material/Chip';
 import { Stack } from '@mui/material';
 
-const ListChips = ({ chipData }) => {
+const ListChips = ({ chipData, justifyContent }) => {
   return (
     <Stack
-      spacing={1}  
+      columnGap={1}
+      rowGap={1} 
       direction="row"
+      flexWrap={'wrap'}
+      justifyContent={justifyContent ? justifyContent : 'flex-start'}
     >
       {chipData?.map((chip, index) => (
         <Chip

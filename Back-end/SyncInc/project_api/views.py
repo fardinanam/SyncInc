@@ -70,7 +70,7 @@ def get_organization_projects(request, organization_id):
         designation = user.designations.filter(organization=organization).first()
         # for designation in designations:
 
-        if designation and designation.role != 'Admin':
+        if not designation:
             return Response({
                 'message': 'You are not authorized to view this organization',
                 'data': None
@@ -612,4 +612,25 @@ def assign_user_task(request):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_tasks(request):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        tasks = UserTask.objects.filter(assignee=user)
+        serializer = GetUserTaskSerializer(tasks, many=True)
+
+        return Response({
+            'message': 'User tasks fetched successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
     
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
