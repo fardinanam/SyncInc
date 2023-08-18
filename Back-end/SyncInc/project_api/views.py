@@ -65,6 +65,7 @@ def get_organization_projects(request, organization_id):
 
         organization = Organization.objects.get(id=organization_id)
         serializer = OrganizationProjectsSerializer(organization)
+        print(serializer.data)
 
         # check if the user is an admin of the organization
         designation = user.designations.filter(organization=organization).first()
@@ -100,7 +101,14 @@ def get_organization_employees(request, organization_id):
         user = User.objects.get(username=username)
 
         organization = Organization.objects.get(id=organization_id)
+
         serializer = OrganizationEmployeeSerializer(organization)
+        data = serializer.data
+
+        designation = user.designations.filter(organization=organization).first()
+        role = designation.role
+        data['role'] = role
+
 
         isEmployee = user.designations.filter(organization=organization).exists()
   
@@ -112,7 +120,7 @@ def get_organization_employees(request, organization_id):
 
         return Response({
             'message': f'Members of the organization {organization.name}',
-            'data': serializer.data
+            'data': data
         }, status=status.HTTP_200_OK)
         
     except Exception as e:
@@ -121,42 +129,6 @@ def get_organization_employees(request, organization_id):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
-    
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_organization_vendors(request, organization_id):
-    """
-        Get organization name and all the vendors of the organization
-        from the given organization id
-    """
-    try:
-        username = get_data_from_token(request, 'username')
-        user = User.objects.get(username=username)
-
-        organization = Organization.objects.get(id=organization_id)
-        serializer = OrganizationVendorSerializer(organization)
-
-        print(serializer.data)
-        isEmployee = user.designations.filter(
-            organization=organization).exists()
-
-        if not isEmployee:
-            return Response({
-                'message': 'You are not authorized to view the members of this organization',
-                'data': None
-            }, status=status.HTTP_401_UNAUTHORIZED)
-
-        return Response({
-            'message': f'Members of the organization {organization.name}',
-            'data': serializer.data
-        }, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        print(e)
-        return Response({
-            'message': 'Something went wrong',
-            'data': None
-        }, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -171,7 +143,14 @@ def get_organization_vendors(request, organization_id):
         user = User.objects.get(username=username)
 
         organization = Organization.objects.get(id=organization_id)
+        
         serializer = OrganizationVendorSerializer(organization)
+        data = serializer.data
+
+        designation = user.designations.filter(organization=organization).first()
+        role = designation.role
+        data['role'] = role
+
 
         isEmployee = user.designations.filter(
             organization=organization).exists()
@@ -238,7 +217,6 @@ def create_project(request, organization_id):
 
         # check if the user is an admin of the organization
         designation = user.designations.filter(organization=organization).first()
-        # for designation in designations:
 
         if designation and designation.role != 'Admin':
             return Response({
@@ -257,7 +235,6 @@ def create_project(request, organization_id):
         serializer = ProjectSerializer(data=data)
         
         if not serializer.is_valid():
-            print("x",serializer.errors)
             return Response({
                 'message': serializer.errors.get('non_field_errors')[0],
                 'data': serializer.errors
@@ -279,7 +256,40 @@ def create_project(request, organization_id):
         
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_member_suggestions(request, organization_id):
+def get_employee_suggestions(request, organization_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        organization = Organization.objects.get(id=organization_id)
+        designation = user.designations.filter(organization=organization).first()
+
+        if designation and designation.role != 'Admin':
+            return Response({
+                'message': 'You are not authorized to get new employee suggestion for this organization',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        
+        employees = User.objects.exclude(designation__organization=organization).values( 'id','username', 'email')
+
+        print(employees)
+
+        return Response({
+            'message': f'New member suggestion for the organization {organization.name}',
+            'data': employees
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_vendor_suggestions(request, organization_id):
     try:
         username = get_data_from_token(request, 'username')
         user = User.objects.get(username=username)
@@ -287,29 +297,18 @@ def get_member_suggestions(request, organization_id):
         # check if the user is an admin of the organization
         organization = Organization.objects.get(id=organization_id)
         designation = user.designations.filter(organization=organization).first()
-        # for designation in designations:
 
         if designation and designation.role != 'Admin':
             return Response({
-                'message': 'You are not authorized to add new member to this organization',
+                'message': 'You are not authorized to get new vendor suggestion for this organization',
                 'data': None
             }, status=status.HTTP_401_UNAUTHORIZED)
         
-        
-        employees = User.objects.exclude(designation__organization=organization).values( 'id','username', 'email')
         vendors = Vendor.objects.exclude(organization=organization).annotate(username=F('name')).values('id','username', 'email')
-
-        for employee in employees:
-            employee['member_type'] = 'employee'
-
-        for vendor in vendors:
-            vendor['member_type'] = 'vendor'
-        data = list(employees) + list(vendors)
-        print(data)
 
         return Response({
             'message': f'New member suggestion for the organization {organization.name}',
-            'data': data
+            'data': vendors
         }, status=status.HTTP_200_OK)
         
     except Exception as e:
@@ -321,39 +320,70 @@ def get_member_suggestions(request, organization_id):
     
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def add_member(request, organization_id):
+def add_employee(request, organization_id):
     try:
         username = get_data_from_token(request, 'username')
         user = User.objects.get(username=username)
 
         organization = Organization.objects.get(id=organization_id)
         designation = user.designations.filter(organization=organization).first()
-        # for designation in designations:
+
+        print(request)
 
         if designation and designation.role != 'Admin':
             return Response({
-                'message': 'You are not authorized to add new member to this organization',
+                'message': 'You are not authorized to add new employee to this organization',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        data = request.data
+        member_id = data['id']
+        employee = User.objects.get(id=member_id)
+        designation = Designation.objects.create(
+            employee=employee,
+            organization=organization,
+            role='Employee'
+        )
+        designation.save()
+        data = EmployeeSerializer(employee).data
+
+        return Response({
+            'message': f'Member added successfully to the {organization.name}',
+            'data': data
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_vendor(request, organization_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        organization = Organization.objects.get(id=organization_id)
+        designation = user.designations.filter(organization=organization).first()
+
+        if designation and designation.role != 'Admin':
+            return Response({
+                'message': 'You are not authorized to add new vendor to this organization',
                 'data': None
             }, status=status.HTTP_401_UNAUTHORIZED)
 
         data = request.data
         member_id = data['id']
 
-        if(data['member_type'] == 'employee'):
-            employee = User.objects.get(id=member_id)
-            designation = Designation.objects.create(
-                employee=employee,
-                organization=organization,
-                role='Employee'
-            )
-            designation.save()
+        vendor = Vendor.objects.get(id=member_id)
+        vendor.organizations.add(organization)
+        vendor.save()
 
-        elif(data['member_type'] == 'vendor'):
-            vendor = Vendor.objects.get(id=member_id)
-            vendor.organizations.add(organization)
-            vendor.save()
+        data = VendorSerializer(vendor).data
 
-        print(data)
         return Response({
             'message': f'Member added successfully to the {organization.name}',
             'data': data

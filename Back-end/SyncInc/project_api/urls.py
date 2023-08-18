@@ -11,8 +11,10 @@ urlpatterns = [
     path('organization_vendors/<int:organization_id>/', views.get_organization_vendors, name='organization_vendors'),
     path('get_project/<int:project_id>/', views.get_project, name='project_details'),
 
-    path('get_member_suggestions/<int:organization_id>/', views.get_member_suggestions, name='member_suggestions'),
-    path('add_member/<int:organization_id>/', views.add_member, name='add_member'),
+    path('get_employee_suggestions/<int:organization_id>/', views.get_employee_suggestions, name='employee_suggestions'),
+    path('get_vendor_suggestions/<int:organization_id>/', views.get_vendor_suggestions, name='vendor_suggestions'),
+    path('add_employee/<int:organization_id>/', views.add_employee, name='add_employee'),
+    path('add_vendor/<int:organization_id>/', views.add_vendor, name='add_vendor'),
   
     path('all_tags/', views.get_all_tags, name='all_tags'),
     path('set_user_tags/', views.set_or_create_user_tags, name='set_user_tags'),

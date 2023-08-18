@@ -7,7 +7,7 @@ import Rating from '@mui/material/Rating';
 
 const MemberTable = ({pageName, members}) => {
     const [open, setOpen] = useState(true);
-    console.log(members);
+    
     return (
         
                 
@@ -27,7 +27,7 @@ const MemberTable = ({pageName, members}) => {
                                 key={member.id}
                                 sx={{alignItems:"flex-start"}}
                             >   
-                                <TableCell width="25%">{member.name}</TableCell>
+                                <TableCell width="25%">{member.username}</TableCell>
                                 <TableCell width="25%">
                                     <ListChips chipData={member.expertise} />
                                 </TableCell>

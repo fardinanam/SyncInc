@@ -135,19 +135,16 @@ class ProjectSerializer(serializers.ModelSerializer):
         user = self.initial_data.get('username')
         user = User.objects.get(username=user)
 
-        designations = user.designations.all()
         print("serializer",valid_data)
-        for designation in designations:
-            if designation.role == 'Admin' and designation.organization.name == valid_data['name']:
-                raise serializers.ValidationError('Organization already exists for the user')
-        # # if client does not exist show error
-        #             # if not client:
-        #     raise serializers.ValidationError('Client not listed for this organization')
-            
-        # if client has same project name show error
-        # if client and client.projects.filter(name=valid_data['name']).exists():
-        #     raise serializers.ValidationError('Project already exists for the client')
-            
+        
+        #check if the project already exists in the organization
+        projects = valid_data['organization'].projects.all( )
+        print("projects")
+        print(projects)
+        print("\n\n")
+        for project in projects:
+            if project.name == valid_data['name']:
+                raise serializers.ValidationError('Project already exists in the organization')
         return valid_data
         
     def create(self, validated_data):
