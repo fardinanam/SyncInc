@@ -171,7 +171,7 @@ const AddMemberModal = (props) => {
                             :
                             <Autocomplete
                                 options={filteredOptions}
-                                getOptionLabel={(option) => option.username}
+                                getOptionLabel={(option) => option.id}
                                 onChange={handleSelectedOption}
                                 renderOption={(props, option) => (
                                     <Grid container component='li' {...props}>

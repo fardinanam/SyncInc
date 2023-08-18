@@ -110,14 +110,20 @@ class VendorSerializer(serializers.ModelSerializer):
         if avg_time is None:
             return 'N/A'
 
-class OrganizationMembersSerializer(serializers.ModelSerializer):
+class OrganizationEmployeeSerializer(serializers.ModelSerializer):
     employees = EmployeeSerializer(many=True)
-    vendors = VendorSerializer(many=True)
+    
     class Meta:
         model = Organization
-        fields = ['id', 'name', 'employees', 'vendors']
-        depth = 1
+        fields = ['id', 'name', 'employees']
 
+
+class OrganizationVendorSerializer(serializers.ModelSerializer):
+    vendors = VendorSerializer(many=True)
+
+    class Meta:
+        model = Organization
+        fields = ['id', 'name', 'vendors']
 
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:

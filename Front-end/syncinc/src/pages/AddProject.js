@@ -12,12 +12,14 @@ import { baseUrl } from "../utils/config";
 import AuthContext from '../context/AuthContext';
 import axios from "axios";
 import AddItemLayout from "../components/AddItemLayout";
+import notifyWithToast from "../utils/toast";
+import { useLoading } from "../context/LoadingContext";
 
 const AddProject = () => {
     const { authTokens } = useContext(AuthContext);
+    const { id } = useParams();
+    const { setLoading } = useLoading();
     const navigate = useNavigate();
-    const { id } = useParams(); 
-    console.log(id);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -36,6 +38,7 @@ const AddProject = () => {
             'client': e.target.client_name.value,
             'description': e.target.description.value,
         })
+        setLoading(true);
         try {
             console.log(e.target.project_name.value);
             const response = await axios.post(
@@ -43,11 +46,13 @@ const AddProject = () => {
                 body ,
                 config
             )
-            alert("Project created successfully");
+            navigate(`/organization/${id}/projects`);
+            notifyWithToast("success", "Project created successfully")
             
         } catch (error) {
-            alert(error.response.data.message);
+            notifyWithToast("error", error.response.data.message)
         }
+        setLoading(false);
 
     };
     return(
