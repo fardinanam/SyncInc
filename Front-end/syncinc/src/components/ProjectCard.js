@@ -13,8 +13,6 @@ const ProjectCard = (props) => {
             sx={{
                 borderRadius: 2,
                 boxShadow: 0,
-                width: 300,
-                height: 200,
                 '&:hover': {
                     cursor: 'pointer',
                 },

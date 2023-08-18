@@ -21,6 +21,9 @@ import { LoadingProvider } from "./context/LoadingContext";
 import ResetPassword from "./pages/ResetPassword";
 import Tasks from "./pages/Tasks";
 import ProjectDetails from "./pages/ProjectDetails";
+import OrganizationProjects from "./pages/OrganizationProjects";
+import OrganizationEmployees from "./pages/OrganizationEmployees";
+import OrganizationVendors from "./pages/OrganizationVendors";
 import AddTask from "./pages/AddTask";
 
 function App() {
@@ -45,7 +48,10 @@ function App() {
                                         <Route path="/projects" element={<Projects />} exact />
                                         <Route path="/organizations" element={<Organizations />} exact />
                                     
-                                        <Route path="/organization/:id" element={<OrganizationDetails />} exact />
+                                        <Route path="/organization/:id/projects" element={<OrganizationProjects />} exact />
+                                        <Route path="/organization/:id/employees" element={<OrganizationEmployees />} exact />
+                                        <Route path="/organization/:id/vendors" element={<OrganizationVendors />} exact />
+                                        
                                         
                                         <Route path="/organization/:id/add-project" element={<AddProject />} exact />
                                         <Route path="/project/:id" element={<ProjectDetails />} exact />

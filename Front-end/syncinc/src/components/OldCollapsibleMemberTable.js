@@ -23,7 +23,7 @@ import NameAvatar from "./NameAvatar";
 import ListItem from '@mui/material/ListItem';
 import ListChips from "./ListChips";
 
-const CollapsibleMemberTable = ({title, members}) => {
+const OldCollapsibleMemberTable = ({title, members}) => {
     const [open, setOpen] = useState(true);
     console.log(members);
     
@@ -72,4 +72,4 @@ const CollapsibleMemberTable = ({title, members}) => {
             </Paper> 
     );
 };
-export default CollapsibleMemberTable;
+export default OldCollapsibleMemberTable;

@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 import SummaryCard from '../components/SummaryCard';
 import ProjectCard from '../components/ProjectCard';
+import ProjectsStack from '../components/ProjectsStack';
 import WorkIcon from '@mui/icons-material/Work';
 
 const columnStackStyle = {
@@ -17,9 +18,19 @@ const columnStackStyle = {
     width: 300,
 }
 
+const newProjects = [ {name: "Project 1", client: "Client 1", description: "This is a description of the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."},
+                {name: "Project 2", client: "Client 2", description: "This is a description of the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."},
+            ]
 
+const projectsInProgress = [ {name: "Project 3", client: "Client 3", description: "This is a description of the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."},
+                {name: "Project 4", client: "Client 4", description: "This is a description of the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."},
+            ]
+const completedProjects = [ {name: "Project 5", client: "Client 5", description: "This is a description of the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."},
+                {name: "Project 6", client: "Client 6", description: "This is a description of the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."},
+            ]
 const Projects = () => {
     const navigate = useNavigate();
+    // const [newProjects, setNewProjects] = useState([]);
 
     return (
         <>
@@ -35,139 +46,22 @@ const Projects = () => {
                         Your Projects
                     </Typography>
             </Box>
-            <Stack
-                direction = {"row"}
-                spacing = {12}
-                justifyContent={"flex-start"}
+            <Grid  
+                container 
+                spacing={3}
             >
-                <Grid item>
-                    <Stack
-                        spacing = {2}
-                        sx = {columnStackStyle}
-                    >
-                        <Grid item>
-                            <Typography
-                                variant='h6'
-                                sx={{ fontWeight: 'bold' }}
-                                flexGrow={1}
-                            >
-                                New Projects
-                            </Typography>
-                        </Grid >
-                        <Grid item>
-                            <ProjectCard
-                                name="Advertisement"
-                                client="Client Name"
-                                description="This is a description of the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-                                onClick={() => navigate(`/` ) }
-                            >
-                            </ProjectCard>
-                        </Grid >
-                        <Grid item>
-                        <ProjectCard
-                                name="Advertisement"
-                                client="Client Name"
-                                description="This is a description of the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-                                onClick={() => navigate(`/` ) }
-                            >
-                            </ProjectCard>
-                        </Grid >
-                    </Stack>
-                </Grid >
-                <Grid item>
-                    <Stack
-                        spacing = {2}
-                        sx = {columnStackStyle}
-                    >
-                        <Grid item>
-                            <Typography
-                                variant='h6'
-                                sx={{ fontWeight: 'bold' }}
-                                flexGrow={1}
-                            >
-                                Projects In Progress
-                            </Typography>
-                        </Grid >
-                        {/* <Grid item>
-                            <ProjectCard
-                                name="Advertisement"
-                                client="Client Name"
-                                description="This is a description of the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-                                onClick={() => navigate(`/` ) }
-                            >
-                            </ProjectCard>
-                        </Grid > */}
-                        {/* <Grid item>
-                            <ProjectCard
-                                name="Advertisement"
-                                client="Client Name"
-                                description="This is a description of the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-                                onClick={() => navigate(`/` ) }
-                            >
-                            </ProjectCard>
-                        </Grid >  */}
-                    </Stack>
-                </Grid >
-                <Grid item>
-                    <Stack
-                        spacing = {2}
-                        sx = {columnStackStyle}
-                    >
-                        <Grid item>
-                            <Typography
-                                variant='h6'
-                                sx={{ fontWeight: 'bold' }}
-                                flexGrow={1}
-                            >
-                                Completed Projects
-                            </Typography>
-                        </Grid >
-                        <Grid item>
-                            <ProjectCard
-                                name="Advertisement"
-                                client="Client Name"
-                                description="This is a description of the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-                                onClick={() => navigate(`/` ) }
-                            >
-                            </ProjectCard>
-                        </Grid >
-                        {/* <Grid item>
-                            <ProjectCard
-                                name="Advertisement"
-                                client="Client Name"
-                                description="This is a description of the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-                                onClick={() => navigate(`/` ) }
-                            >
-                            </ProjectCard>
-                        </Grid > */}
-                    </Stack>
-                </Grid >
-            </Stack>
-
+                <Grid item xs={12} md={4}>
+                    <ProjectsStack title="New Projects" projects={newProjects} />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                    <ProjectsStack title="Projects in Progress" projects={projectsInProgress} />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                    <ProjectsStack title="Completed Projects" projects={completedProjects} />
+                </Grid>
+            </Grid>
         </>
-
     )
-        // <>
-        //     <Box 
-        //         display= 'flex'                
-        //         alignGrid items='center'
-        //     >
-        //         <Typography
-        //             variant='h5'
-        //             sx={{ fontWeight: 'bold' }}
-        //             flexGrow={1}
-        //         >
-        //             Your Projects
-        //         </Typography>
-        //         <Button variant='contained' onClick={() => navigate('/add_project')}><AddRoundedIcon />project</Button>
-        //     </Box>
-        //     <Grid  
-        //         container 
-        //         spacing={3}
-        //         columns={{ xs: 12, sm: 6, md: 3 }}
-        //     >
-        //     </Grid>
-        // </>
         
 }
 

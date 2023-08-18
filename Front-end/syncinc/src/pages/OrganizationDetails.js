@@ -15,7 +15,7 @@ import { baseUrl } from "../utils/config";
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import ToggleButton from '@mui/material/ToggleButton';
 
-import OrganizationMembers from "./OrganizationMembers";
+import OrganizationMembers from "./OrganizationEmployees";
 import OrganizationProjects from "./OrganizationProjects";
 import { AddMemberModal } from "../components/Modals";
 
@@ -148,7 +148,6 @@ const OrganizationDetails = (props) => {
                 </Grid>
             
             </Grid>
-            { selectedValue === 'projects' ? <OrganizationProjects id={id} /> : <OrganizationMembers id={id} /> }
             
         </>
     );
