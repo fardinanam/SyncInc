@@ -177,9 +177,10 @@ class ProjectDetailsSerializer(serializers.ModelSerializer):
         # return username, first_name, last_name, profile_pic url
         return {
             'username': project_leader.username,
+            'email': project_leader.email,
             'first_name': project_leader.first_name,
             'last_name': project_leader.last_name,
-            'profile_pic': project_leader.profile_picture.url if project_leader.profile_picture else None
+            'profile_picture': project_leader.profile_picture.url if project_leader.profile_picture else None
         } 
     
 class TagSerializer(serializers.ModelSerializer):

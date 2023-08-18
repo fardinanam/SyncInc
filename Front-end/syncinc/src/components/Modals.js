@@ -5,7 +5,8 @@ import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import { Avatar, Chip, Autocomplete, TextField } from "@mui/material";
+import { Avatar, ToggleButton, Autocomplete, TextField, Checkbox } from "@mui/material";
+import CheckIcon from '@mui/icons-material/Check';
 import { baseUrl } from '../utils/config';
 import AuthContext from '../context/AuthContext';
 import axios from "axios";
@@ -1023,15 +1024,23 @@ const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
     const [options, setOptions] = useState([]);
     const [selectedOption, setSelectedOption] = useState(null);
     const {setLoading} = useLoading();
+    const [isTagSuggestionEnabled, setIsTagSuggestionEnabled] = useState(true);
+    const [matchedTagOptions, setMatchedTagOptions] = useState([]);
 
     const handleSearchChange = (event) => {
         const inputText = event.target.value;
         if (inputText.trim() !== '') {
-            setFilteredOptions(
-                options.filter(option => option.name.toLowerCase().includes(inputText.toLowerCase()))
+            isTagSuggestionEnabled
+            ? setFilteredOptions(
+                matchedTagOptions?.filter(option => option.username.toLowerCase().includes(inputText.toLowerCase()))
+            )
+            : setFilteredOptions(
+                options?.filter(option => option.name.toLowerCase().includes(inputText.toLowerCase()))
             );
         } else {
-            setFilteredOptions([])
+            isTagSuggestionEnabled
+            ? setFilteredOptions(matchedTagOptions)
+            : setFilteredOptions([]);
         }
     };
 
@@ -1048,6 +1057,29 @@ const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
     const handleClose = (data) => {
         onClose(data);
         handleClear();
+    }
+
+    const mactchTags = () => {
+        const taskTags = task?.tags?.map(tag => tag.name);
+        const members = options;
+        const matchedTagOptions = members.filter(member => {
+            const memberExpertises = member.expertise;
+            member.filtered_expertise = [];
+
+            for (let i = 0; i < memberExpertises.length; i++) {
+                if (taskTags.includes(memberExpertises[i])) {
+                    member.filtered_expertise.push(memberExpertises[i]);
+                }
+            }
+
+            if (member.filtered_expertise.length > 0) {
+                return true;
+            }
+
+            return false;
+        });
+
+        setMatchedTagOptions(matchedTagOptions);
     }
 
     const fetchMembers = async () => {
@@ -1113,12 +1145,21 @@ const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
         }
     }, [isOpen]);
 
+    useEffect(() => {
+        mactchTags();
+    }, [options]);
+
+    useEffect(() => {
+        setFilteredOptions([]);
+    }, [isTagSuggestionEnabled]);
+
     return (
         <Modal
             open={isOpen}
-            onClose={() => handleClose()}
+            onClose={() => {setIsTagSuggestionEnabled(true); handleClose()}}
         >
-            <Box sx={style}
+            <Box 
+                sx={style}
             >
                 <Typography id="assign-task-modal-title" variant="h5" align="center">
                     Assign Task
@@ -1128,10 +1169,28 @@ const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
                     onSubmit={handleSubmit}
                     noValidate
                     sx={{ mt: 1 }}
-                >
+                >   
+                    <Box 
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                    >
+                    {!selectedOption &&
+                        <>
+                            <Typography fontSize='xs'>Only show employees with matched tags 
+                            </Typography>
+                            <Checkbox 
+                                color="success" 
+                                size="small" 
+                                checked={isTagSuggestionEnabled}
+                                onChange={() => setIsTagSuggestionEnabled(!isTagSuggestionEnabled)}
+                            />
+                        </>
+                    }
+                    </Box>
                     {selectedOption?
                         <Grid container>
-                            <SearchSuggestion suggestion={selectedOption} />
+                            <SearchSuggestion selected={selectedOption ? true : false} suggestion={selectedOption} />
                             <Grid item md={1}>
                             <IconButton onClick={handleClear} size="small">
                                 <ClearIcon />
@@ -1143,6 +1202,7 @@ const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
                             options={filteredOptions}
                             getOptionLabel={(option) => option.username}
                             onChange={handleSelectedOption}
+                            onFocus={handleSearchChange}
                             renderOption={(props, option) => (
                                 <Grid container component='li' {...props}>
                                     <SearchSuggestion suggestion={option} />

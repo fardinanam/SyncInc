@@ -70,7 +70,7 @@ def get_organization_projects(request, organization_id):
         designation = user.designations.filter(organization=organization).first()
         # for designation in designations:
 
-        if designation and designation.role != 'Admin':
+        if not designation:
             return Response({
                 'message': 'You are not authorized to view this organization',
                 'data': None
@@ -612,4 +612,3 @@ def assign_user_task(request):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
-    
