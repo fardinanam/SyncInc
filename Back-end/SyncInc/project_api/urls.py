@@ -7,8 +7,7 @@ urlpatterns = [
     path('get_organizations/<int:organization_id>/', views.get_organization, name='get_organization'),
     path('create_project/<int:organization_id>/', views.create_project, name='create_project'),
     path('organization_projects/<int:organization_id>/', views.get_organization_projects, name='organization_projects'),
-    path('organization_employees/<int:organization_id>/', views.get_organization_employees, name='organization_members'),
-    path('organization_employees/<int:organization_id>/', views.get_organization_employees, name='organization_members'),
+    path('organization_employees/<int:organization_id>/', views.get_organization_employees, name='organization_employees'),
     path('organization_vendors/<int:organization_id>/', views.get_organization_vendors, name='organization_vendors'),
     path('get_project/<int:project_id>/', views.get_project, name='project_details'),
 
@@ -20,4 +19,5 @@ urlpatterns = [
     path('create_task/<int:project_id>/', views.create_task, name='create_task'),
     path('user_tasks/<int:project_id>/', views.get_user_tasks, name='user_tasks'),
     path('vendor_tasks/<int:project_id>/', views.get_vendor_tasks, name='vendor_tasks'),
+    path('assign_user_task/', views.assign_user_task, name='assign_task'),
 ]

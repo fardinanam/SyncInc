@@ -101,9 +101,9 @@ def get_organization_employees(request, organization_id):
 
         organization = Organization.objects.get(id=organization_id)
         serializer = OrganizationEmployeeSerializer(organization)
-        
-        isEmployee = user.designations.filter(organization=organization).exists()
 
+        isEmployee = user.designations.filter(organization=organization).exists()
+  
         if not isEmployee:
             return Response({
                 'message': 'You are not authorized to view the members of this organization',
@@ -137,6 +137,42 @@ def get_organization_vendors(request, organization_id):
         serializer = OrganizationVendorSerializer(organization)
 
         print(serializer.data)
+        isEmployee = user.designations.filter(
+            organization=organization).exists()
+
+        if not isEmployee:
+            return Response({
+                'message': 'You are not authorized to view the members of this organization',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        return Response({
+            'message': f'Members of the organization {organization.name}',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_organization_vendors(request, organization_id):
+    """
+        Get organization name and all the vendors of the organization
+        from the given organization id
+    """
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        organization = Organization.objects.get(id=organization_id)
+        serializer = OrganizationVendorSerializer(organization)
+
         isEmployee = user.designations.filter(
             organization=organization).exists()
 
@@ -533,6 +569,47 @@ def create_task(request, project_id):
         print(e)        
         return Response({
             'message': serializer.errors.get('non_field_errors')[0],
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def assign_user_task(request):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        data = request.data
+        task_id = data['id']
+        task = UserTask.objects.get(id=task_id)
+
+        if task.project.project_leader != user:
+            return Response({
+                'message': 'You are not authorized to assign task for this project',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        if task.assignee:
+            return Response({
+                'message': 'Task already assigned',
+                'data': None
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        task.assignee = user
+        task.save()
+
+        serializer = GetUserTaskSerializer(task)
+
+        return Response({
+            'message': 'Task assigned successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
     
