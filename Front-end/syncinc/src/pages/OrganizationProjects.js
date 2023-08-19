@@ -38,10 +38,23 @@ const OrganizationProjects = () => {
     const [newProjects, setNewProjects] = useState([]);
     const [projectsInProgress, setProjectsInProgress] = useState([]);
     const [completedProjects, setCompletedProjects] = useState([]);
+
+    const categorizeProjects = (projects) => {
    
+        //projects that have no tasks is assigned to newProjects
+        const today = new Date();
+        console.log(today);
+        console.log(projects);
+        setNewProjects(projects.filter(project => project.task_count === 0));
+
+        //projects that have tasks and if its end_time exists it is smaller than current date is assigned to projectsInProgress
+        setProjectsInProgress(projects.filter(project => project.task_count > 0 && (project.end_time === null || new Date(project.end_time) > today)));
+
+        //projects that have end_time lower than current time is assigned to completedProjects
+        setCompletedProjects(projects.filter(project => project.end_time !== null && new Date(project.end_time) < today));
+    }
     // use axios to get organization details
     const fetchOrganizationProjectDetails = async () => {
-        console.log("sth")
         setLoading(true);
         try {
             const response = await axios.get(
@@ -55,12 +68,9 @@ const OrganizationProjects = () => {
                 }  
 
             )
-
-            console.log(response.data.data);
             setOrganizationName(response.data.data.name);
             setRole(response.data.data.role)
-            setNewProjects(response.data.data.projects)
-            console.log(organizationName)
+            categorizeProjects(response.data.data.projects);
         } catch (error) {
             console.log(error.response.data.message);
             // window.location.href = '/organizations';
@@ -76,22 +86,16 @@ const OrganizationProjects = () => {
         <>  
             <TitleBar 
                 title={organizationName}
-                subtitle="Employees"
+                subtitle="Projects"
             >
                 <NavMenu menuItems={menuItems} handleMenuSelect={handleMenuSelect}/>
             </TitleBar>
-            <Box 
-                display= 'flex'
-                flexGrow={1}
-                marginBottom={2}
-            >
-                    <Typography 
-                        variant='h5'
-                        sx={{ fontWeight: 'bold' }}
-                    >
-                        Your Projects
-                    </Typography>
-            </Box>
+            {
+                role === 'Admin' &&
+                <Box display="flex" justifyContent="flex-end" m={1}>
+                    <Button variant="contained" onClick={() => {navigate(`/organization/${id}/add-project`)}}>Add New Project</Button>
+                </Box>
+            }
             <Grid  
                 container 
                 spacing={3}
@@ -100,10 +104,10 @@ const OrganizationProjects = () => {
                     <ProjectsStack title="New Projects" projects={newProjects} />
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    {/* <ProjectsStack title="Projects in Progress" projects={projectsInProgress} /> */}
+                    <ProjectsStack title="Projects in Progress" projects={projectsInProgress} />
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    {/* <ProjectsStack title="Completed Projects" projects={completedProjects} /> */}
+                    <ProjectsStack title="Completed Projects" projects={completedProjects} />
                 </Grid>
             </Grid>
         </>
