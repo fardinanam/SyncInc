@@ -11,12 +11,42 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { Typography } from "@mui/material";
 import { Task } from "@mui/icons-material";
+import {useDropzone} from 'react-dropzone';
 
 const SubmitTask = () => {
     const { authTokens } = useContext(AuthContext);
     const { id } = useParams();
     const { setLoading } = useLoading();
     const navigate = useNavigate();
+
+    const {
+        acceptedFiles,
+        fileRejections,
+        getRootProps,
+        getInputProps
+    } = useDropzone({
+        accept: {
+        'image/jpeg': [],
+        'image/png': []
+        }
+    });
+
+    const acceptedFileItems = acceptedFiles.map(file => (
+        <li key={file.path}>
+        {file.path} - {file.size} bytes
+        </li>
+    ));
+
+    const fileRejectionItems = fileRejections.map(({ file, errors }) => (
+        <li key={file.path}>
+        {file.path} - {file.size} bytes
+        <ul>
+            {errors.map(e => (
+            <li key={e.code}>{e.message}</li>
+            ))}
+        </ul>
+        </li>
+    ));
     
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -41,25 +71,25 @@ const SubmitTask = () => {
     return(
         <AddItemLayout
             title="Submit Task"
-            onClose={() => navigate(`/organization/${id}/projects/${id}/tasks`)} //!
+            onClose={() => navigate(`/organization/${id}/projects/${id}/tasks`)}
         >
             <Grid container
                     spacing={2}
                     component="form"
                     onSubmit={handleSubmit}
             >
-                <Grid item xs={6} sm={3}>
+                <Grid item xs={12}>
                     <TextField
                         name="task_title"
                         label="Title"
                         required
                         fullWidth
-                        multiline
                         rows={2}
                         id="task_title"
+                        disabled
                     />
                 </Grid>
-                <Grid item xs={18} sm={9}>
+                <Grid item xs={12}>
                     <TextField
                         name="description"
                         label="Description"
@@ -68,21 +98,22 @@ const SubmitTask = () => {
                         multiline
                         rows={2}
                         id="description"
+                        disabled
                     />
                 </Grid>
-                <Grid item sm={12}>
-                    Upload File
-                </Grid>
                 <Grid item xs={12} sm={12}>
-                    <Box 
-                        sx={{
-                            display: 'flex',
-                            justifyContent: 'end',
-                        }}
-                    >
-                        {/* <Button variant="contained" color="success" type="submit">Save</Button> */}
-                        {/* <Button variant="contained" color="secondary">Cancel</Button> */}
-                    </Box>
+                    <section className="container">
+                    <div {...getRootProps({ className: 'dropzone' })}>
+                        <input {...getInputProps()} />
+                        <p>Drag 'n' drop some files here, or click to select files</p>
+                    </div>
+                    <aside>
+                        <h4>Accepted files</h4>
+                        <ul>{acceptedFileItems}</ul>
+                        <h4>Rejected files</h4>
+                        <ul>{fileRejectionItems}</ul>
+                    </aside>
+                    </section>
                 </Grid>
             </Grid>
         </AddItemLayout>

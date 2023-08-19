@@ -17,6 +17,7 @@ import { isValidEmail } from "../utils/validators";
 import notifyWithToast from "../utils/toast";
 import { useNavigate } from "react-router-dom";
 import { useLoading } from "../context/LoadingContext";
+import AuthLayout from "../components/AuthLayout";
 
 const Register = () => {
     const navigate = useNavigate();
@@ -65,16 +66,7 @@ const Register = () => {
     };
 
     return (
-        <Container component="main" maxWidth="xs">
-            <CssBaseline />
-            <Box
-            sx={{
-                marginTop: 8,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center"
-            }}
-            >
+        <AuthLayout>
             <Avatar sx={{ m: 1, bgcolor: "secondary" }}>
                 <LockOutlinedIcon />
             </Avatar>
@@ -85,103 +77,105 @@ const Register = () => {
                 component="form"
                 noValidate
                 onSubmit={handleSubmit}
-                sx={{ mt: 3 }}
+                sx={{ mt: 1 }}
+                p={6}
             >
                 <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                    <TextField
-                    autoComplete="given-name"
-                    name="first_name"
-                    required
-                    fullWidth
-                    id="firstName"
-                    label="First Name"
-                    autoFocus
-                    />
+                    <Grid item xs={12} md={6}>
+                        <TextField
+                        autoComplete="given-name"
+                        name="first_name"
+                        required
+                        fullWidth
+                        id="firstName"
+                        label="First Name"
+                        autoFocus
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <TextField
+                        required
+                        fullWidth
+                        id="lastName"
+                        label="Last Name"
+                        name="last_name"
+                        autoComplete="family-name"
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                        required
+                        fullWidth
+                        id="email"
+                        label="Email Address"
+                        name="email"
+                        autoComplete="email"
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                        required
+                        fullWidth
+                        name="username"
+                        label="Username"
+                        type="username"
+                        id="username"
+                        autoComplete="username"
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                        fullWidth
+                        name="phone"
+                        label="Phone Number"
+                        type="phone"
+                        id="phone"
+                        autoComplete="phone"
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                        required
+                        fullWidth
+                        name="password"
+                        label="Password"
+                        type="password"
+                        id="password"
+                        autoComplete="new-password"
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                        required
+                        fullWidth
+                        name="confirmPassword"
+                        label="Confirm Password"
+                        type="password"
+                        id="confirmPassword"
+                        autoComplete="new-password"
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            sx={{ mt: 3, mb: 2 }}
+                            >
+                            Sign Up
+                        </Button>
+                    </Grid>
                 </Grid>
-                <Grid item xs={12} sm={6}>
-                    <TextField
-                    required
-                    fullWidth
-                    id="lastName"
-                    label="Last Name"
-                    name="last_name"
-                    autoComplete="family-name"
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <TextField
-                    required
-                    fullWidth
-                    id="email"
-                    label="Email Address"
-                    name="email"
-                    autoComplete="email"
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <TextField
-                    required
-                    fullWidth
-                    name="username"
-                    label="Username"
-                    type="username"
-                    id="username"
-                    autoComplete="username"
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <TextField
-                    fullWidth
-                    name="phone"
-                    label="Phone Number"
-                    type="phone"
-                    id="phone"
-                    autoComplete="phone"
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <TextField
-                    required
-                    fullWidth
-                    name="password"
-                    label="Password"
-                    type="password"
-                    id="password"
-                    autoComplete="new-password"
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <TextField
-                    required
-                    fullWidth
-                    name="confirmPassword"
-                    label="Confirm Password"
-                    type="password"
-                    id="confirmPassword"
-                    autoComplete="new-password"
-                    />
-                </Grid>
-                </Grid>
-                <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-                >
-                Sign Up
-                </Button>
                 <Grid container justifyContent="center">
-                <Grid item>
-                    <Link to="/login">
-                    Already have an account? Sign in
-                    </Link>
-                </Grid>
+                    <Grid item>
+                        <Link to="/login">
+                        Already have an account? Sign in
+                        </Link>
+                    </Grid>
                 </Grid>
             </Box>
-            </Box>
-            <Copyright sx={{ mt: 5 }} />
-        </Container>
+            
+        </AuthLayout>
     );
 }
 

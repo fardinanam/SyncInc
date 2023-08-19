@@ -24,4 +24,6 @@ urlpatterns = [
     path('vendor_tasks/<int:project_id>/', views.get_vendor_tasks, name='vendor_tasks'),
     path('assign_user_task/', views.assign_user_task, name='assign_task'),
     path('assign_project_leader/<int:project_id>/', views.assign_project_leader, name='assign_project_leader'),
+    path('get_all_tasks_of_user/', views.get_all_tasks_of_user, name='get_all_tasks_of_user'),
+    path('get_user_task/<int:task_id>/', views.get_user_task, name='get_task'),
 ]

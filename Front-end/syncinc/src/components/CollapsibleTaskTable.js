@@ -172,7 +172,7 @@ const CollapsibleTaskTable = ({title, initialTasks, role, organization_id, canAd
                                 }
                             </TableCell>
                             <TableCell  >{task.deadline? 
-                                dayjs(task.deadline).format('DD/MM/YYYY') : "No Deadline"}
+                                dayjs(task.deadline).format('DD MMM, YYYY') : "No Deadline"}
                             </TableCell>
                             {String(role).toLowerCase() === "project leader" && 
                                 <TableCell
