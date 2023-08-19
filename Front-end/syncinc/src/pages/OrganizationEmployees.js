@@ -29,7 +29,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { AddMemberModal } from "../components/Modals";
 
 const OrganizationEmployees = (props) => {
-   
+
     const { authTokens } = useContext(AuthContext);
     const { id }= useParams();
     const { setLoading } = useLoading();
@@ -130,14 +130,6 @@ const OrganizationEmployees = (props) => {
             setTimeSort(!timeSort);
         }
     
-    // const initMembers = [ {id: 1, name: "John Doe", expertise:["Video Editing", "Motion Graphics"], completed_tasks: 22, avg_rating: 3.0, averageTime: 15, role: "employee" },
-    //                {id: 2, name: "Jane Doe", expertise:["Motion Graphics"], completed_tasks: 18, avg_rating: 3.5, averageTime: 14, role: "vendor" },
-    //                 {id: 3, name: "Anna F", expertise:["Motion Graphics"], completed_tasks: 24, avg_rating: 3.6, averageTime: 13, role: "vendor" },
-    //                 {id: 4, name: "Robert X", expertise:["Advertising"], completed_tasks: 6, avg_rating: 3.8, averageTime: 15, role: "employee" },
-    //                 {id: 5, name: "James Milner", expertise:["Motion Graphics"], completed_tasks: 10, avg_rating: 4.6, averageTime: 11, role: "vendor" },
-    //                 {id: 6, name: "Fardin Aungon", expertise:["Everything"], completed_tasks: 16, avg_rating: 4.8, averageTime: 12, role: "employee" },
-        //   ]
-    // const [members, setMembers] = useState([]);
     useEffect(() => {
     }, [nameSort, numTasksSort, ratingSort, timeSort]);
     
@@ -161,7 +153,7 @@ const OrganizationEmployees = (props) => {
                         <Typography variant="h6">
                             Search option here
                         </Typography>
-                    </Grid >
+                    </Grid>
                     {
                     role === 'Admin' &&
                     <Grid item display={'flex'} xs={12} md={4} sx={{justifyContent: 'flex-end'}}>
@@ -173,7 +165,7 @@ const OrganizationEmployees = (props) => {
                         <AddMemberModal id={id} memberType={'employee'} open={addModalOpen} handleClose={handleAddModalClose}/>
                     </Grid>
                     }
-                </ Grid>
+                </Grid>
 
                 <MemberTable
                     pageName="Employee"

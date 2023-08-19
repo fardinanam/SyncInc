@@ -10,9 +10,11 @@ urlpatterns = [
     path('organization_employees/<int:organization_id>/', views.get_organization_employees, name='organization_employees'),
     path('organization_vendors/<int:organization_id>/', views.get_organization_vendors, name='organization_vendors'),
     path('get_project/<int:project_id>/', views.get_project, name='project_details'),
+    path('get_organization_role/<int:organization_id>/', views.get_organization_role, name='organization_role'),
 
     path('get_employee_suggestions/<int:organization_id>/', views.get_employee_suggestions, name='employee_suggestions'),
     path('get_vendor_suggestions/<int:organization_id>/', views.get_vendor_suggestions, name='vendor_suggestions'),
+    path('get_project_leader_suggestions/<int:project_id>/', views.get_project_leader_suggestions, name='project_leder_suggestions'),
     path('add_employee/<int:organization_id>/', views.add_employee, name='add_employee'),
     path('add_vendor/<int:organization_id>/', views.add_vendor, name='add_vendor'),
   
@@ -24,4 +26,7 @@ urlpatterns = [
     path('assign_user_task/', views.assign_user_task, name='assign_task'),
     
     path('get_user_items_count/', views.get_user_items_count, name='get_user_items_count'),
+    path('assign_project_leader/<int:project_id>/', views.assign_project_leader, name='assign_project_leader'),
+    path('get_all_tasks_of_user/', views.get_all_tasks_of_user, name='get_all_tasks_of_user'),
+    path('get_user_task/<int:task_id>/', views.get_user_task, name='get_task'),
 ]

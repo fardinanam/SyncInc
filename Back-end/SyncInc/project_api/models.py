@@ -61,7 +61,7 @@ class Designation(models.Model):
 
     employee = models.ForeignKey(
         User, 
-        related_name='designations', # user.designations.all()
+        related_name='designations',
         related_query_name='designation',
         on_delete=models.CASCADE
     )
@@ -160,6 +160,13 @@ class Project(models.Model):
         return self.name + ' - ' + self.organization.__str__()
     
 class AbstractTask(models.Model):
+    STATUS_CHOICES = [
+        ('Unassigned', 'Unassigned'),
+        ('In Progress', 'In Progress'),
+        ('Submitted', 'Submitted'),
+        ('Completed', 'Completed'),
+        ('Rejected', 'Rejected'),
+    ]
     project = models.ForeignKey(
         Project, 
         related_name='%(class)ss',
@@ -186,6 +193,7 @@ class AbstractTask(models.Model):
         on_delete=models.SET_NULL
     )
 
+    status = models.CharField(max_length=32, default='Unassigned', choices=STATUS_CHOICES)
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
     deadline = models.DateTimeField()

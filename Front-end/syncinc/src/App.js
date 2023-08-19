@@ -12,7 +12,6 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AddProject from "./pages/AddProject";
-import OrganizationDetails from "./pages/OrganizationDetails";
 import MainLayout from "./components/MainLayout";
 import ErrorPage from "./pages/ErrorPage";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -24,7 +23,7 @@ import ProjectDetails from "./pages/ProjectDetails";
 import OrganizationProjects from "./pages/OrganizationProjects";
 import OrganizationEmployees from "./pages/OrganizationEmployees";
 import OrganizationVendors from "./pages/OrganizationVendors";
-import AddTask from "./pages/AddTask";
+import TaskDetails from "./pages/TaskDetails";
 import SubmitTask from "./pages/SubmitTask";
 
 function App() {
@@ -58,7 +57,8 @@ function App() {
                                         <Route path="/project/:id" element={<ProjectDetails />} exact />
                                         {/* <Route path="/project/:id/add-task" element={<AddTask />} exact /> */}
                                         <Route path="/tasks" element={<Tasks />} exact />
-                                        <Route path="/submit-task" element={<SubmitTask />} exact />
+                                        <Route path="/task/:id" element={<TaskDetails />} exact />
+                                        <Route path="/submit-task/:id" element={<SubmitTask />} exact />
                                     </Routes>
                                 </MainLayout>
                             </RequireAuth>

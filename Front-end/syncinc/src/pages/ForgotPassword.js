@@ -3,6 +3,7 @@ import { Box, Typography, TextField, Button } from "@mui/material";
 import axios from "axios";
 import notifyWithToast from "../utils/toast"
 import { baseUrl } from "../utils/config";
+import AuthLayout from "../components/AuthLayout";
 
 const ForgotPassword = () => {
     const handleSubmit = async (e) => {
@@ -33,45 +34,34 @@ const ForgotPassword = () => {
         }
     }
     return (
-        <Container component="main" maxWidth="xs">
-        <CssBaseline />
+        <AuthLayout>
+            <Typography component="h1" variant="h5">
+                Forgot Password
+            </Typography>
             <Box
-                sx={{
-                    marginTop: 8,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center"
-                }}
+                component="form"
+                noValidate
+                onSubmit={handleSubmit}
+                sx={{ mt: 3 }}
             >
-
-                <Typography component="h1" variant="h5">
-                    Forgot Password
-                </Typography>
-                <Box
-                    component="form"
-                    noValidate
-                    onSubmit={handleSubmit}
-                    sx={{ mt: 3 }}
+                <TextField
+                    required
+                    fullWidth
+                    id="email"
+                    label="Email Address"
+                    name="email"
+                    autoComplete="email"
+                />
+                <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    sx={{ mt: 3, mb: 2 }}
                 >
-                    <TextField
-                        required
-                        fullWidth
-                        id="email"
-                        label="Email Address"
-                        name="email"
-                        autoComplete="email"
-                    />
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        sx={{ mt: 3, mb: 2 }}
-                    >
-                        Send Email
-                    </Button>
-                </Box>
+                    Send Email
+                </Button>
             </Box>
-        </Container>
+        </AuthLayout>
     )
 }
 

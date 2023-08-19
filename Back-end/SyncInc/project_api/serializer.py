@@ -3,7 +3,7 @@ from .models import *
 from accounts.models import User
 from django.db.models import Q, Avg, F
 from datetime import datetime
-
+from django.utils import timezone
 
 class OrganizationSerializer(serializers.ModelSerializer):
     num_projects = serializers.SerializerMethodField()
@@ -43,7 +43,22 @@ class OrganizationSerializer(serializers.ModelSerializer):
         ).save()
         return organization
 
+class ProjectSummarySerializer(serializers.ModelSerializer):
+    task_count = serializers.SerializerMethodField()
+    client = serializers.SerializerMethodField()
+    class Meta:
+        model = Project
+        fields = ['id', 'name', 'description', 'client', 'start_time', 'end_time', 'task_count']
+
+    def get_task_count(self, obj):
+        return obj.usertasks.count() + obj.vendortasks.count()
+    def get_client(self, obj):
+        return obj.client.name
+    
+
+    
 class OrganizationProjectsSerializer(serializers.ModelSerializer):
+    projects = ProjectSummarySerializer(many=True)
     class Meta:
         model = Organization
         fields = ['id', 'name', 'projects']
@@ -54,6 +69,9 @@ class OrganizationProjectsSerializer(serializers.ModelSerializer):
         # up to a depth of 1 level. In this case, if the projects field is a ForeignKey or 
         # OneToOneField to another model, the related object's data will be included in the 
         # serialized output.
+    
+
+
 class EmployeeSerializer(serializers.ModelSerializer):
     expertise = serializers.SerializerMethodField()
     completed_tasks = serializers.SerializerMethodField()
@@ -128,7 +146,7 @@ class OrganizationVendorSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ['name', 'organization', 'client', 'description']
+        fields = ['id', 'name', 'organization', 'client', 'description']
         
     def validate(self, data):
         valid_data = super().validate(data)
@@ -172,13 +190,16 @@ class ProjectDetailsSerializer(serializers.ModelSerializer):
     def get_project_leader(self, obj):
         project_leader = obj.project_leader
         # return username, first_name, last_name, profile_pic url
-        return {
-            'username': project_leader.username,
-            'email': project_leader.email,
-            'first_name': project_leader.first_name,
-            'last_name': project_leader.last_name,
-            'profile_picture': project_leader.profile_picture.url if project_leader.profile_picture else None
-        } 
+        if project_leader:
+            return {
+                'username': project_leader.username,
+                'email': project_leader.email,
+                'first_name': project_leader.first_name,
+                'last_name': project_leader.last_name,
+                'profile_picture': project_leader.profile_picture.url if project_leader.profile_picture else None
+            } 
+        
+        return None
     
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -188,11 +209,38 @@ class TagSerializer(serializers.ModelSerializer):
 class GetUserTaskSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     assignee = EmployeeSerializer()
+    status = serializers.SerializerMethodField()
+    project_name = serializers.SerializerMethodField()
+    organization_name = serializers.SerializerMethodField()
 
     class Meta:
         model = UserTask
-        fields = ['id', 'name', 'tags', 'assignee', 'deadline']
+        fields = ['id', 'name', 'tags', 'assignee', 'deadline', 'status', 'project_name', 'organization_name']
 
+    def get_status(self, obj):
+        # if deadline has passed and task is not submitted or completed or rejected: task is overdue
+        # if task is submitted: task is submitted
+        # if task is completed: task is completed
+        # if task is rejected: task is rejected
+        # if assignee is none: task is unassigned
+        if obj.status == 'Submitted':
+            return 'Submitted'
+        elif obj.status == 'Completed':
+            return 'Completed'
+        elif obj.status == 'Rejected':
+            return 'Rejected'
+        elif obj.assignee is None:
+            return 'Unassigned'
+        elif obj.deadline < timezone.now():
+            return 'Overdue'
+        else:
+            return 'In Progress'
+        
+    def get_project_name(self, obj):
+        return obj.project.name
+
+    def get_organization_name(self, obj):
+        return obj.project.organization.name
 
 class VendorTaskSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
@@ -225,28 +273,6 @@ class CreateUserTaskSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f'Task named {name} already exists for this project')
         return valid_data
     
-    # def validate_tags(self, tags):
-    #     # get or create tags
-    #     tag_objs = []
-    #     for tag in tags:
-    #         tag_obj, created = Tag.objects.get_or_create(name=tag)
-    #         tag_objs.append(tag_obj)
-        
-    #     return tag_objs
-                
-    
-    # def create(self, validated_data):
-    #     task = super().create(validated_data)
-    #     # add or create tags
-    #     tags = self.initial_data.get('tags')
-    #     if tags:
-    #         for tag in tags:
-    #             tag_obj, created = Tag.objects.get_or_create(name=tag)
-    #             task.tags.add(tag_obj)
-
-    #     task.save()
-    #     return task
-    
     def create(self, validated_data):
         tags_data = validated_data.pop('tags')
         task = UserTask.objects.create(**validated_data)
@@ -256,3 +282,4 @@ class CreateUserTaskSerializer(serializers.ModelSerializer):
             task.tags.add(tag)
 
         return task
+

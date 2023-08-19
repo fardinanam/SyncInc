@@ -14,16 +14,43 @@ import axios from "axios";
 import AddItemLayout from "../components/AddItemLayout";
 import notifyWithToast from "../utils/toast";
 import { useLoading } from "../context/LoadingContext";
+import { useState, useEffect } from "react";
+import ErrorPage from "./ErrorPage";
 
 const AddProject = () => {
     const { authTokens } = useContext(AuthContext);
     const { id } = useParams();
     const { setLoading } = useLoading();
     const navigate = useNavigate();
+    const [role, setRole] = useState();
+
+    const getRole = (async () => {
+        const config = {
+            headers: {
+                'Authorization': 'Bearer ' + authTokens?.access,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+        };
+        try {
+            const response = await axios.get(
+                `${baseUrl}get_organization_role/${id}/`,
+                config
+            )
+            console.log(response.data.data)
+            setRole(response.data.data)
+        } catch (error) {
+            console.log(error)   
+        }
+    })
+
+    useEffect(() => {
+        getRole();
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        // console.log("something in 26")
         const config = {
             headers: {
                 'Authorization': 'Bearer ' + authTokens?.access,
@@ -46,68 +73,79 @@ const AddProject = () => {
                 body ,
                 config
             )
-            navigate(`/organization/${id}/projects`);
+            console.log(response)
+            const project_id = response.data.data.id
+            navigate(`/project/${project_id}`);
             notifyWithToast("success", "Project created successfully")
             
         } catch (error) {
-            notifyWithToast("error", error.response.data.message)
+            console.log(error)
+            notifyWithToast("error", error.response.data?.message)
         }
         setLoading(false);
 
     };
-    return(
-        <AddItemLayout
-            title="Add Project"
-            onClose={() => navigate(`/organization/${id}`)}
-        >
-            <Grid container
-                    spacing={2}
-                    component="form"
-                    onSubmit={handleSubmit}
-            >
-                <Grid item xs={12} sm={6}>
-                    <TextField
-                        name="project_name"
-                        label="Project Name"
-                        required
-                        fullWidth
-                        id="project_name"
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                    <TextField
-                        name="client_name"
-                        label="Client Name"
-                        required
-                        fullWidth
-                        id="client_name"
-                    />
-                </Grid>
-                <Grid item sm={12}>
-                    <TextField
-                        name="description"
-                        label="Description"
-                        required
-                        fullWidth
-                        multiline
-                        rows={10}
-                        id="description"
-                    />
-                </Grid>
-                <Grid item xs={12} sm={12}>
-                    <Box 
-                        sx={{
-                            display: 'flex',
-                            justifyContent: 'end',
-                        }}
+    {
+        if(role !== "Admin") {
+            {console.log(role)}
+            return <ErrorPage />
+        } else {
+            return(
+                <AddItemLayout
+                    title="Add Project"
+                    onClose={() => navigate(`/organization/${id}`)}
+                >
+                    <Grid container
+                            spacing={2}
+                            component="form"
+                            onSubmit={handleSubmit}
                     >
-                        <Button variant="contained" color="success" type="submit">Save</Button>
-                        {/* <Button variant="contained" color="secondary">Cancel</Button> */}
-                    </Box>
-                </Grid>
-            </Grid>
-        </AddItemLayout>
-    )
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                name="project_name"
+                                label="Project Name"
+                                required
+                                fullWidth
+                                id="project_name"
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                name="client_name"
+                                label="Client Name"
+                                required
+                                fullWidth
+                                id="client_name"
+                            />
+                        </Grid>
+                        <Grid item sm={12}>
+                            <TextField
+                                name="description"
+                                label="Description"
+                                required
+                                fullWidth
+                                multiline
+                                rows={10}
+                                id="description"
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={12}>
+                            <Box 
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'end',
+                                }}
+                            >
+                                <Button variant="contained" color="success" type="submit">Save</Button>
+                                {/* <Button variant="contained" color="secondary">Cancel</Button> */}
+                            </Box>
+                        </Grid>
+                    </Grid>
+                </AddItemLayout>
+            )
+        }
+    }
+    
 }
 
 export default AddProject;
