@@ -122,6 +122,8 @@ const AddMemberModal = ( props ) => {
 
             if (memberType === "project_leader") {
                 url = `${baseUrl}assign_project_leader/${id}/`
+            } else if (memberType === "employee") {
+                url = `${baseUrl}invite_${memberType}/${id}/`
             } else {
                 url = `${baseUrl}add_${memberType}/${id}/`
             }
@@ -134,8 +136,10 @@ const AddMemberModal = ( props ) => {
                 )
 
                 handleClose(response.data.data);
-
-                notifyWithToast("success",memberType+" added successfully");
+                if(memberType === "employee")
+                    notifyWithToast("success",memberType+" invited successfully");
+                else
+                    notifyWithToast("success",memberType+" added successfully");
             } catch (error) {
                 handleClose();
                 notifyWithToast("error","Something went wrong");

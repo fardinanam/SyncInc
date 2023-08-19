@@ -74,7 +74,7 @@ class Designation(models.Model):
         choices=ROLE_CHOICES,
         default='Employee',
     )
-
+    invitationAccepted = models.BooleanField(default=False)
     joined_at = models.DateTimeField(auto_now_add=True)
     left_at = models.DateTimeField(blank=True, null=True)
 

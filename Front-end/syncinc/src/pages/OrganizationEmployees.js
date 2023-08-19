@@ -50,9 +50,6 @@ const OrganizationEmployees = (props) => {
         setAddModalOpen(true);
     }
     const handleAddModalClose = (employee) => {
-        if(employee) {
-            setEmployees([...employees, employee]);
-        }
         setAddModalOpen(false);
     }
 

@@ -25,6 +25,7 @@ import OrganizationEmployees from "./pages/OrganizationEmployees";
 import OrganizationVendors from "./pages/OrganizationVendors";
 import TaskDetails from "./pages/TaskDetails";
 import SubmitTask from "./pages/SubmitTask";
+import Invites from "./pages/Invites";
 
 function App() {
     return (
@@ -44,9 +45,11 @@ function App() {
                                     <Routes>
                                         <Route path="*" element={<ErrorPage />} />
                                         <Route path="/profile" element={<Profile />} exact />
+                                        <Route path="/invites" element={<Invites />} exact />
                                         <Route path="/dashboard" element={<Home />} exact />
                                         <Route path="/projects" element={<Projects />} exact />
                                         <Route path="/organizations" element={<Organizations />} exact />
+                                        
                                     
                                         <Route path="/organization/:id/projects" element={<OrganizationProjects />} exact />
                                         <Route path="/organization/:id/employees" element={<OrganizationEmployees />} exact />
