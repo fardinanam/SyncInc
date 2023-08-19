@@ -1,17 +1,60 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-
+import { useNavigate } from 'react-router-dom';
+import { useState, useContext, useEffect } from 'react';
 import SummaryCard from '../components/SummaryCard';
 import { Grid } from '@mui/material';
 import FormatListNumberedRtlRoundedIcon from '@mui/icons-material/FormatListNumberedRtlRounded';
+import DashboardCard from '../components/DashboardCard';
+import AuthContext from '../context/AuthContext';
+import { baseUrl } from '../utils/config';
+import axios from 'axios';
+import { useLoading } from '../context/LoadingContext';
+import { Work } from '@mui/icons-material';
+import DescriptionIcon from '@mui/icons-material/Description';
+import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 
 export default function ClippedDrawer() {
+    const navigate = useNavigate();
+    const {authTokens} = useContext(AuthContext);
+    const [numOrganizations, setNumOrganizations] = useState([]);
+    const [numProjects, setNumProjects] = useState([]);
+    const [numTasks, setNumTasks] = useState([]);
+    const {setLoading} = useLoading();
+    useEffect(() => {
+        fetchNumberItems();
+    }, []);
+
+    const fetchNumberItems = async () => {
+        setLoading(true);
+        try {
+            let response = await axios.get(
+                `${baseUrl}get_user_items_count/`,  
+                {
+                    headers: {
+                        'Authorization': 'Bearer ' + authTokens?.access,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                }  
+
+            )
+            console.log(response.data.data);
+            setNumOrganizations(response.data.data.numOrganizations);
+            setNumProjects(response.data.data.numProjects);
+            setNumTasks(response.data.data.numTasks);
+        } catch (error) {
+            console.log(error.response.data.message);
+        }
+        setLoading(false);
+    }
+
     return (
         // <MainLayout selected='dashboard'>
         <>
             <Box>
                 <Typography variant='h5' sx={{ fontWeight: 'bold' }}>
-                    Dashboard
+                    Your Dashboard
                 </Typography>
             </Box>
             <Grid  
@@ -23,30 +66,47 @@ export default function ClippedDrawer() {
                 <Grid 
                     item
                 >
-                <SummaryCard
-                    title="Ongoing Tasks"
-                    count={3}
-                    name="Tasks"  
+                <DashboardCard
+                    title="Your Organizations"
+                    count={numOrganizations}
+                    name="Organizations Managed"  
+                    onClick={() => navigate('/organizations')}
                 >
-                    <FormatListNumberedRtlRoundedIcon 
+                    <Work 
                         color='primary'
                         fontSize='large'
                     />
-                </SummaryCard>
+                </DashboardCard>
                 </Grid>
                 <Grid 
                     item
                 >
-                <SummaryCard
-                    title="Ongoing Projects"
-                    count={2}
-                    name="Projects"
+                <DashboardCard
+                    title="Your Projects"
+                    count={numProjects}
+                    name="Projects Led"
+                    onClick={() => navigate('/projects')}   
                 >
-                    <FormatListNumberedRtlRoundedIcon 
-                        color='secondary'
+                    <DescriptionIcon 
+                        color='primary'
                         fontSize='large'
                     />
-                </SummaryCard>
+                </DashboardCard>
+                </Grid>
+                <Grid 
+                    item
+                >
+                <DashboardCard
+                    title="Your Tasks"
+                    count={numTasks}
+                    name="Tasks Assigned"
+                    onClick={() => navigate('/tasks')}
+                >
+                    <AssignmentRoundedIcon 
+                        color='primary'
+                        fontSize='large'
+                    />
+                </DashboardCard>
                 </Grid>
             </Grid>
         </>
