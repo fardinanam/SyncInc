@@ -99,7 +99,7 @@ const ProjectDetails = () => {
                                 Project Leader
                             </Typography>
                             <Typography variant="subtitle2">
-                                @{project.project_leader?.username}
+                                {project.project_leader? '@'+project.project_leader.name : "N/A"}
                             </Typography>
                         </Stack>
                     </Stack>

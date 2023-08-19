@@ -9,7 +9,6 @@ import { useNavigate } from 'react-router-dom';
 const ProjectsStack = ({title, projects}) => {
 
     const navigate = useNavigate()
-    console.log(projects)
 
     return (
             <Stack justifyContent="center" spacing={2} mt={2}>

@@ -103,8 +103,7 @@ def get_organization_projects(request, organization_id):
         designation = user.designations.filter(organization=organization).first()
         role = designation.role
         data['role'] = role
-
-
+        
         if not designation:
             return Response({
                 'message': 'You are not authorized to view this organization',
