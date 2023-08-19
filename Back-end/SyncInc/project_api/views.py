@@ -691,6 +691,31 @@ def assign_user_task(request):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
+        
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_items_count(request):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+        
+        designations = user.designations.all()
+        
+        data = {}
+        data['numOrganizations'] = Organization.objects.filter(designation__in=designations).count()
+        data['numProjects'] = Project.objects.filter(project_leader=user).count()
+        data['numTasks'] = UserTask.objects.filter(assignee=user).count()
+        return Response({
+            'message': f'Item counts of {user.username} fetched successfully',
+            'data': data
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -767,7 +792,7 @@ def assign_project_leader(request, project_id):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
-    
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_all_tasks_of_user(request):
@@ -791,7 +816,7 @@ def get_all_tasks_of_user(request):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
-    
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_task(request, task_id):
@@ -832,3 +857,4 @@ def get_user_task(request, task_id):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
+
