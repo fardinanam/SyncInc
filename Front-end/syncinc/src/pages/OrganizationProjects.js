@@ -76,22 +76,16 @@ const OrganizationProjects = () => {
         <>  
             <TitleBar 
                 title={organizationName}
-                subtitle="Employees"
+                subtitle="Projects"
             >
                 <NavMenu menuItems={menuItems} handleMenuSelect={handleMenuSelect}/>
             </TitleBar>
-            <Box 
-                display= 'flex'
-                flexGrow={1}
-                marginBottom={2}
-            >
-                    <Typography 
-                        variant='h5'
-                        sx={{ fontWeight: 'bold' }}
-                    >
-                        Your Projects
-                    </Typography>
-            </Box>
+            {
+                role === 'Admin' &&
+                <Box display="flex" justifyContent="flex-end" m={1}>
+                    <Button variant="contained">Add New Project</Button>
+                </Box>
+            }
             <Grid  
                 container 
                 spacing={3}
@@ -100,10 +94,10 @@ const OrganizationProjects = () => {
                     <ProjectsStack title="New Projects" projects={newProjects} />
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    {/* <ProjectsStack title="Projects in Progress" projects={projectsInProgress} /> */}
+                    <ProjectsStack title="Projects in Progress" projects={projectsInProgress} />
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    {/* <ProjectsStack title="Completed Projects" projects={completedProjects} /> */}
+                    <ProjectsStack title="Completed Projects" projects={completedProjects} />
                 </Grid>
             </Grid>
         </>

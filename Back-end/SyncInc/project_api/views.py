@@ -52,6 +52,38 @@ def get_organization(request, organization_id):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_organization_role(request, organization_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+
+        organization = Organization.objects.get(id=organization_id)
+        designation = user.designations.filter(organization=organization).first()
+        print(f'designation: {designation}')
+
+        if not designation:
+            return Response({
+                'message': 'You are not authorized to view this organization',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        role = designation.role
+
+        return Response({
+            'message': f'Role in the organization {organization.name}',
+            'data': role
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -81,7 +113,7 @@ def get_organization_projects(request, organization_id):
 
         return Response({
             'message': f'Projects of the organization {organization.name}',
-            'data': serializer.data
+            'data': data
         }, status=status.HTTP_200_OK)
         
     except Exception as e:
