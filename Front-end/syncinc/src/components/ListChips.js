@@ -5,8 +5,8 @@ import { Stack } from '@mui/material';
 const ListChips = ({ chipData, justifyContent }) => {
   return (
     <Stack
-      columnGap={1}
-      rowGap={1} 
+      columnGap={0.5}
+      rowGap={0.5} 
       direction="row"
       flexWrap={'wrap'}
       justifyContent={justifyContent ? justifyContent : 'flex-start'}
@@ -18,6 +18,7 @@ const ListChips = ({ chipData, justifyContent }) => {
           color='success'
           variant='outlined'
           fontSize='small'
+          size='small'
         />
       ))}
     </Stack>

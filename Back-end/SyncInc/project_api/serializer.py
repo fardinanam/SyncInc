@@ -3,7 +3,7 @@ from .models import *
 from accounts.models import User
 from django.db.models import Q, Avg, F
 from datetime import datetime
-
+from django.utils import timezone
 
 class OrganizationSerializer(serializers.ModelSerializer):
     num_projects = serializers.SerializerMethodField()
@@ -209,11 +209,29 @@ class TagSerializer(serializers.ModelSerializer):
 class GetUserTaskSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     assignee = EmployeeSerializer()
-
+    status = serializers.SerializerMethodField()
     class Meta:
         model = UserTask
-        fields = ['id', 'name', 'tags', 'assignee', 'deadline']
+        fields = ['id', 'name', 'tags', 'assignee', 'deadline', 'status']
 
+    def get_status(self, obj):
+        # if deadline has passed and task is not submitted or completed or rejected: task is overdue
+        # if task is submitted: task is submitted
+        # if task is completed: task is completed
+        # if task is rejected: task is rejected
+        # if assignee is none: task is unassigned
+        if obj.status == 'Submitted':
+            return 'Submitted'
+        elif obj.status == 'Completed':
+            return 'Completed'
+        elif obj.status == 'Rejected':
+            return 'Rejected'
+        elif obj.assignee is None:
+            return 'Unassigned'
+        elif obj.deadline < timezone.now():
+            return 'Overdue'
+        else:
+            return 'In Progress'
 
 class VendorTaskSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
