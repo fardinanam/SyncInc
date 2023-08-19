@@ -10,6 +10,7 @@ import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { Typography } from "@mui/material";
+import Chip from "@mui/material/Chip";
 import { Task } from "@mui/icons-material";
 import {useDropzone} from 'react-dropzone';
 
@@ -27,25 +28,23 @@ const SubmitTask = () => {
     } = useDropzone({
         accept: {
         'image/jpeg': [],
-        'image/png': []
+        'image/png': [],
+        'application/pdf': [],
+        'video/mp4': [],
+        'audio/mpeg': [],
         }
     });
 
     const acceptedFileItems = acceptedFiles.map(file => (
-        <li key={file.path}>
-        {file.path} - {file.size} bytes
-        </li>
+        <Chip
+            label={file.name + " - " + file.size + " bytes"}
+            key={file.path}
+        >
+        </Chip>
     ));
 
     const fileRejectionItems = fileRejections.map(({ file, errors }) => (
-        <li key={file.path}>
-        {file.path} - {file.size} bytes
-        <ul>
-            {errors.map(e => (
-            <li key={e.code}>{e.message}</li>
-            ))}
-        </ul>
-        </li>
+        notifyWithToast("error", file.name + " could not be uploaded, file type error, try again")
     ));
     
     const handleSubmit = async (e) => {
@@ -105,12 +104,30 @@ const SubmitTask = () => {
                     <section className="container">
                     <div {...getRootProps({ className: 'dropzone' })}>
                         <input {...getInputProps()} />
-                        <p>Drag 'n' drop some files here, or click to select files</p>
+                        {/* make a box for the drag and drop */}
+                        <Box
+                            sx={{
+                                border: '1px dashed grey',
+                                borderRadius: '0.5rem',
+                                p: '1rem',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                height: '100%',
+                            }}
+                        >
+                            <Typography
+                                variant='body1'
+                            >
+                                Drag and drop your files here
+                            </Typography>
+                        </Box>
                     </div>
+                    {/* if the files are accepted, show them as small chips, if rejected, show as toast */}
                     <aside>
-                        <h4>Accepted files</h4>
-                        <ul>{acceptedFileItems}</ul>
-                        <h4>Rejected files</h4>
+                        {/* <h4>Uploaded files:</h4> */}
+                        <ul>{acceptedFileItems}</ul> 
+                        {/* <h4>Unsupported files:</h4> */}
                         <ul>{fileRejectionItems}</ul>
                     </aside>
                     </section>

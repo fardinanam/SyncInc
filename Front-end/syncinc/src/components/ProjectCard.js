@@ -24,13 +24,13 @@ const ProjectCard = (props) => {
                 {children}
                 <Typography
                     variant="h5"
+                    fontWeight={'bold'}
                 >
                     {name}
                 </Typography>
                 <Typography
                     sx={{
-                        fontSize: 18,
-                        fontWeight: 'bold'
+                        fontSize: 16,
                     }}
                     color="text.secondary" gutterBottom
                 >
