@@ -16,6 +16,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { IconButton } from "@mui/material";
 import NavMenu from "../components/NavMenu";
 
+import ProjectCard from '../components/ProjectCard';
+import ProjectsStack from '../components/ProjectsStack';
 
 const OrganizationProjects = () => {
     const  { id } = useParams();
@@ -31,10 +33,15 @@ const OrganizationProjects = () => {
             navigate(`/organization/${id}/vendors`);
     }
 
-    const [organization, setOrganization] = useState({});
+    const [organizationName, setOrganizationName] = useState();
+    const [role, setRole] = useState();
+    const [newProjects, setNewProjects] = useState([]);
+    const [projectsInProgress, setProjectsInProgress] = useState([]);
+    const [completedProjects, setCompletedProjects] = useState([]);
    
     // use axios to get organization details
     const fetchOrganizationProjectDetails = async () => {
+        console.log("sth")
         setLoading(true);
         try {
             const response = await axios.get(
@@ -49,9 +56,11 @@ const OrganizationProjects = () => {
 
             )
 
-            console.log(response);
-            setOrganization(response.data.data);
-            console.log(organization)
+            console.log(response.data.data);
+            setOrganizationName(response.data.data.name);
+            setRole(response.data.data.role)
+            setNewProjects(response.data.data.projects)
+            console.log(organizationName)
         } catch (error) {
             console.log(error.response.data.message);
             // window.location.href = '/organizations';
@@ -66,40 +75,39 @@ const OrganizationProjects = () => {
     return (
         <>  
             <TitleBar 
-                title="organization name"
-                subtitle="projects"
+                title={organizationName}
+                subtitle="Employees"
             >
                 <NavMenu menuItems={menuItems} handleMenuSelect={handleMenuSelect}/>
             </TitleBar>
+            <Box 
+                display= 'flex'
+                flexGrow={1}
+                marginBottom={2}
+            >
+                    <Typography 
+                        variant='h5'
+                        sx={{ fontWeight: 'bold' }}
+                    >
+                        Your Projects
+                    </Typography>
+            </Box>
             <Grid  
                 container 
                 spacing={3}
-                columns={{ xs: 12, sm: 6, md: 3 }}
-                paddingTop={2}
             >
-            {organization?.projects?.map((project, idx) => (
-                <Grid 
-                    item
-                    key={`project-${idx}`}
-                    xs={12}
-                    sm={6}
-                    md={3}
-                >
-                    <SummaryCard
-                        title={project.name}
-                        count={0}
-                        name="Tasks"
-                        onClick={() => navigate(`/project/${project.id}`)}
-                    >
-                        <WorkIcon fontSize='large' color='primary' />
-                        {/* <ListItemIcon fontSize='small' color='primary' /> */}
-                    </SummaryCard>
+                <Grid item xs={12} md={4}>
+                    <ProjectsStack title="New Projects" projects={newProjects} />
                 </Grid>
-            ))}
+                <Grid item xs={12} md={4}>
+                    {/* <ProjectsStack title="Projects in Progress" projects={projectsInProgress} /> */}
+                </Grid>
+                <Grid item xs={12} md={4}>
+                    {/* <ProjectsStack title="Completed Projects" projects={completedProjects} /> */}
+                </Grid>
             </Grid>
         </>
-        
-        
+          
     );
 };
 

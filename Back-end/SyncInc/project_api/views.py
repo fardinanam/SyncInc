@@ -5,6 +5,7 @@ from rest_framework import status
 from .models import *
 from .serializer import *
 from .utils import *
+from datetime import date
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -16,7 +17,7 @@ def get_organizations(request):
         designations = user.designations.all()
         organizations = [designation.organization for designation in designations]
         serializer = OrganizationSerializer(organizations, many=True)
-        print(serializer.data)
+        
         return Response({
             'message': f'Organizations of {user.username} fetched successfully',
             'data': serializer.data
@@ -64,12 +65,13 @@ def get_organization_projects(request, organization_id):
         user = User.objects.get(username=username)
 
         organization = Organization.objects.get(id=organization_id)
-        serializer = OrganizationProjectsSerializer(organization)
-        print(serializer.data)
 
-        # check if the user is an admin of the organization
+        serializer = OrganizationProjectsSerializer(organization)
+        data = serializer.data
         designation = user.designations.filter(organization=organization).first()
-        # for designation in designations:
+        role = designation.role
+        data['role'] = role
+
 
         if not designation:
             return Response({
@@ -184,7 +186,7 @@ def create_organization(request):
         data['username'] = username
         
         serializer = OrganizationSerializer(data=data)
-        print('before validation')
+
         if not serializer.is_valid():
             print(serializer.errors)
             return Response({
@@ -233,6 +235,7 @@ def create_project(request, organization_id):
         )
         data['client'] = client.id
         serializer = ProjectSerializer(data=data)
+
         
         if not serializer.is_valid():
             return Response({
@@ -241,7 +244,7 @@ def create_project(request, organization_id):
             }, status=status.HTTP_400_BAD_REQUEST)
             
         project = serializer.save()
-        print(serializer.data)
+
         return Response({
             'message': 'Project created successfully',
             'data': serializer.data
@@ -272,8 +275,6 @@ def get_employee_suggestions(request, organization_id):
         
         
         employees = User.objects.exclude(designation__organization=organization).values( 'id','username', 'email')
-
-        print(employees)
 
         return Response({
             'message': f'New member suggestion for the organization {organization.name}',
@@ -327,8 +328,6 @@ def add_employee(request, organization_id):
 
         organization = Organization.objects.get(id=organization_id)
         designation = user.designations.filter(organization=organization).first()
-
-        print(request)
 
         if designation and designation.role != 'Admin':
             return Response({
@@ -400,6 +399,7 @@ def add_vendor(request, organization_id):
 @permission_classes([IsAuthenticated])
 def get_project(request, project_id):
     try:
+
         username = get_data_from_token(request, 'username')
         user = User.objects.get(username=username)
 
@@ -424,8 +424,9 @@ def get_project(request, project_id):
             }, status=status.HTTP_401_UNAUTHORIZED)
         
         serializer = ProjectDetailsSerializer(project)
+        
         serializer.data['project_role'] = project_role
-
+        
         return Response({
             'message': 'Project details',
             'data': {

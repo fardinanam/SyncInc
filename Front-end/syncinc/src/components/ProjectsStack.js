@@ -4,8 +4,11 @@ import Button from '@mui/material/Button';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { Grid, Stack, Typography } from '@mui/material';
 import ProjectCard from './ProjectCard';
+import { useNavigate } from 'react-router-dom';
 
 const ProjectsStack = ({title, projects}) => {
+    
+    const navigate = useNavigate()
     console.log(projects)
 
     return (
@@ -22,7 +25,7 @@ const ProjectsStack = ({title, projects}) => {
                         name={project.name}
                         client={project.client}
                         description={project.description}
-                    
+                        onClick={() => navigate(`/project/${project.id}`)}
                     />
                     
                 ))}

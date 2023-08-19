@@ -23,7 +23,7 @@ const AddProject = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        // console.log("something in 26")
         const config = {
             headers: {
                 'Authorization': 'Bearer ' + authTokens?.access,
@@ -46,11 +46,14 @@ const AddProject = () => {
                 body ,
                 config
             )
-            navigate(`/organization/${id}/projects`);
+            console.log(response)
+            const project_id = response.data.data.id
+            navigate(`/project/${project_id}`);
             notifyWithToast("success", "Project created successfully")
             
         } catch (error) {
-            notifyWithToast("error", error.response.data.message)
+            console.log(error)
+            notifyWithToast("error", error.response.data?.message)
         }
         setLoading(false);
 

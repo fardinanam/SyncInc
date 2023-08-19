@@ -43,7 +43,22 @@ class OrganizationSerializer(serializers.ModelSerializer):
         ).save()
         return organization
 
+class ProjectSummarySerializer(serializers.ModelSerializer):
+    task_count = serializers.SerializerMethodField()
+    client = serializers.SerializerMethodField()
+    class Meta:
+        model = Project
+        fields = ['id', 'name', 'description', 'client', 'start_time', 'end_time', 'task_count']
+
+    def get_task_count(self, obj):
+        return obj.usertasks.count() + obj.vendortasks.count()
+    def get_client(self, obj):
+        return obj.client.name
+    
+
+    
 class OrganizationProjectsSerializer(serializers.ModelSerializer):
+    projects = ProjectSummarySerializer(many=True)
     class Meta:
         model = Organization
         fields = ['id', 'name', 'projects']
@@ -54,6 +69,9 @@ class OrganizationProjectsSerializer(serializers.ModelSerializer):
         # up to a depth of 1 level. In this case, if the projects field is a ForeignKey or 
         # OneToOneField to another model, the related object's data will be included in the 
         # serialized output.
+    
+
+
 class EmployeeSerializer(serializers.ModelSerializer):
     expertise = serializers.SerializerMethodField()
     completed_tasks = serializers.SerializerMethodField()
@@ -128,7 +146,7 @@ class OrganizationVendorSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ['name', 'organization', 'client', 'description']
+        fields = ['id', 'name', 'organization', 'client', 'description']
         
     def validate(self, data):
         valid_data = super().validate(data)
@@ -172,13 +190,16 @@ class ProjectDetailsSerializer(serializers.ModelSerializer):
     def get_project_leader(self, obj):
         project_leader = obj.project_leader
         # return username, first_name, last_name, profile_pic url
-        return {
-            'username': project_leader.username,
-            'email': project_leader.email,
-            'first_name': project_leader.first_name,
-            'last_name': project_leader.last_name,
-            'profile_picture': project_leader.profile_picture.url if project_leader.profile_picture else None
-        } 
+        if project_leader:
+            return {
+                'username': project_leader.username,
+                'email': project_leader.email,
+                'first_name': project_leader.first_name,
+                'last_name': project_leader.last_name,
+                'profile_picture': project_leader.profile_picture.url if project_leader.profile_picture else None
+            } 
+        
+        return None
     
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
