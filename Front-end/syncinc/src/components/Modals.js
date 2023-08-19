@@ -22,6 +22,7 @@ import SearchSuggestion from "./SearchSuggestion";
 import { IconButton } from "@mui/material";
 import ClearIcon from '@mui/icons-material/Clear';
 import AutocompleteTagInput from "./AutocompleteTagInput";
+import AutocompleteUserInput from "./AutocompleteUserInput";
 
 
 const style = {
@@ -116,25 +117,31 @@ const AddMemberModal = ( props ) => {
             const body = JSON.stringify({
                 'id': selectedOption.id,
             })
+
+            let url = ''
+
+            if (memberType === "project_leader") {
+                url = `${baseUrl}assign_project_leader/${id}/`
+            } else {
+                url = `${baseUrl}add_${memberType}/${id}/`
+            }
+
             try {
                 const response = await axios.post(
-                    `${baseUrl}add_${memberType}/${id}/`,
+                    url,
                     body ,
                     config
                 )
-                console.log(response.data.data);
+
                 handleClose(response.data.data);
-                console.log(memberType)
-                console.log(memberType+" added successfully")
+
                 notifyWithToast("success",memberType+" added successfully");
             } catch (error) {
                 handleClose();
                 notifyWithToast("error","Something went wrong");
                 
             }
-        }
-        console.log(selectedOption);
-        
+        }        
     }
         return (
             <>
@@ -169,28 +176,18 @@ const AddMemberModal = ( props ) => {
                                 </Grid>
                             </Grid>
                             :
-                            <Autocomplete
-                                options={filteredOptions}
-                                getOptionLabel={(option) => option.username}
-                                onChange={handleSelectedOption}
-                                renderOption={(props, option) => (
-                                    <Grid container component='li' {...props}>
-                                        <SearchSuggestion suggestion={option} />
-                                    </Grid>
-                                )}
-                                freeSolo
-                                renderInput={ (params) => {
-                                    return (<TextField 
-                                        {...params} 
-                                        label="Search Member" 
-                                        variant="outlined"
-                                        onChange={handleSearchChange}
-                                    />)
-                                } }
+                            <AutocompleteUserInput
+                                label="Search Member"
+                                filteredOptions={filteredOptions}
+                                onChangeAutocomplete={handleSelectedOption}
+                                onChangeInput={handleSearchChange}
                             />
                         }
                         <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-                            Invite
+                            {memberType === "project_leader" ?
+                                "Assign"
+                            : "Invite"
+                            }
                         </Button>
                     </Box>
                 </Box>
@@ -1200,25 +1197,12 @@ const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
                             </Grid>
                         </Grid>
                         :
-                        <Autocomplete
-                            options={filteredOptions}
-                            getOptionLabel={(option) => option.username}
-                            onChange={handleSelectedOption}
+                        <AutocompleteUserInput
+                            label="Search Member"
+                            filteredOptions={filteredOptions}
+                            onChangeAutocomplete={handleSelectedOption}
+                            onChangeInput={handleSearchChange}
                             onFocus={handleSearchChange}
-                            renderOption={(props, option) => (
-                                <Grid container component='li' {...props}>
-                                    <SearchSuggestion suggestion={option} />
-                                </Grid>
-                            )}
-                            freeSolo
-                            renderInput={ (params) => {
-                                return (<TextField 
-                                    {...params} 
-                                    label="Search Member" 
-                                    variant="outlined"
-                                    onChange={handleSearchChange}
-                                />)
-                            } }
                         />
                     }
                     <Button

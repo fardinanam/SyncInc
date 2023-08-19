@@ -14,6 +14,7 @@ urlpatterns = [
 
     path('get_employee_suggestions/<int:organization_id>/', views.get_employee_suggestions, name='employee_suggestions'),
     path('get_vendor_suggestions/<int:organization_id>/', views.get_vendor_suggestions, name='vendor_suggestions'),
+    path('get_project_leader_suggestions/<int:project_id>/', views.get_project_leader_suggestions, name='project_leder_suggestions'),
     path('add_employee/<int:organization_id>/', views.add_employee, name='add_employee'),
     path('add_vendor/<int:organization_id>/', views.add_vendor, name='add_vendor'),
   
@@ -23,4 +24,7 @@ urlpatterns = [
     path('user_tasks/<int:project_id>/', views.get_user_tasks, name='user_tasks'),
     path('vendor_tasks/<int:project_id>/', views.get_vendor_tasks, name='vendor_tasks'),
     path('assign_user_task/', views.assign_user_task, name='assign_task'),
+    path('assign_project_leader/<int:project_id>/', views.assign_project_leader, name='assign_project_leader'),
+    path('get_all_tasks_of_user/', views.get_all_tasks_of_user, name='get_all_tasks_of_user'),
+    path('get_user_task/<int:task_id>/', views.get_user_task, name='get_task'),
 ]

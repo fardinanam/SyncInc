@@ -448,6 +448,8 @@ def get_project(request, project_id):
             project_role = 'Project Leader'
         elif designation and designation.role == 'Admin':
             project_role = 'Admin'
+        elif designation and designation.role == 'Employee':
+            project_role = 'Employee'
         else:
             return Response({
                 'message': 'You are not authorized to view this project',
@@ -540,14 +542,15 @@ def get_user_tasks(request, project_id):
 
         # check if the user is an admin of the organization or project leader
         designation = user.designations.filter(organization=project.organization).first()
-        
-        if not designation or not (designation.role == 'Admin' or project.project_leader == user):
+
+        tasks = UserTask.objects.filter(project=project)
+
+        if not ((designation and designation.role == 'Admin') or project.project_leader == user or tasks.filter(assignee=user).exists()):
             return Response({
                 'message': 'You are not authorized to view this project',
                 'data': None
             }, status=status.HTTP_401_UNAUTHORIZED)
 
-        tasks = UserTask.objects.filter(project=project)
         serializer = GetUserTaskSerializer(tasks, many=True)
 
         return Response({
@@ -576,14 +579,19 @@ def get_vendor_tasks(request, project_id):
 
         # check if the user is an admin of the organization or project leader
         designation = user.designations.filter(organization=project.organization).first()
-        
-        if not designation or not (designation.role == 'Admin' or project.project_leader == user):
+
+        tasks = VendorTask.objects.filter(project=project)
+
+        # check if the user is an admin of the organization or project leader
+        # or a member of the project
+        has_user_task = UserTask.objects.filter(project=project, assignee=user).exists()
+
+        if not ((designation and designation.role == 'Admin') or project.project_leader == user or has_user_task):
             return Response({
                 'message': 'You are not authorized to view this project',
                 'data': None
             }, status=status.HTTP_401_UNAUTHORIZED)
 
-        tasks = VendorTask.objects.filter(project=project)
         serializer = VendorTaskSerializer(tasks, many=True)
 
         return Response({
@@ -658,13 +666,163 @@ def assign_user_task(request):
                 'data': None
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        task.assignee = user
+        assignee = User.objects.get(id=data['assignee'])
+
+        if not assignee:
+            return Response({
+                'message': 'User not found',
+                'data': None
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        task.assignee = assignee
+        task.status = 'In Progress'
         task.save()
 
         serializer = GetUserTaskSerializer(task)
 
         return Response({
             'message': 'Task assigned successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_project_leader_suggestions(request, project_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        project = Project.objects.get(id=project_id)
+        # check if the user is an Admin of the organization of the project
+        designation = user.designations.filter(organization=project.organization).first()
+
+        if not designation or designation.role != 'Admin':
+            return Response({
+                'message': 'You are not authorized to get project leader suggestion for this project',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        # get all the employees of the organization
+        employees = User.objects.filter(designation__organization=project.organization).values('id','username', 'email')
+
+        return Response({
+            'message': 'Project leader suggestion fetched successfully',
+            'data': employees
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def assign_project_leader(request, project_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        project = Project.objects.get(id=project_id)
+        # check if the user is an Admin of the organization of the project
+        designation = user.designations.filter(organization=project.organization).first()
+
+        if not designation or designation.role != 'Admin':
+            return Response({
+                'message': 'You are not authorized to assign project leader for this project',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        data = request.data
+        project_leader_id = data['id']
+        project_leader = User.objects.get(id=project_leader_id)
+
+        if not project_leader:
+            return Response({
+                'message': 'User not found',
+                'data': None
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        project.project_leader = project_leader
+        project.save()
+
+        serializer = EmployeeSerializer(project_leader)
+
+        return Response({
+            'message': 'Project leader assigned successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_all_tasks_of_user(request):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        # get all the tasks assigned to the user
+        tasks = UserTask.objects.filter(assignee=user)
+
+        serializer = GetUserTaskSerializer(tasks, many=True)
+
+        return Response({
+            'message': 'Tasks fetched successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_task(request, task_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        # get all the tasks assigned to the user
+        task = UserTask.objects.get(id=task_id)
+
+        role = ''
+        if task.assignee == user:
+            role = 'Assignee'
+        elif task.project.project_leader == user:
+            role = 'Project Leader'
+        elif task.project.organization.designations.filter(employee=user).first().role == 'Admin':
+            role = 'Admin'
+
+
+        if role == '':
+            return Response({
+                'message': 'You are not authorized to view this task',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        serializer = GetUserTaskSerializer(task)
+        serializer.data['role'] = role
+        print(serializer.data)
+        
+        return Response({
+            'message': 'Task fetched successfully',
             'data': serializer.data
         }, status=status.HTTP_200_OK)
     

@@ -12,6 +12,7 @@ import EditButton from "../components/EditButton"
 import { EditProfilePicModal, EditPersonalInfoModal, EditAddressModal, ChangePasswordModal, AddTagModal } from "../components/Modals"
 import AddRounded from '@mui/icons-material/AddRounded';
 import { useLoading } from "../context/LoadingContext"
+import ListChips from "../components/ListChips";
 
 const sectionStyle = {
     borderRadius: 2,
@@ -336,14 +337,8 @@ const Profile = () => {
                     >
                         {profileInfo.tags?.length === 0 
                             ? <Typography>No tag</Typography>
-                            : profileInfo.tags?.map((tag, index) => (
-                                <Chip 
-                                    key={`{tag}-${index}`}
-                                    variant="outlined"
-                                    color="success"
-                                    label={tag}                   
-                                />
-                            ))
+                            : <ListChips chipData={profileInfo.tags} />
+                            
                         }
                     </Stack>
                 </Box>

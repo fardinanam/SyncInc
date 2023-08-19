@@ -1,32 +1,31 @@
-import {  useEffect, useState } from 'react';
+import {  useEffect, useState, useContext } from 'react';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import BorderColorRoundedIcon from '@mui/icons-material/BorderColorRounded';
-import { Collapse, Divider, IconButton, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography, Button, Box, Tooltip } from '@mui/material';
+import { Collapse, Divider, IconButton, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography, Button, Box, Chip } from '@mui/material';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { AssignTaskModal } from './Modals';
 import ListChips from './ListChips';
 import dayjs from 'dayjs';
-import { baseUrl } from '../utils/config';
 import UserInfo from './UserInfo';
 import { AddTaskModal } from './Modals';
 
 const CollapsibleTaskTable = ({title, initialTasks, role, organization_id, canAddTask}) => {
     const [open, setOpen] = useState(true);
-    const [modalOpen, setModalOpen] = useState(false);
+    const [isAssignTaskModalOpen, setIsAssignTaskModalOpen] = useState(false);
     const [modalData, setModalData] = useState({});
     const [tasks, setTasks] = useState([]);
     const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
 
     const handleAssignTask = (task) => {
         setModalData(task);
-        setModalOpen(true);
+        setIsAssignTaskModalOpen(true);
     }
 
     const handleModalClose = (updatedTask) => {
         setModalData({});
-        setModalOpen(false);
+        setIsAssignTaskModalOpen(false);
 
         if (updatedTask) {
             const taskIdx = tasks.findIndex(task => task.id === updatedTask.id);
@@ -87,31 +86,46 @@ const CollapsibleTaskTable = ({title, initialTasks, role, organization_id, canAd
                 </Typography>
                 {
                     canAddTask && String(role).toLowerCase() === "project leader" &&
-                    <>
-                        <Tooltip title="Add Task">
-                            <IconButton
-                                color="success"
-                                onClick={() => setIsAddTaskModalOpen(true)}
-                            >
-                                <AddRoundedIcon />
-                            </IconButton>
-                        </Tooltip>
+                    <Box 
+                        display='flex'
+                        flexDirection='column'
+                        justifyContent='center'
+                    >
+                        <Button
+                            color="primary"
+                            variant="outlined"
+                            size="small"
+                            onClick={() => setIsAddTaskModalOpen(true)}
+                            sx={{
+                                height: '2rem',
+                                marginRight: '1rem',
+                            }}
+                        >
+                            <AddRoundedIcon />
+                            Task
+                        </Button>
 
                         <AddTaskModal 
                             isOpen={isAddTaskModalOpen}
                             onClose={handleAddTaskModalClose}
                             taskType={"User"}
                         />
-                    </>
+                    </Box>
                 }
             </Box>
                 <Collapse
                     in={open}
                     timeout="auto"
                     unmountOnExit
+                    sx={{
+                        overflow: 'auto'
+                    }}
                 > 
                     <Divider />
-                    <Table sx={{ minWidth: 650}} aria-label="simple table">
+                    { tasks.length > 0 ?
+                    <Table sx={{ 
+                        minWidth: 650,
+                    }} aria-label="simple table">
                     <TableHead>
                         <TableRow>
                             <TableCell  >Task Name</TableCell>
@@ -122,6 +136,8 @@ const CollapsibleTaskTable = ({title, initialTasks, role, organization_id, canAd
                                 String(role).toLowerCase() === "project leader" && 
                                 <TableCell>Actions</TableCell>
                             }
+                            <TableCell >status</TableCell>
+
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -156,7 +172,7 @@ const CollapsibleTaskTable = ({title, initialTasks, role, organization_id, canAd
                                 }
                             </TableCell>
                             <TableCell  >{task.deadline? 
-                                dayjs(task.deadline).format('DD/MM/YYYY') : "No Deadline"}
+                                dayjs(task.deadline).format('DD MMM, YYYY') : "No Deadline"}
                             </TableCell>
                             {String(role).toLowerCase() === "project leader" && 
                                 <TableCell
@@ -166,12 +182,26 @@ const CollapsibleTaskTable = ({title, initialTasks, role, organization_id, canAd
                                     <IconButton color='error'><DeleteRoundedIcon color='error' fontSize="small"/></IconButton>
                                 </TableCell>
                             }
+                            <TableCell  >
+                                <Chip size='small' label={task.status} color={task.status === "Completed" ? "success" : task.status=="Overdue" || task.status=="Rejected" ? "error" : "warning"} />
+                            </TableCell>
                         </TableRow>
                         ))}
                     </TableBody>
-                </Table>
+                </Table> :
+                <Box
+                    display='flex'
+                    justifyContent='center'
+                    alignItems='center'
+                    height='10rem'
+                >
+                    <Typography variant='h6' color='text.secondary'>
+                        No Task Assigned
+                    </Typography>
+                </Box>
+                }
                 <AssignTaskModal
-                    isOpen={modalOpen}
+                    isOpen={isAssignTaskModalOpen}
                     task={modalData}
                     organization_id={organization_id}
                     onClose={handleModalClose}

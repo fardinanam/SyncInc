@@ -5,10 +5,10 @@ import { baseUrl } from "../utils/config";
 import AuthContext from "../context/AuthContext";
 import notifyWithToast from "../utils/toast";
 import axios from "axios";
-import { Box, CssBaseline, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Chip, CssBaseline, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import CollapsibleTaskTable from "../components/CollapsibleTaskTable";
-import { AddTaskModal } from "../components/Modals";
+import { AddMemberModal, AddTaskModal } from "../components/Modals";
 import TitleBar from "../components/TitleBar";
 import UserInfo from "../components/UserInfo";
 
@@ -21,6 +21,7 @@ const ProjectDetails = () => {
     const [userTasks, setUserTasks] = useState([]);
     const [vendorTasks, setVendorTasks] = useState([]);
     const [role, setRole] = useState("");
+    const [openAssignProjectLeaderModal, setOpenAssignProjectLeaderModal] = useState(false);
 
     const fetchProjectDetails = async () => {
         const config = {
@@ -60,6 +61,16 @@ const ProjectDetails = () => {
         setLoading(false);
     }
 
+    const handleProjectLeaderModalClose = (project_leader) => {
+        if (project_leader) {
+            setProject(prevState => ({
+                ...prevState,
+                project_leader: project_leader
+            }));
+        }
+        setOpenAssignProjectLeaderModal(false);
+    }
+
     useEffect(() => {
         fetchProjectDetails();
     }, []);
@@ -75,34 +86,72 @@ const ProjectDetails = () => {
                     display={"flex"}
                     alignItems={"center"}
                 >
-                    
                     <Stack direction="row" spacing={1}>
-                        <Box 
-                            display="flex"
-                            flexDirection="column"
-                            alignItems="center"
-                            justifyContent="center"
-                        >
-                        <UserInfo
-                            sx={{
-                                width: '3rem',
-                                height: '3rem'
-                            }}
-                            userInfo={project.project_leader}
-                        />
-                        </Box>
-                        <Stack 
-                            direction="column"
-                            justifyContent="center"
-                        >
-                            <Typography fontWeight="light">
-                                Project Leader
-                            </Typography>
-                            <Typography variant="subtitle2">
-                                {project.project_leader? '@'+project.project_leader.name : "N/A"}
-                            </Typography>
-                        </Stack>
-                    </Stack>
+                    {project?.project_leader ?
+                        <>
+                            <Box 
+                                display="flex"
+                                flexDirection="column"
+                                alignItems="center"
+                                justifyContent="center"
+                            >
+                            <UserInfo
+                                sx={{
+                                    width: '3rem',
+                                    height: '3rem'
+                                }}
+                                userInfo={project.project_leader}
+                            />
+                            </Box>
+                            <Stack 
+                                direction="column"
+                                justifyContent="center"
+                            >
+                                <Typography fontWeight="light">
+                                    Project Leader
+                                </Typography>
+                                <Typography variant="subtitle2">
+                                    @{project.project_leader?.username}
+                                </Typography>
+                            </Stack>
+                        </> :
+                        <>
+                            {
+                            
+                                role === "Admin" ?
+                                <>
+                                <Button 
+                                    size="small" 
+                                    variant="contained"
+                                    onClick={() => setOpenAssignProjectLeaderModal(true)}
+                                >
+                                    <AddRoundedIcon />
+                                    Project Leader
+                                </Button> 
+                                <AddMemberModal 
+                                    id={id}
+                                    memberType="project_leader"
+                                    open={openAssignProjectLeaderModal}
+                                    handleClose={handleProjectLeaderModalClose}
+                                />
+                                </>
+                                :
+                                <Stack 
+                                direction="column"
+                                justifyContent="center"
+                                >
+                                    <Typography fontWeight="light">
+                                        Project Leader
+                                    </Typography>
+                                    <Typography variant="subtitle2">
+                                        <Chip label="Not Assigned" color="error" />
+                                    </Typography>
+                                </Stack>
+                            }
+                        </>
+                    }
+                    </Stack> 
+
                 </Box>
             </TitleBar>
             <CollapsibleTaskTable 
