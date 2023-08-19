@@ -9,9 +9,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
 
         token['username'] = user.username
-        token['email'] = user.email
         token['first_name'] = user.first_name
         token['last_name'] = user.last_name
+
+        try:
+            token['profile_picture'] = user.profile_picture.url 
+        except Exception as e:
+            print(e)           
 
         return token
 
@@ -44,6 +48,7 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=254)
 
 class ProfileInfoSerializer(serializers.ModelSerializer):
+    tags = serializers.StringRelatedField(many=True)
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name', 'last_name', 'phone', 'birth_date', 'address', 'profile_picture', 'tags']
@@ -53,6 +58,9 @@ class ProfileInfoSerializer(serializers.ModelSerializer):
             'email_token': {'write_only': True},
             'is_email_verified': {'read_only': True},    
         }
+
+    def get_tags(self, obj):
+        return obj.tags.values_list('name', flat=True)
 
 class ProfilePicSerializer(serializers.ModelSerializer):
     class Meta:
@@ -96,6 +104,17 @@ class ResetPasswordSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'email_token', 'password']
+
+    def validate(self, data):
+        valid_data = super().validate(data)
+        username = self.initial_data.get("username")
+        given_email_token = self.initial_data.get("email_token")
+        user = User.objects.get(username=username)
+
+        if user.email_token != given_email_token:
+            raise serializers.ValidationError("Email token does not match")
+        
+        return valid_data
 
     # update the password and save it to the database
     def update(self, instance, validated_data):

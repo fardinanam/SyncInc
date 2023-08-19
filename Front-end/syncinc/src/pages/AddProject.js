@@ -4,121 +4,148 @@ import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import MainLayout from "../components/MainLayout";
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { isValidEmail, isValidNumber } from "../utils/validators";
+import { baseUrl } from "../utils/config";
+import AuthContext from '../context/AuthContext';
+import axios from "axios";
+import AddItemLayout from "../components/AddItemLayout";
+import notifyWithToast from "../utils/toast";
+import { useLoading } from "../context/LoadingContext";
+import { useState, useEffect } from "react";
+import ErrorPage from "./ErrorPage";
 
 const AddProject = () => {
+    const { authTokens } = useContext(AuthContext);
+    const { id } = useParams();
+    const { setLoading } = useLoading();
     const navigate = useNavigate();
+    const [role, setRole] = useState();
 
-    return(
-        <>
-            <Box
-                component="form"
-                noValidate
-                sx={{ 
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                }}
+    const getRole = (async () => {
+        const config = {
+            headers: {
+                'Authorization': 'Bearer ' + authTokens?.access,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+        };
+        try {
+            const response = await axios.get(
+                `${baseUrl}get_organization_role/${id}/`,
+                config
+            )
+            console.log(response.data.data)
+            setRole(response.data.data)
+        } catch (error) {
+            console.log(error)   
+        }
+    })
+
+    useEffect(() => {
+        getRole();
+    }, []);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        // console.log("something in 26")
+        const config = {
+            headers: {
+                'Authorization': 'Bearer ' + authTokens?.access,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+        };
+
+        const body = JSON.stringify({
+            'name': e.target.project_name.value,
+            'organization': id,
+            'client': e.target.client_name.value,
+            'description': e.target.description.value,
+        })
+        setLoading(true);
+        try {
+            console.log(e.target.project_name.value);
+            const response = await axios.post(
+                `${baseUrl}create_project/${id}/`,
+                body ,
+                config
+            )
+            console.log(response)
+            const project_id = response.data.data.id
+            navigate(`/project/${project_id}`);
+            notifyWithToast("success", "Project created successfully")
+            
+        } catch (error) {
+            console.log(error)
+            notifyWithToast("error", error.response.data?.message)
+        }
+        setLoading(false);
+
+    };
+    {
+        if(role !== "Admin") {
+            {console.log(role)}
+            return <ErrorPage />
+        } else {
+            return(
+                <AddItemLayout
+                    title="Add Project"
+                    onClose={() => navigate(`/organization/${id}`)}
                 >
-                <Grid container mt={10}>
-                    <Grid item xs={0} sm={3} />
-                    <Grid item xs={12} sm={6}>
-                        <Grid container spacing={4}>
-                            <Grid item xs={12} sm={12}>
-                            <Grid container>
-                                <Grid item xs={1} sm={2} />
-                                <Grid item xs={10} sm={8} >
-                                    <Typography 
-                                        sx = {{
-                                            fontWeight: 'bold'
-                                        }} 
-                                        align="center"
-                                        variant="h5" 
-                                    >
-                                    Add a New Project
-                                    </Typography>
-                                </Grid>
-                                <Grid item xs={1} sm={2}>
-                                    <Box 
-                                        sx={{
-                                            textAlign: 'right',
-                                            verticalAlign: 'middle',
-                                        }}
-                                    >
-                                        <Button color="error" onClick={() => navigate('/projects')}>
-                                            <CloseRoundedIcon />
-                                        </Button>
-                                    </Box>
-                                </Grid>
-                            </Grid>
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    name="project_name"
-                                    label="Project Name"
-                                    required
-                                    fullWidth
-                                    id="project_name"
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    name="client_name"
-                                    label="Client Name"
-                                    required
-                                    fullWidth
-                                    id="client_name"
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    name="contact_number"
-                                    label="Contact Number"
-                                    required
-                                    fullWidth
-                                    id="contact_number"
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    name="contact_email"
-                                    label="Contact Email"
-                                    required
-                                    fullWidth
-                                    id="contact_email"
-                                />
-                            </Grid>
-                            <Grid item sm={12}>
-                                <TextField
-                                    name="description"
-                                    label="Description"
-                                    required
-                                    fullWidth
-                                    multiline
-                                    rows={10}
-                                    id="description"
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={12}>
-                                <Box 
-                                    sx={{
-                                        display: 'flex',
-                                        justifyContent: 'end',
-                                    }}
-                                >
-                                    <Button variant="contained" color="success">Save</Button>
-                                    {/* <Button variant="contained" color="secondary">Cancel</Button> */}
-                                </Box>
-                            </Grid>
+                    <Grid container
+                            spacing={2}
+                            component="form"
+                            onSubmit={handleSubmit}
+                    >
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                name="project_name"
+                                label="Project Name"
+                                required
+                                fullWidth
+                                id="project_name"
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                name="client_name"
+                                label="Client Name"
+                                required
+                                fullWidth
+                                id="client_name"
+                            />
+                        </Grid>
+                        <Grid item sm={12}>
+                            <TextField
+                                name="description"
+                                label="Description"
+                                required
+                                fullWidth
+                                multiline
+                                rows={10}
+                                id="description"
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={12}>
+                            <Box 
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'end',
+                                }}
+                            >
+                                <Button variant="contained" color="success" type="submit">Save</Button>
+                                {/* <Button variant="contained" color="secondary">Cancel</Button> */}
+                            </Box>
                         </Grid>
                     </Grid>
-                    <Grid item xs={0} sm={3} />
-                </Grid>
-            </Box>
-        </>
-    )
+                </AddItemLayout>
+            )
+        }
+    }
+    
 }
 
 export default AddProject;

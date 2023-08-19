@@ -35,7 +35,7 @@ class Vendor(models.Model):
         blank=True,
     )
 
-    tag = models.ManyToManyField(Tag, blank=True)
+    tags = models.ManyToManyField(Tag, blank=True)
 
     def __str__(self):
         return self.name
@@ -61,7 +61,7 @@ class Designation(models.Model):
 
     employee = models.ForeignKey(
         User, 
-        related_name='designations', # user.designations.all()
+        related_name='designations',
         related_query_name='designation',
         on_delete=models.CASCADE
     )
@@ -145,7 +145,7 @@ class Project(models.Model):
     
     name = models.CharField(max_length=254)
     description = models.TextField(blank=True, null=True)
-    start_time = models.DateTimeField(auto_now_add=True)
+    start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
     deadline = models.DateTimeField(blank=True, null=True)
 
@@ -157,9 +157,16 @@ class Project(models.Model):
         super().clean()
 
     def __str__(self):
-        return self.name
+        return self.name + ' - ' + self.organization.__str__()
     
 class AbstractTask(models.Model):
+    STATUS_CHOICES = [
+        ('Unassigned', 'Unassigned'),
+        ('In Progress', 'In Progress'),
+        ('Submitted', 'Submitted'),
+        ('Completed', 'Completed'),
+        ('Rejected', 'Rejected'),
+    ]
     project = models.ForeignKey(
         Project, 
         related_name='%(class)ss',
@@ -171,11 +178,12 @@ class AbstractTask(models.Model):
         Tag, 
         related_name='%(class)ss',
         related_query_name='%(class)s',
-        blank=True
+        blank=True,
+        null=True
     )
 
     name = models.CharField(max_length=127)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True)
     
     previous_task = models.ForeignKey(
         'self', 
@@ -185,9 +193,11 @@ class AbstractTask(models.Model):
         on_delete=models.SET_NULL
     )
 
+    status = models.CharField(max_length=32, default='Unassigned', choices=STATUS_CHOICES)
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
     deadline = models.DateTimeField()
+    rating = models.IntegerField(blank=True, null=True)
 
     def clean(self):
         if self.previous_task and self.previous_task.project != self.project:
@@ -197,7 +207,7 @@ class AbstractTask(models.Model):
         super().clean()
 
     def __str__(self):
-        return self.name
+        return self.name + '-' + self.project.__str__()
 
     class Meta:
         abstract = True
@@ -213,7 +223,6 @@ class UserTask(AbstractTask):
     )
 
     file = models.FileField(upload_to='files/', blank=True)
-    rating = models.IntegerField(blank=True, null=True)
 
     def clean(self):
         if self.assignee and self.assignee not in self.project.organization.employees.all():
@@ -237,7 +246,7 @@ class VendorTask(AbstractTask):
         return super().clean()
 
     def __str__(self):
-        return self.vendor.name + ' - ' + self.task.name
+        return self.vendor.name + '-' + self.task.name
     
 class Message(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)

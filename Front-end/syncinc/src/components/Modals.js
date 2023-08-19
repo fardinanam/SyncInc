@@ -1,9 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
+import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import { Avatar, Input, TextField } from "@mui/material";
+import { Avatar, ToggleButton, Autocomplete, TextField, Checkbox } from "@mui/material";
+import CheckIcon from '@mui/icons-material/Check';
 import { baseUrl } from '../utils/config';
 import AuthContext from '../context/AuthContext';
 import axios from "axios";
@@ -14,8 +17,13 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import notifyWithToast from "../utils/toast";
 import { useLoading } from "../context/LoadingContext";
+import NameAvatar from "./NameAvatar";
+import SearchSuggestion from "./SearchSuggestion";
+import { IconButton } from "@mui/material";
+import ClearIcon from '@mui/icons-material/Clear';
+import AutocompleteTagInput from "./AutocompleteTagInput";
+import AutocompleteUserInput from "./AutocompleteUserInput";
 
-const yesterday = dayjs().subtract(10 * 365, 'day');
 
 const style = {
     position: 'absolute',
@@ -30,6 +38,163 @@ const style = {
     px: 4,
     pb: 3,
 };
+
+
+const AddMemberModal = ( props ) => {
+
+    const { id } = props
+    const { memberType } = props
+
+    const {authTokens} = useContext(AuthContext);
+    const [filteredOptions, setFilteredOptions] = useState([]);
+    const [options, setOptions] = useState([]);
+    const [selectedOption, setSelectedOption] = useState(null);
+    
+    const handleSearchChange = (event) => {
+        const inputText = event.target.value;
+        if (inputText?.trim() !== '') {
+            setFilteredOptions(
+                options.filter(option => option.username.toLowerCase().includes(inputText.toLowerCase()))
+            );
+        } else {
+            setFilteredOptions([])
+        }
+    };
+    
+
+    const handleClose = (member) => {
+        setSelectedOption(null)
+        setFilteredOptions([])
+        props.handleClose(member);
+    }
+    
+    const handleSelectedOption = (event, value) => {
+        setSelectedOption(value);
+        setFilteredOptions([])
+    }
+
+    const fetchSuggestedMembers = async () => {
+        try {
+            console.log("link",`${baseUrl}get_${memberType}_suggestions/${id}`)
+            const response = await axios.get(
+                `${baseUrl}get_${memberType}_suggestions/${id}`,  
+                {
+                    headers: {
+                        'Authorization': 'Bearer ' + authTokens?.access,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                }  
+
+            )
+
+            setOptions(response.data.data);
+        } catch (error) {
+            console.log("error",error.response.data.message);
+            // window.location.href = '/organizations';
+        }
+    }
+
+    const handleClear = () => {
+        setSelectedOption(null)
+        setFilteredOptions([])
+    }
+    useEffect(() => {
+        if (props.open)
+            fetchSuggestedMembers();
+    }, [props.open]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if(selectedOption) {
+            const config = {
+                headers: {
+                    'Authorization': 'Bearer ' + authTokens?.access,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                }
+            };
+            const body = JSON.stringify({
+                'id': selectedOption.id,
+            })
+
+            let url = ''
+
+            if (memberType === "project_leader") {
+                url = `${baseUrl}assign_project_leader/${id}/`
+            } else {
+                url = `${baseUrl}add_${memberType}/${id}/`
+            }
+
+            try {
+                const response = await axios.post(
+                    url,
+                    body ,
+                    config
+                )
+
+                handleClose(response.data.data);
+
+                notifyWithToast("success",memberType+" added successfully");
+            } catch (error) {
+                handleClose();
+                notifyWithToast("error","Something went wrong");
+                
+            }
+        }        
+    }
+        return (
+            <>
+                <Modal
+                    open={props.open}
+                    onClose={() => handleClose()}
+                >
+                <Box 
+                    sx={{ 
+                        ...style,
+                        width: 400 
+                    }}
+                    
+                >
+                    <Typography id="parent-modal-title" variant="h5" align="center">
+                        Add Member
+                    </Typography>
+                    <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    noValidate
+                    sx={{ mt: 1 }}
+                    >
+                    {/* <SearchBar /> */}
+                        {selectedOption?
+                            <Grid container>
+                                <SearchSuggestion suggestion={selectedOption} />
+                                <Grid item md={1}>
+                                <IconButton onClick={handleClear} size="small">
+                                    <ClearIcon />
+                                </IconButton>
+                                </Grid>
+                            </Grid>
+                            :
+                            <AutocompleteUserInput
+                                label="Search Member"
+                                filteredOptions={filteredOptions}
+                                onChangeAutocomplete={handleSelectedOption}
+                                onChangeInput={handleSearchChange}
+                            />
+                        }
+                        <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+                            {memberType === "project_leader" ?
+                                "Assign"
+                            : "Invite"
+                            }
+                        </Button>
+                    </Box>
+                </Box>
+                </Modal>
+            </>
+        )
+    };
 
 const CreateOrgModal = (props) => {
     const { authTokens } = useContext(AuthContext);
@@ -80,23 +245,23 @@ const CreateOrgModal = (props) => {
                     Create Organization
                 </Typography>
                 <Box
-                component="form"
-                onSubmit={handleSubmit}
-                noValidate
-                sx={{ mt: 1 }}
-            >
-                <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    id="organization_name"
-                    label="Organization Name"
-                    name="name"
-                    autoFocus
-                />
-                <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-                    Create
-                </Button>
+                    component="form"
+                    onSubmit={handleSubmit}
+                    noValidate
+                    sx={{ mt: 1 }}
+                >
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="organization_name"
+                        label="Organization Name"
+                        name="name"
+                        autoFocus
+                    />
+                    <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+                        Create
+                    </Button>
                 </Box>
             </Box>
             </Modal>
@@ -348,6 +513,7 @@ const EditPersonalInfoModal = (props) => {
                             >
                                 <DatePicker label="Birth Date" 
                                     defaultValue={dayjs(birthDate)}
+                                    maxDate={dayjs().subtract(10, 'year')}
                                     fullWidth
                                     id="birth_date"
                                     name="birth_date"
@@ -558,11 +724,13 @@ const ChangePasswordModal = (props) => {
             );
 
             if (response.status === 200) {
-                props.handleClose("success", "Password changed successfully!");
+                // props.handleClose();
+                notifyWithToast("success", "Password changed successfully!");
             }
         } catch (error) {
-            props.handleClose("error", error.response.data);
+            notifyWithToast("error", error.response.data.message);
         }
+        props.handleClose();
         setLoading(false);
     }
 
@@ -647,4 +815,419 @@ const ChangePasswordModal = (props) => {
         </Modal>
     )
 }
-export {CreateOrgModal, EditProfilePicModal, EditPersonalInfoModal, EditAddressModal, ChangePasswordModal};
+
+const AddTagModal = ({tags, isOpen, onClose}) => {
+    const [selectedTags, setSelectedTags] = useState([]);
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
+    const {authTokens} = useContext(AuthContext);
+    const { setLoading } = useLoading();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        console.log(selectedTags);
+        const body = JSON.stringify({
+            'tags': selectedTags
+        });
+
+        const config = {
+            headers:{
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + authTokens?.access,
+            }
+        };
+
+        setLoading(true);
+        try {
+            const response = await axios.post(
+                `${baseUrl}set_user_tags/`,
+                body,
+                config
+            );
+
+            if (response.status === 201) {
+                onClose(selectedTags);
+                notifyWithToast("success", "Expertise updated successfully!");
+            }
+        } catch (error) {
+            onClose();
+
+            notifyWithToast("error", error.response.data.message);
+        }
+
+        setLoading(false);
+    }
+
+    const handleChange = (_, value) => {
+        setSelectedTags(value);
+        setIsSubmitDisabled(false);
+    }
+
+    useEffect(() => {
+        setSelectedTags(tags);
+    }, [tags]);
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={() => onClose()}
+        >
+            <Box sx={style}>
+                <Typography id="add-tag-modal-title" variant="h5" align="center">
+                    Edit Tags
+                </Typography>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <AutocompleteTagInput 
+                        defaultTags={tags}
+                        isLoaded={isOpen}
+                        onChange={handleChange}
+                    />
+
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{ mt: 2 }}
+                        disabled={isSubmitDisabled}
+                    >
+                        Save
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+
+const AddTaskModal = ({isOpen, onClose, taskType}) => {
+    const {id} = useParams();
+    const {authTokens} = useContext(AuthContext);
+    const {setLoading} = useLoading();
+    const [deadline, setDeadline] = useState('');
+    const [selectedTags, setSelectedTags] = useState([]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        console.log(selectedTags);
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`
+            }
+        }
+
+        const body = JSON.stringify({
+            name: e.target.task_name.value,
+            description: e.target.task_description.value,
+            tags: selectedTags,
+            deadline: deadline,
+        });
+
+        setLoading(true);
+
+        try {
+            const response = await axios.post(
+                `${baseUrl}create_task/${id}/`, 
+                body, 
+                config
+            );
+
+            if (response.status === 201) {
+                onClose(response.data.data);
+                notifyWithToast('success', 'Task created successfully');
+            }
+        } catch (error) {
+            onClose();
+            notifyWithToast('error', error.response.data.message);
+        }
+        
+        
+        setLoading(false);
+    }
+
+    const handleDeadlineChange = (date) => {
+        setDeadline(date);
+    }
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={() => onClose()}
+        >
+            <Box sx={style}>
+                <Typography id="add-task-modal-title" variant="h5" align="center">
+                    Add {taskType} Task
+                </Typography>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        id="task_name"
+                        label="Task Name"
+                        name="task_name"
+                        required
+                        autoFocus
+                    />
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>    
+                        <DatePicker 
+                            label="Deadline" 
+                            minDate={dayjs().add(1, 'day')}
+                            id="deadline"
+                            name="deadline"
+                            onChange={handleDeadlineChange}
+                            sx={{
+                                width: '100%',
+                            }}
+                            required
+                        />
+                    </LocalizationProvider>
+
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        id="task_description"
+                        label="Task Description"
+                        name="task_description"
+                        multiline
+                        required
+                    />
+                    <AutocompleteTagInput
+                        isLoaded={isOpen}
+                        onChange={(_, value) => setSelectedTags(value)}
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{ mt: 2 }}
+                    >
+                        Save
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+
+    )
+}
+
+const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
+    const {authTokens} = useContext(AuthContext);
+    const [filteredOptions, setFilteredOptions] = useState([]);
+    const [options, setOptions] = useState([]);
+    const [selectedOption, setSelectedOption] = useState(null);
+    const {setLoading} = useLoading();
+    const [isTagSuggestionEnabled, setIsTagSuggestionEnabled] = useState(true);
+    const [matchedTagOptions, setMatchedTagOptions] = useState([]);
+
+    const handleSearchChange = (event) => {
+        const inputText = event.target.value;
+        if (inputText.trim() !== '') {
+            isTagSuggestionEnabled
+            ? setFilteredOptions(
+                matchedTagOptions?.filter(option => option.username.toLowerCase().includes(inputText.toLowerCase()))
+            )
+            : setFilteredOptions(
+                options?.filter(option => option.name.toLowerCase().includes(inputText.toLowerCase()))
+            );
+        } else {
+            isTagSuggestionEnabled
+            ? setFilteredOptions(matchedTagOptions)
+            : setFilteredOptions([]);
+        }
+    };
+
+    const handleSelectedOption = (_, value) => {
+        setSelectedOption(value);
+        setFilteredOptions([])
+    }
+
+    const handleClear = () => {
+        setSelectedOption(null)
+        setFilteredOptions([])
+    }
+
+    const handleClose = (data) => {
+        onClose(data);
+        handleClear();
+    }
+
+    const mactchTags = () => {
+        const taskTags = task?.tags?.map(tag => tag.name);
+        const members = options;
+        const matchedTagOptions = members.filter(member => {
+            const memberExpertises = member.expertise;
+            member.filtered_expertise = [];
+
+            for (let i = 0; i < memberExpertises.length; i++) {
+                if (taskTags.includes(memberExpertises[i])) {
+                    member.filtered_expertise.push(memberExpertises[i]);
+                }
+            }
+
+            if (member.filtered_expertise.length > 0) {
+                return true;
+            }
+
+            return false;
+        });
+
+        setMatchedTagOptions(matchedTagOptions);
+    }
+
+    const fetchMembers = async () => {
+        setLoading(true);
+
+        try {
+            const response = await axios.get(`${baseUrl}organization_employees/${organization_id}/`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authTokens?.access}`
+                    }
+                }
+            );
+
+            if (response.status === 200) {
+                setOptions(response.data.data.employees);
+            }
+        } catch (error) {
+            notifyWithToast('error', error.response.data?.message);
+        }
+        setLoading(false);
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`
+            }
+        }
+
+        const body = JSON.stringify({
+            'id': task.id,
+            'assignee': selectedOption.id,
+        });
+
+        setLoading(true);
+
+        try {
+            const response = await axios.put(
+                `${baseUrl}assign_user_task/`,
+                body,
+                config
+            );
+
+            if (response.status === 200) {
+                handleClose(response.data.data);
+                notifyWithToast('success', 'Task assigned successfully');
+            }
+        } catch (error) {
+            handleClose();
+            notifyWithToast('error', error.response.data.message);
+        }
+
+        setLoading(false);
+    }
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchMembers();
+        }
+    }, [isOpen]);
+
+    useEffect(() => {
+        mactchTags();
+    }, [options]);
+
+    useEffect(() => {
+        setFilteredOptions([]);
+    }, [isTagSuggestionEnabled]);
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={() => {setIsTagSuggestionEnabled(true); handleClose()}}
+        >
+            <Box 
+                sx={style}
+            >
+                <Typography id="assign-task-modal-title" variant="h5" align="center">
+                    Assign Task
+                </Typography>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    noValidate
+                    sx={{ mt: 1 }}
+                >   
+                    <Box 
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                    >
+                    {!selectedOption &&
+                        <>
+                            <Typography fontSize='xs'>Only show employees with matched tags 
+                            </Typography>
+                            <Checkbox 
+                                color="success" 
+                                size="small" 
+                                checked={isTagSuggestionEnabled}
+                                onChange={() => setIsTagSuggestionEnabled(!isTagSuggestionEnabled)}
+                            />
+                        </>
+                    }
+                    </Box>
+                    {selectedOption?
+                        <Grid container>
+                            <SearchSuggestion selected={selectedOption ? true : false} suggestion={selectedOption} />
+                            <Grid item md={1}>
+                            <IconButton onClick={handleClear} size="small">
+                                <ClearIcon />
+                            </IconButton>
+                            </Grid>
+                        </Grid>
+                        :
+                        <AutocompleteUserInput
+                            label="Search Member"
+                            filteredOptions={filteredOptions}
+                            onChangeAutocomplete={handleSelectedOption}
+                            onChangeInput={handleSearchChange}
+                            onFocus={handleSearchChange}
+                        />
+                    }
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{ mt: 2 }}
+                    >
+                        Assign
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+
+export {
+    CreateOrgModal, 
+    AddMemberModal, 
+    EditProfilePicModal, 
+    EditPersonalInfoModal, 
+    EditAddressModal, 
+    ChangePasswordModal, 
+    AddTagModal,
+    AddTaskModal,
+    AssignTaskModal,
+};

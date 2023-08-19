@@ -3,7 +3,6 @@ import jwt_decode from 'jwt-decode';
 import { baseUrl } from '../utils/config';
 import { useNavigate } from 'react-router-dom';
 import { refreshTokenDelay } from '../utils/config';
-import Load from '../components/Load';
 import notifyWithToast from '../utils/toast';
 import { useLoading } from './LoadingContext';
 
@@ -89,6 +88,7 @@ const AuthProvider = ({ children }) => {
     let contextData = {
         authTokens: authTokens,
         user: user,
+        setUser: setUser,
         loginUser: loginUser,
         logoutUser: logoutUser
     }

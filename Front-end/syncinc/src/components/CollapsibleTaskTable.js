@@ -1,0 +1,214 @@
+import {  useEffect, useState, useContext } from 'react';
+import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
+import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
+import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
+import BorderColorRoundedIcon from '@mui/icons-material/BorderColorRounded';
+import { Collapse, Divider, IconButton, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography, Button, Box, Chip } from '@mui/material';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import { AssignTaskModal } from './Modals';
+import ListChips from './ListChips';
+import dayjs from 'dayjs';
+import UserInfo from './UserInfo';
+import { AddTaskModal } from './Modals';
+
+const CollapsibleTaskTable = ({title, initialTasks, role, organization_id, canAddTask}) => {
+    const [open, setOpen] = useState(true);
+    const [isAssignTaskModalOpen, setIsAssignTaskModalOpen] = useState(false);
+    const [modalData, setModalData] = useState({});
+    const [tasks, setTasks] = useState([]);
+    const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
+
+    const handleAssignTask = (task) => {
+        setModalData(task);
+        setIsAssignTaskModalOpen(true);
+    }
+
+    const handleModalClose = (updatedTask) => {
+        setModalData({});
+        setIsAssignTaskModalOpen(false);
+
+        if (updatedTask) {
+            const taskIdx = tasks.findIndex(task => task.id === updatedTask.id);
+
+            if (taskIdx !== -1) {
+                const updatedTasks = [...tasks];
+                updatedTasks[taskIdx] = updatedTask;
+                setTasks(updatedTasks);
+            } else {
+                setTasks(prevState => ([
+                    ...prevState,
+                    updatedTask
+                ]));
+            }
+        }
+    }
+
+    const handleAddTaskModalClose = (newTask) => {
+        setIsAddTaskModalOpen(false);
+        if (newTask) {
+            newTask["tags"] = newTask.tags_details;
+            setTasks(prevState => ([
+                ...prevState,
+                newTask
+            ]));
+        }
+    }
+
+    useEffect(() => {
+        setTasks(initialTasks);
+    }, [initialTasks]);
+
+    return (
+        <Paper 
+            sx={{
+                marginTop: '1.5rem',
+                borderRadius: '0.5rem'
+            }} 
+            elevation={0}
+        >
+            <Box
+                display='flex'
+                justifyContent='space-between'
+                flexDirection='row'
+            >
+                <Typography variant='h6' sx={{ fontWeight: 'bold', paddingTop: '10px', paddingBottom: '10px'}}>
+                    <IconButton
+                        aria-label="expand row"
+                        size="small"
+                        onClick={() => setOpen(!open)}
+                    >
+                        { open 
+                            ? <KeyboardArrowDownRoundedIcon /> 
+                            : <KeyboardArrowRightRoundedIcon />
+                        }
+                    </IconButton>
+                        {title}
+                </Typography>
+                {
+                    canAddTask && String(role).toLowerCase() === "project leader" &&
+                    <Box 
+                        display='flex'
+                        flexDirection='column'
+                        justifyContent='center'
+                    >
+                        <Button
+                            color="primary"
+                            variant="outlined"
+                            size="small"
+                            onClick={() => setIsAddTaskModalOpen(true)}
+                            sx={{
+                                height: '2rem',
+                                marginRight: '1rem',
+                            }}
+                        >
+                            <AddRoundedIcon />
+                            Task
+                        </Button>
+
+                        <AddTaskModal 
+                            isOpen={isAddTaskModalOpen}
+                            onClose={handleAddTaskModalClose}
+                            taskType={"User"}
+                        />
+                    </Box>
+                }
+            </Box>
+                <Collapse
+                    in={open}
+                    timeout="auto"
+                    unmountOnExit
+                    sx={{
+                        overflow: 'auto'
+                    }}
+                > 
+                    <Divider />
+                    { tasks.length > 0 ?
+                    <Table sx={{ 
+                        minWidth: 650,
+                    }} aria-label="simple table">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell  >Task Name</TableCell>
+                            <TableCell  >Tags</TableCell>
+                            <TableCell  >Assignee</TableCell>
+                            <TableCell  >Deadline</TableCell>
+                            {
+                                String(role).toLowerCase() === "project leader" && 
+                                <TableCell>Actions</TableCell>
+                            }
+                            <TableCell >status</TableCell>
+
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {tasks?.sort((taskA, taskB) => {
+                            return dayjs(taskA.deadline).isBefore(dayjs(taskB.deadline))? -1 : 1
+                        }).map((task) => (
+                        <TableRow
+                            key={`task-${task.id}`}
+                            sx={{alignItems:"flex-start"}}
+                        >   
+                            <TableCell  >{task.name}</TableCell>
+                            <TableCell  >
+                                <ListChips chipData={task.tags?.map((value, _) => value.name)} />
+                            </TableCell>
+                            <TableCell >
+                                {task.assignee ? 
+                                    <UserInfo
+                                        userInfo={task.assignee}
+                                        sx={{
+                                            width: '2rem',
+                                            height: '2rem'
+                                        }}
+                                    />
+                                    : role === "Project Leader" ? <Button 
+                                        variant="outlined" 
+                                        size="small"
+                                        onClick={() => handleAssignTask(task)}
+                                    >
+                                        Assign
+                                    </Button> 
+                                    : "Unassigned"
+                                }
+                            </TableCell>
+                            <TableCell  >{task.deadline? 
+                                dayjs(task.deadline).format('DD MMM, YYYY') : "No Deadline"}
+                            </TableCell>
+                            {String(role).toLowerCase() === "project leader" && 
+                                <TableCell
+                                    width='auto'
+                                >
+                                    <IconButton color='primary'><BorderColorRoundedIcon color='primary' fontSize="small"/></IconButton>
+                                    <IconButton color='error'><DeleteRoundedIcon color='error' fontSize="small"/></IconButton>
+                                </TableCell>
+                            }
+                            <TableCell  >
+                                <Chip size='small' label={task.status} color={task.status === "Completed" ? "success" : task.status=="Overdue" || task.status=="Rejected" ? "error" : "warning"} />
+                            </TableCell>
+                        </TableRow>
+                        ))}
+                    </TableBody>
+                </Table> :
+                <Box
+                    display='flex'
+                    justifyContent='center'
+                    alignItems='center'
+                    height='10rem'
+                >
+                    <Typography variant='h6' color='text.secondary'>
+                        No Task Assigned
+                    </Typography>
+                </Box>
+                }
+                <AssignTaskModal
+                    isOpen={isAssignTaskModalOpen}
+                    task={modalData}
+                    organization_id={organization_id}
+                    onClose={handleModalClose}
+                />
+                </Collapse>
+            </Paper> 
+    );
+}
+
+export default CollapsibleTaskTable;
