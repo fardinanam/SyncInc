@@ -7,6 +7,7 @@ import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import AddIcCallIcon from '@mui/icons-material/AddIcCall';
 
 import AuthContext from '../context/AuthContext';
 import { Toolbar } from '@mui/material';
@@ -39,6 +40,11 @@ const ProfileMenu = () => {
     const handleAccount = () => {
         handleCloseUserMenu();
         navigate('/profile');
+    }
+
+    const handleInvites = () => {
+        handleCloseUserMenu();
+        navigate('/invites');
     }
 
     return (
@@ -76,12 +82,20 @@ const ProfileMenu = () => {
                     <Typography textAlign="center" ml={1}>Profile</Typography>
                 </MenuItem>
                 <MenuItem 
+                    key="invites" 
+                    onClick={handleInvites}
+                >
+                    <AddIcCallIcon />
+                    <Typography textAlign="center" ml={1}>Invites</Typography>
+                </MenuItem>
+                <MenuItem 
                     key="logout" 
                     onClick={handleLogout}
                 >
                     <LogoutRoundedIcon />
                     <Typography textAlign="center" ml={1}>Logout</Typography>
                 </MenuItem>
+                
             </Menu>
         </Toolbar>
     )

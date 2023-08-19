@@ -39,7 +39,8 @@ class OrganizationSerializer(serializers.ModelSerializer):
         Designation.objects.create(
             employee=user,
             organization=organization,
-            role='Admin'
+            role='Admin',
+            invitationAccepted=True
         ).save()
         return organization
 
@@ -173,7 +174,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         client.save()
             
         return project
-        
+       
 class ProjectDetailsSerializer(serializers.ModelSerializer):
     has_ended = serializers.SerializerMethodField()
     project_leader = serializers.SerializerMethodField()
@@ -200,6 +201,14 @@ class ProjectDetailsSerializer(serializers.ModelSerializer):
             } 
         
         return None
+    
+class DesignationSerializer(serializers.ModelSerializer):
+    organization = serializers.SerializerMethodField()
+    class Meta:
+        model = Designation
+        fields = ['id', 'organization'] 
+    def get_organization(self, obj):
+        return { 'name': obj.organization.name, 'id': obj.organization.id }
     
 class TagSerializer(serializers.ModelSerializer):
     class Meta:

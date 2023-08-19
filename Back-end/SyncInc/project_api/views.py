@@ -15,7 +15,7 @@ def get_organizations(request):
         user = User.objects.get(username=username)
 
         designations = user.designations.all()
-        organizations = [designation.organization for designation in designations]
+        organizations = [designation.organization for designation in designations if designation.invitationAccepted == True]
         serializer = OrganizationSerializer(organizations, many=True)
         
         return Response({
@@ -103,7 +103,7 @@ def get_organization_projects(request, organization_id):
         designation = user.designations.filter(organization=organization).first()
         role = designation.role
         data['role'] = role
-        
+
         if not designation:
             return Response({
                 'message': 'You are not authorized to view this organization',
@@ -352,7 +352,7 @@ def get_vendor_suggestions(request, organization_id):
     
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def add_employee(request, organization_id):
+def invite_employee(request, organization_id):
     try:
         username = get_data_from_token(request, 'username')
         user = User.objects.get(username=username)
@@ -362,17 +362,24 @@ def add_employee(request, organization_id):
 
         if designation and designation.role != 'Admin':
             return Response({
-                'message': 'You are not authorized to add new employee to this organization',
+                'message': 'You are not authorized to invite new employee to this organization',
                 'data': None
             }, status=status.HTTP_401_UNAUTHORIZED)
 
         data = request.data
         member_id = data['id']
         employee = User.objects.get(id=member_id)
+        # check if the employee is already a member of the organization
+        if employee.designations.filter(organization=organization).exists():
+            return Response({
+                'message': 'Employee is already a member of the organization',
+                'data': None
+            }, status=status.HTTP_400_BAD_REQUEST)
         designation = Designation.objects.create(
             employee=employee,
             organization=organization,
-            role='Employee'
+            role='Employee',
+            invitationAccepted=False
         )
         designation.save()
         data = EmployeeSerializer(employee).data
@@ -388,6 +395,85 @@ def add_employee(request, organization_id):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_invites(request):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+        
+        invitations = Designation.objects.filter(employee=user, invitationAccepted=False)
+        serializer = DesignationSerializer(invitations, many=True)
+        return Response({
+                'message': f'Invites of {username}',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def accept_invite(request, designation_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        designation = Designation.objects.get(id=designation_id)
+        print(designation)
+
+        # if designation.employee != user:
+        #     return Response({
+        #         'message': 'You are not authorized to accept this invite',
+        #         'data': None
+        #     }, status=status.HTTP_401_UNAUTHORIZED)
+        designation.invitationAccepted = True
+        designation.save()
+
+        return Response({
+            'message': f'Invite accepted successfully',
+            'data': None
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        })
+    
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def reject_invite(request, designation_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        designation = Designation.objects.get(id=designation_id)
+
+        if designation.employee != user:
+            return Response({
+                'message': 'You are not authorized to reject this invite',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        designation.delete()
+
+        return Response({
+            'message': f'Invite rejected successfully',
+            'data': None
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        })
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -430,7 +516,6 @@ def add_vendor(request, organization_id):
 @permission_classes([IsAuthenticated])
 def get_project(request, project_id):
     try:
-
         username = get_data_from_token(request, 'username')
         user = User.objects.get(username=username)
 
