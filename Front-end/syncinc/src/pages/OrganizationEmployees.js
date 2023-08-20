@@ -25,7 +25,7 @@ import {Toolbar} from "@mui/material";
 import { useLoading } from "../context/LoadingContext";
 import { Autocomplete, TextField } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { AddMemberModal } from "../components/Modals";
 
 const OrganizationEmployees = (props) => {
@@ -146,17 +146,24 @@ const OrganizationEmployees = (props) => {
                 elevation={0}
             >
                 <Grid container spacing={2} >
-                    <Grid item xs={12} md={8}>
+                    {/* <Grid item xs={12} md={8}>
                         <Typography variant="h6">
                             Search option here
                         </Typography>
-                    </Grid>
+                    </Grid> */}
                     {
                     role === 'Admin' &&
-                    <Grid item display={'flex'} xs={12} md={4} sx={{justifyContent: 'flex-end'}}>
+                    <Grid item display={'flex'} xs={12} md={12} sx={{justifyContent: 'flex-end'}}>
                         
-                        <Button color="primary" onClick={() => handleAddModalOpen()}>
-                            <AddCircleOutlineIcon />
+                        <Button 
+                            color="primary" 
+                            variant="outlined" 
+                            size="small"
+                            sx={{
+                                mr: '1rem'
+                            }}
+                            onClick={() => handleAddModalOpen()}>
+                            <AddRoundedIcon />
                                 Employee
                         </Button>
                         <AddMemberModal id={id} memberType={'employee'} open={addModalOpen} handleClose={handleAddModalClose}/>

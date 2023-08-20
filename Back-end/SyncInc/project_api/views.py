@@ -358,6 +358,13 @@ def invite_employee(request, organization_id):
         user = User.objects.get(username=username)
 
         organization = Organization.objects.get(id=organization_id)
+
+        if not organization:
+            return Response({
+                'message': 'Organization not found',
+                'data': None
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
         designation = user.designations.filter(organization=organization).first()
 
         if designation and designation.role != 'Admin':
@@ -370,22 +377,36 @@ def invite_employee(request, organization_id):
         member_id = data['id']
         employee = User.objects.get(id=member_id)
         # check if the employee is already a member of the organization
+
+        if not employee:
+            return Response({
+                'message': 'User not found',
+                'data': None
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
         if employee.designations.filter(organization=organization).exists():
             return Response({
                 'message': 'Employee is already a member of the organization',
                 'data': None
             }, status=status.HTTP_400_BAD_REQUEST)
-        designation = Designation.objects.create(
-            employee=employee,
+        
+        if employee.invitations.filter(organization=organization).exists():
+            return Response({
+                'message': 'Employee is already invited to the organization',
+                'data': None
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        invitation = Invitation.objects.create(
             organization=organization,
-            role='Employee',
-            invitationAccepted=False
+            invitee=employee,
+            invited_by=user
         )
-        designation.save()
+
+        invitation.save()
         data = EmployeeSerializer(employee).data
 
         return Response({
-            'message': f'Member added successfully to the {organization.name}',
+            'message': f'Invitation sent successfully to the {employee.name}',
             'data': data
         }, status=status.HTTP_200_OK)
         
@@ -403,12 +424,14 @@ def get_invites(request):
         username = get_data_from_token(request, 'username')
         user = User.objects.get(username=username)
         
-        invitations = Designation.objects.filter(employee=user, invitationAccepted=False)
-        serializer = DesignationSerializer(invitations, many=True)
+        invitations = Invitation.objects.filter(invitee=user, has_accepted=False)
+        serializer = InvitationSerializer(invitations, many=True)
+
         return Response({
                 'message': f'Invites of {username}',
                 'data': serializer.data
             }, status=status.HTTP_200_OK)
+    
     except Exception as e:
         print(e)
         return Response({
@@ -418,21 +441,36 @@ def get_invites(request):
     
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def accept_invite(request, designation_id):
+def accept_invite(request, invitation_id):
     try:
         username = get_data_from_token(request, 'username')
         user = User.objects.get(username=username)
 
-        designation = Designation.objects.get(id=designation_id)
-        print(designation)
+        invitation = Invitation.objects.get(id=invitation_id)
+        print(invitation)
 
-        # if designation.employee != user:
-        #     return Response({
-        #         'message': 'You are not authorized to accept this invite',
-        #         'data': None
-        #     }, status=status.HTTP_401_UNAUTHORIZED)
-        designation.invitationAccepted = True
-        designation.save()
+        if not invitation:
+            return Response({
+                'message': 'Invitation not found',
+                'data': None
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        if invitation.invitee != user:
+            return Response({
+                'message': 'You are not authorized to accept this invite',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        designation = Designation.objects.create(
+            employee=user,
+            organization=invitation.organization,
+            role='Employee',
+            invitationAccepted=True
+        )
+
+        if designation:
+            invitation.delete()
+            designation.save()
 
         return Response({
             'message': f'Invite accepted successfully',
@@ -448,20 +486,26 @@ def accept_invite(request, designation_id):
     
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-def reject_invite(request, designation_id):
+def reject_invite(request, invitation_id):
     try:
         username = get_data_from_token(request, 'username')
         user = User.objects.get(username=username)
 
-        designation = Designation.objects.get(id=designation_id)
+        invitation = Invitation.objects.get(id=invitation_id)
 
-        if designation.employee != user:
+        if not invitation:
+            return Response({
+                'message': 'Invitation not found',
+                'data': None
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if invitation.invitee != user:
             return Response({
                 'message': 'You are not authorized to reject this invite',
                 'data': None
             }, status=status.HTTP_401_UNAUTHORIZED)
 
-        designation.delete()
+        invitation.delete()
 
         return Response({
             'message': f'Invite rejected successfully',

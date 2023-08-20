@@ -70,7 +70,7 @@ const SubmitTask = () => {
     return(
         <AddItemLayout
             title="Submit Task"
-            onClose={() => navigate(`/organization/${id}/projects/${id}/tasks`)}
+            onClose={() => navigate(`/task/${id}/`)}
         >
             <Grid container
                     spacing={2}
