@@ -3,6 +3,7 @@ from .models import *
 
 admin.site.register(Organization)
 admin.site.register(Designation)
+admin.site.register(Invitation)
 admin.site.register(Vendor)
 admin.site.register(Client)
 admin.site.register(Project)

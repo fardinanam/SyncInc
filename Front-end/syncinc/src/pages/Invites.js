@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
-import {Typography, Button, Grid, List, ListItem} from "@mui/material";
+import {Typography, Button, Grid, List, ListItem, Avatar, Box} from "@mui/material";
 import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 
 import AuthContext from '../context/AuthContext';
@@ -11,6 +11,7 @@ import Paper from '@mui/material/Paper';
 
 import { useLoading } from "../context/LoadingContext";
 import notifyWithToast from "../utils/toast";
+import UserInfo from "../components/UserInfo";
 
 
 const Invites = (props) => {
@@ -26,7 +27,7 @@ const Invites = (props) => {
         fetchInvites();
     }, []);
 
-
+    setLoading(true);
     const fetchInvites = async () => {
         try {
             const response = await axios.get(
@@ -45,15 +46,17 @@ const Invites = (props) => {
         } catch (error) {
             console.log(error.response.data.message);
             // window.location.href = '/organizations';
+            notifyWithToast("error", "Something went wrong");
         }
 
     }
+    setLoading(false);
 
-    const handleAccept = async (designation_id) => {
+    const handleAccept = async (invitation_id) => {
         try {
-            console.log("accept", `${baseUrl}accept_invite/${designation_id}/`)
+            console.log("accept", `${baseUrl}accept_invite/${invitation_id}/`)
             const response = await axios.get(
-                `${baseUrl}accept_invite/${designation_id}/`,
+                `${baseUrl}accept_invite/${invitation_id}/`,
                 {
                     headers: {
                         'Authorization': 'Bearer ' + authTokens?.access,
@@ -61,9 +64,10 @@ const Invites = (props) => {
                         'Content-Type': 'application/json',
                     }
                 }
-            )
+            );
+
             notifyWithToast("success", "You have joined the organization successfully");
-            setInvites(invites.filter((invite) => invite.id !== designation_id));
+            setInvites(invites.filter((invite) => invite.id !== invitation_id));
             
             console.log(response.data.data);
         } catch (error) {
@@ -107,13 +111,23 @@ const Invites = (props) => {
                         <TableBody>
                             {invites?.map((invite) => (
                             <TableRow
+                                display="flex"
                                 key={invite.id}
                                 sx={{alignItems:"flex-start"}}
                             >   
-                                <TableCell width={"60%"}>
+                                <TableCell width={"90%"}>
+                                <Box
+                                    display={"flex"}
+                                    flexDirection="row"
+                                    alignItems="center"
+                                    justifyContent="flex-start"
+                                >
+                                    <UserInfo userInfo={invite?.invited_by} />
+
                                     <Typography>
-                                        You are invited to join {invite?.organization?.name} as employee
+                                        {invite?.invited_by?.name} invited you to join {invite?.organization?.name} 
                                     </Typography>
+                                </Box>
                                 </TableCell>
                                 <TableCell width={"20%"}>
                                     <Button variant="contained" color="success" onClick={() => handleAccept(invite.id)}>

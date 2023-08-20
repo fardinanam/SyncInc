@@ -52,6 +52,30 @@ class Organization(models.Model):
     
     def __str__(self):
         return self.name
+    
+class Invitation(models.Model):
+    organization = models.ForeignKey(
+        Organization, 
+        related_name='invitations',
+        related_query_name='invitation',
+        on_delete=models.CASCADE
+    )
+
+    invitee = models.ForeignKey(
+        User, 
+        related_name='invitations',
+        related_query_name='invitation',
+        on_delete=models.CASCADE
+    )
+
+    invited_by = models.ForeignKey(
+        User, 
+        related_name='invitations_sent',
+        related_query_name='invitation_sent',
+        on_delete=models.CASCADE
+    )
+
+    has_accepted = models.BooleanField(default=False)
 
 class Designation(models.Model):
     ROLE_CHOICES = [
@@ -74,6 +98,7 @@ class Designation(models.Model):
         choices=ROLE_CHOICES,
         default='Employee',
     )
+
     invitationAccepted = models.BooleanField(default=False)
     joined_at = models.DateTimeField(auto_now_add=True)
     left_at = models.DateTimeField(blank=True, null=True)

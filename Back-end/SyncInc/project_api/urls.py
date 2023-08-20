@@ -17,10 +17,10 @@ urlpatterns = [
     path('get_project_leader_suggestions/<int:project_id>/', views.get_project_leader_suggestions, name='project_leder_suggestions'),
     path('invite_employee/<int:organization_id>/', views.invite_employee, name='invite_employee'),
     path('get_invites/', views.get_invites, name='get_invites'),
-    path('accept_invite/<int:designation_id>/', views.accept_invite, name='accept_invite'),
-    path('reject_invite/<int:designation_id>/', views.reject_invite, name='reject_invite'),
+    path('accept_invite/<int:invitation_id>/', views.accept_invite, name='accept_invite'),
+    path('reject_invite/<int:invitation_id>/', views.reject_invite, name='reject_invite'),
     path('add_vendor/<int:organization_id>/', views.add_vendor, name='add_vendor'),
-  
+
     path('all_tags/', views.get_all_tags, name='all_tags'),
     path('set_user_tags/', views.set_or_create_user_tags, name='set_user_tags'),
     path('create_task/<int:project_id>/', views.create_task, name='create_task'),

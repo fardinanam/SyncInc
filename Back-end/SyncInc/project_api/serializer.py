@@ -210,6 +210,13 @@ class DesignationSerializer(serializers.ModelSerializer):
     def get_organization(self, obj):
         return { 'name': obj.organization.name, 'id': obj.organization.id }
     
+class InvitationSerializer(serializers.ModelSerializer):
+    invited_by = EmployeeSerializer()
+    organization = OrganizationSerializer()
+    class Meta:
+        model = Invitation
+        fields = ['id', 'organization', 'invited_by', 'has_accepted']
+    
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
