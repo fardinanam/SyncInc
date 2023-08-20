@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 
 front_end_url = 'https://syncinc.netlify.app'
+
 verify_email_url = 'https://syncinc-backend.onrender.com/accounts/verify-email'
 
 def send_email_token(email, subject, message):
