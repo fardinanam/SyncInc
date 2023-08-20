@@ -27,6 +27,7 @@ import { Autocomplete, TextField } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { AddMemberModal } from "../components/Modals";
+import OrganizationNavMenu from "../components/OrganizationNavMenu";
 
 
 const OrganizationVendors = (props) => {
@@ -34,15 +35,6 @@ const OrganizationVendors = (props) => {
     const { authTokens } = useContext(AuthContext);
     const { id }= useParams();
     const { setLoading } = useLoading();
-    const navigate = useNavigate();
-
-    const menuItems = ["projects", "employees", "vendors"];
-    const handleMenuSelect = (menu) => {
-        if(menu === "projects")
-            navigate(`/organization/${id}/projects`);
-        else if(menu === "employees")
-            navigate(`/organization/${id}/employees`);
-    }
     
     let [addModalOpen, setAddModalOpen] = useState(false);
     
@@ -69,6 +61,7 @@ const OrganizationVendors = (props) => {
 
     // use axios to get organization details
     const fetchOrganizationVendors = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(
                 `${baseUrl}organization_vendors/${id}/`,  
@@ -89,7 +82,7 @@ const OrganizationVendors = (props) => {
             console.log(error.response.data.message);
             // window.location.href = '/organizations';
         }
-
+        setLoading(false);
     }
 
     let [nameSort, setNameSort] = useState(false);
@@ -139,7 +132,7 @@ const OrganizationVendors = (props) => {
                 title={organizationName}
                 subtitle="Vendors"
             >
-                <NavMenu menuItems={menuItems} handleMenuSelect={handleMenuSelect}/>
+                <OrganizationNavMenu organization_id={id}/>
             </TitleBar>
             <Paper 
                 sx={{

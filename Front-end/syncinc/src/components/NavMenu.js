@@ -6,7 +6,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { IconButton } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 
-export default function BasicMenu(props) {
+const NavMenu = (props) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const { menuItems, handleMenuSelect } = props;
@@ -55,3 +55,5 @@ export default function BasicMenu(props) {
     </div>
   );
 }
+
+export default NavMenu;

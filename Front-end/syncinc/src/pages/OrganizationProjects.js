@@ -3,35 +3,18 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useLoading } from "../context/LoadingContext";
 import axios from "axios";
 
-import { Box, Typography, Button, Grid, Icon, Menu } from "@mui/material";
-import WorkIcon from '@mui/icons-material/Work';
-
-import SummaryCard from "../components/SummaryCard";
+import { Box, Button, Grid } from "@mui/material";
 import AuthContext from '../context/AuthContext';
 import { baseUrl } from "../utils/config";
-import OrganizationDetails from "./OrganizationDetails";
 import TitleBar from "../components/TitleBar";
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import MenuIcon from '@mui/icons-material/Menu';
-import { IconButton } from "@mui/material";
-import NavMenu from "../components/NavMenu";
-
-import ProjectCard from '../components/ProjectCard';
 import ProjectsStack from '../components/ProjectsStack';
+import OrganizationNavMenu from "../components/OrganizationNavMenu";
 
 const OrganizationProjects = () => {
     const  { id } = useParams();
     const { setLoading } = useLoading();
     const { authTokens } = useContext(AuthContext);;
     const navigate = useNavigate();
-    
-    const menuItems = ["projects", "employees", "vendors"];
-    const handleMenuSelect = (menu) => {
-        if(menu === "employees")
-            navigate(`/organization/${id}/employees`);
-        else if(menu === "vendors")
-            navigate(`/organization/${id}/vendors`);
-    }
 
     const [organizationName, setOrganizationName] = useState();
     const [role, setRole] = useState();
@@ -88,7 +71,7 @@ const OrganizationProjects = () => {
                 title={organizationName}
                 subtitle="Projects"
             >
-                <NavMenu menuItems={menuItems} handleMenuSelect={handleMenuSelect}/>
+                <OrganizationNavMenu organization_id={id}/>
             </TitleBar>
             {
                 role === 'Admin' &&
