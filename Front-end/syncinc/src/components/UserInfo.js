@@ -20,7 +20,7 @@ const UserInfo = ({sx, userInfo}) => {
     useEffect(() => {
         if (userInfo) {
             if (userInfo.profile_picture) {
-                setProfilePicUrl(baseUrl.concat(String(userInfo.profile_picture).substring(1)));
+                setProfilePicUrl(userInfo.profile_picture);
             }
 
             if (userInfo.name)

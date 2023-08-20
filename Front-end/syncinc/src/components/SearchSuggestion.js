@@ -14,7 +14,7 @@ const SearchSuggestion = ({ suggestion, selected }) => {
                     suggestion.profile_picture
                     ? <Avatar 
                         alt={suggestion.username} 
-                        src={suggestion.profile_picture && baseUrl.concat(String(suggestion.profile_picture).substring(1))}
+                        src={suggestion.profile_picture && suggestion.profile_picture}
                     />
                     : <NameAvatar name={suggestion.username} />
                 }

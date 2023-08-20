@@ -23,7 +23,9 @@ import { IconButton } from "@mui/material";
 import ClearIcon from '@mui/icons-material/Clear';
 import AutocompleteTagInput from "./AutocompleteTagInput";
 import AutocompleteUserInput from "./AutocompleteUserInput";
-
+import storage from "../utils/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { v4 } from "uuid";
 
 const style = {
     position: 'absolute',
@@ -282,20 +284,34 @@ const  EditProfilePicModal = (props) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const body = new FormData()
-        body.append('profile_picture', selectedFile);
 
-        const config = {
-            headers:{
-            'Authorization': 'Bearer ' + authTokens?.access,
-            'Content-Disposition': 'attachment',
-            'filename': username.concat('.jpg'),
-            }
-        };
+        if (!selectedFile) {
+            props.handleClose();
+            return;
+        }
 
         setLoading(true);
+        
         try {
-            const response = await axios.put(
+            const imageRef = ref(storage, `profile_pictures/${username + v4()}.jpg`);
+
+            let response = await uploadBytes(imageRef, selectedFile);
+
+            const imageUrl = await getDownloadURL(response.ref);
+
+            console.log(imageUrl);
+            const body = {
+                path: imageUrl
+            }
+
+            const config = {
+                headers:{
+                    'Authorization': 'Bearer ' + authTokens?.access,
+                    'content-type': 'application/json',
+                }
+            };
+
+            response = await axios.put(
                 `${baseUrl}accounts/profile_info/update_profile_pic/`,
                 body,
                 config
@@ -336,7 +352,7 @@ const  EditProfilePicModal = (props) => {
                 </Typography>
                 <Avatar
                     alt="Profile Picture"
-                    src={selectedFile ? URL.createObjectURL(selectedFile) : baseUrl.concat(String(props.profile_picture))}
+                    src={selectedFile ? URL.createObjectURL(selectedFile) : props.profile_picture}
                     sx={{
                         width: 200,
                         height: 200,

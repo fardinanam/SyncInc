@@ -207,7 +207,7 @@ const Profile = () => {
                     <Box
                         display={"flex"}
                     >
-                        <Avatar alt={profileInfo.first_name} src={profileInfo.profile_picture && baseUrl.concat(String(profileInfo.profile_picture).substring(1))} sx={{ width: 75, height: 75 }} />
+                        <Avatar alt={profileInfo.first_name} src={profileInfo.profile_picture && profileInfo.profile_picture} sx={{ width: 75, height: 75 }} />
                         <Box
                             display={"flex"}
                             flexDirection={"column"}
@@ -241,7 +241,7 @@ const Profile = () => {
                             <EditProfilePicModal 
                                 isOpen={isProfilePicModalOpen}
                                 handleClose={handleEditProfilePicModalClose}
-                                profile_picture={profileInfo.profile_picture && String(profileInfo.profile_picture).substring(1)}
+                                profile_picture={profileInfo.profile_picture && profileInfo.profile_picture}
                             />
                         </Box>
                     </Box>
