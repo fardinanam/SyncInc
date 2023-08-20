@@ -86,27 +86,28 @@ WSGI_APPLICATION = 'SyncInc.wsgi.application'
 
 
 # render.com database with external connection
-# postgres://syncinc:LzlKgJ0AZzn3aqQ3SuhptILWtk5PtGF6@dpg-cjghjeb37aks73ck2tm0-a.oregon-postgres.render.com/syncinc_4q2g
+# postgres://syncinc:qU3u0dLIAdalFATVUyvxgJ5Y5R3ZHvk9@dpg-cjgrbik1ja0c73cahom0-a.oregon-postgres.render.com/syncinc_8ynr
+# PGPASSWORD = qU3u0dLIAdalFATVUyvxgJ5Y5R3ZHvk9 psql - h dpg-cjgrbik1ja0c73cahom0-a.oregon-postgres.render.com - U syncinc syncinc_8ynr
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'syncinc_4q2g',
+#         'NAME': 'syncinc_8ynr',
 #         'USER': 'syncinc',
-#         'PASSWORD': 'LzlKgJ0AZzn3aqQ3SuhptILWtk5PtGF6',
-#         'HOST': 'dpg-cjghjeb37aks73ck2tm0-a.oregon-postgres.render.com',
+#         'PASSWORD': 'qU3u0dLIAdalFATVUyvxgJ5Y5R3ZHvk9',
+#         'HOST': 'dpg-cjgrbik1ja0c73cahom0-a.oregon-postgres.render.com',
 #         'PORT': '5432',
 #     }
 # }
 
 # render.com database with internal connection
-# postgres: // syncinc: LzlKgJ0AZzn3aqQ3SuhptILWtk5PtGF6@dpg-cjghjeb37aks73ck2tm0-a/syncinc_4q2g
+# postgres://syncinc:qU3u0dLIAdalFATVUyvxgJ5Y5R3ZHvk9@dpg-cjgrbik1ja0c73cahom0-a/syncinc_8ynr
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'syncinc_4q2g',
+        'NAME': 'syncinc_8ynr',
         'USER': 'syncinc',
-        'PASSWORD': 'LzlKgJ0AZzn3aqQ3SuhptILWtk5PtGF6',
-        'HOST': 'dpg-cjghjeb37aks73ck2tm0-a',
+        'PASSWORD': 'qU3u0dLIAdalFATVUyvxgJ5Y5R3ZHvk9',
+        'HOST': 'dpg-cjgrbik1ja0c73cahom0-a',
         'PORT': '5432',
     }
 }
