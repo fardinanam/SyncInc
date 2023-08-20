@@ -22,10 +22,5 @@ EXPOSE 8000
 # change the directory to SyncInc and run the django commands 
 WORKDIR /app/SyncInc
 
-# migrate the database
-RUN python manage.py makemigrations accounts
-RUN python manage.py makemigrations project_api
-RUN python manage.py migrate
-
 # Start the Django development server
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
