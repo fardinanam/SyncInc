@@ -1,27 +1,44 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useLoading } from "../context/LoadingContext";
 import axios from "axios";
 
-import { Box, Typography, Button, Grid } from "@mui/material";
-import WorkIcon from '@mui/icons-material/Work';
-
-import SummaryCard from "../components/SummaryCard";
+import { Box, Button, Grid } from "@mui/material";
 import AuthContext from '../context/AuthContext';
 import { baseUrl } from "../utils/config";
+import TitleBar from "../components/TitleBar";
+import ProjectsStack from '../components/ProjectsStack';
+import OrganizationNavMenu from "../components/OrganizationNavMenu";
 
+const OrganizationProjects = () => {
+    const  { id } = useParams();
+    const { setLoading } = useLoading();
+    const { authTokens } = useContext(AuthContext);;
+    const navigate = useNavigate();
 
-const OrganizationProjects = (props) => {
-    const { authTokens } = useContext(AuthContext);
-    const id= props.id;
+    const [organizationName, setOrganizationName] = useState();
+    const [role, setRole] = useState();
+    const [newProjects, setNewProjects] = useState([]);
+    const [projectsInProgress, setProjectsInProgress] = useState([]);
+    const [completedProjects, setCompletedProjects] = useState([]);
 
-    const [organization, setOrganization] = useState({});
+    const categorizeProjects = (projects) => {
+   
+        //projects that have no tasks is assigned to newProjects
+        const today = new Date();
+        console.log(today);
+        console.log(projects);
+        setNewProjects(projects.filter(project => project.task_count === 0));
 
-    useEffect(() => {
-        fetchOrganizationProjectDetails();
-    }, []);
+        //projects that have tasks and if its end_time exists it is smaller than current date is assigned to projectsInProgress
+        setProjectsInProgress(projects.filter(project => project.task_count > 0 && (project.end_time === null || new Date(project.end_time) > today)));
 
+        //projects that have end_time lower than current time is assigned to completedProjects
+        setCompletedProjects(projects.filter(project => project.end_time !== null && new Date(project.end_time) < today));
+    }
     // use axios to get organization details
     const fetchOrganizationProjectDetails = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(
                 `${baseUrl}organization_projects/${id}/`,  
@@ -34,45 +51,50 @@ const OrganizationProjects = (props) => {
                 }  
 
             )
-
-            console.log(response);
-            setOrganization(response.data.data);
+            setOrganizationName(response.data.data.name);
+            setRole(response.data.data.role)
+            categorizeProjects(response.data.data.projects);
         } catch (error) {
             console.log(error.response.data.message);
             // window.location.href = '/organizations';
         }
+        setLoading(false);
     }
 
+    useEffect(() => {
+        fetchOrganizationProjectDetails();
+    }, []);
+
     return (
-        <>
+        <>  
+            <TitleBar 
+                title={organizationName}
+                subtitle="Projects"
+            >
+                <OrganizationNavMenu organization_id={id}/>
+            </TitleBar>
+            {
+                role === 'Admin' &&
+                <Box display="flex" justifyContent="flex-end" m={1}>
+                    <Button variant="contained" onClick={() => {navigate(`/organization/${id}/add-project`)}}>Add New Project</Button>
+                </Box>
+            }
             <Grid  
                 container 
                 spacing={3}
-                columns={{ xs: 12, sm: 6, md: 3 }}
-                paddingTop={2}
             >
-            {organization?.projects?.map((project, idx) => (
-                <Grid 
-                    item
-                    key={`project-${idx}`}
-                    xs={12}
-                    sm={6}
-                    md={3}
-                >
-                    <SummaryCard
-                        title={project.name}
-                        count={0}
-                        name="Tasks"
-                    >
-                        <WorkIcon fontSize='large' color='primary' />
-                        {/* <ListItemIcon fontSize='small' color='primary' /> */}
-                    </SummaryCard>
+                <Grid item xs={12} md={4}>
+                    <ProjectsStack title="New Projects" projects={newProjects} />
                 </Grid>
-            ))}
+                <Grid item xs={12} md={4}>
+                    <ProjectsStack title="Projects in Progress" projects={projectsInProgress} />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                    <ProjectsStack title="Completed Projects" projects={completedProjects} />
+                </Grid>
             </Grid>
         </>
-        
-        
+          
     );
 };
 

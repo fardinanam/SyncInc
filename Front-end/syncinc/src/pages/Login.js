@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
+import {CssBaseline} from "@mui/material";
 import TextField from "@mui/material/TextField";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
@@ -14,22 +14,14 @@ import Container from "@mui/material/Container";
 
 import AuthContext from '../context/AuthContext';
 import Copyright from "../components/Copyright";
+import AuthLayout from "../components/AuthLayout";
 
 
 const Login = () => {
     let {loginUser} = useContext(AuthContext);
 
     return (
-        <Container component="main" maxWidth="xs">
-            <CssBaseline />
-            <Box
-            sx={{
-                marginTop: 8,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center"
-            }}
-            >
+        <AuthLayout>
             <Avatar sx={{ m: 1, bgcolor: "secondary" }}>
                 <LockOutlinedIcon />
             </Avatar>
@@ -76,7 +68,7 @@ const Login = () => {
                 </Button>
                 <Grid container>
                 <Grid item xs>
-                    <Link to="#">
+                    <Link to="/forgot-password">
                         Forgot password?
                     </Link>
                 </Grid>
@@ -87,9 +79,7 @@ const Login = () => {
                 </Grid>
                 </Grid>
             </Box>
-            </Box>
-            <Copyright sx={{ mt: 8, mb: 4 }} />
-        </Container>
+        </AuthLayout>
     );
 }
 

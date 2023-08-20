@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from .serializer import *
 from .models import *
-from .utils import send_email_token
+from .utils import send_verification_email, send_reset_password_email
 from project_api.utils import get_data_from_token
 
 class LoginView(APIView):
@@ -67,7 +67,7 @@ class RegisterView(APIView):
                 user = serializer.save()
                 # send email verification token
                 token = user.email_token
-                send_email_token(email, token)
+                send_verification_email(email, token)
                 # return response
                 return Response({
                     'message': 'User created successfully',
@@ -263,7 +263,7 @@ class ForgotPasswordView(APIView):
             serializer.save()
             
             token = user.email_token
-            send_email_token(email, token)
+            send_reset_password_email(user.username, email, token)
             return Response({
                 'message': 'Email sent successfully',
                 'data': {}
@@ -277,9 +277,10 @@ class ForgotPasswordView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         
 class ResetPasswordView(APIView):
-    def post(self, request, email_token):
+    def post(self, request):
         try:
-            user = User.objects.get(email_token=email_token)
+            data = request.data
+            user = User.objects.get(username=data.get('username'))
             serializer = ResetPasswordSerializer(instance=user, data=request.data)
 
             serializer.is_valid(raise_exception=True)

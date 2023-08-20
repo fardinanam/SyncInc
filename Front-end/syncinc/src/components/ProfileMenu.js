@@ -7,12 +7,15 @@ import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import AddIcCallIcon from '@mui/icons-material/AddIcCall';
 
 import AuthContext from '../context/AuthContext';
 import { Toolbar } from '@mui/material';
 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+
+import { baseUrl } from '../utils/config';
 
 
 const ProfileMenu = () => {
@@ -39,9 +42,14 @@ const ProfileMenu = () => {
         navigate('/profile');
     }
 
+    const handleInvites = () => {
+        handleCloseUserMenu();
+        navigate('/invites');
+    }
+
     return (
         <Toolbar sx={{ flexGrow: 0 }}>
-            <Avatar alt={user.first_name + ' ' + user.last_name} src="/static/images/avatar/2.jpg" />
+            <Avatar alt={user.first_name + ' ' + user.last_name} src={user.profile_picture && baseUrl.concat(String(user.profile_picture).substring(1))} />
             <Typography ml={1}>
                 {user.first_name + " " + user.last_name}
             </Typography>
@@ -71,7 +79,14 @@ const ProfileMenu = () => {
                     onClick={handleAccount}
                 >
                     <AccountCircleIcon />
-                    <Typography textAlign="center" ml={1}>Account</Typography>
+                    <Typography textAlign="center" ml={1}>Profile</Typography>
+                </MenuItem>
+                <MenuItem 
+                    key="invites" 
+                    onClick={handleInvites}
+                >
+                    <AddIcCallIcon />
+                    <Typography textAlign="center" ml={1}>Invites</Typography>
                 </MenuItem>
                 <MenuItem 
                     key="logout" 
@@ -80,6 +95,7 @@ const ProfileMenu = () => {
                     <LogoutRoundedIcon />
                     <Typography textAlign="center" ml={1}>Logout</Typography>
                 </MenuItem>
+                
             </Menu>
         </Toolbar>
     )

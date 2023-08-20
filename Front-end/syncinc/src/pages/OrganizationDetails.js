@@ -15,29 +15,62 @@ import { baseUrl } from "../utils/config";
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import ToggleButton from '@mui/material/ToggleButton';
 
-import OrganizationMembers from "./OrganizationMembers";
+import OrganizationMembers from "./OrganizationEmployees";
 import OrganizationProjects from "./OrganizationProjects";
+import { AddMemberModal } from "../components/Modals";
 
 const OrganizationDetails = (props) => {
     const { authTokens } = useContext(AuthContext);
     const navigate = useNavigate();
     const { id } = useParams();
     
-    const location = useLocation();
-    const locationData = location.state.organization;
-    console.log("sth",locationData);
+    // const location = useLocation();
+    // const locationData = location.state.organization;
+   
 
     const [selectedValue, setSelectedValue] = useState('projects');
-    const [organization, setOrganization] = useState(locationData);
+    const [organization, setOrganization] = useState();
+
+    const fetchOrganizationData = async () => {
+        try {
+            const response = await axios.get(
+                `${baseUrl}get_organizations/${id}`,  
+                {
+                    headers: {
+                        'Authorization': 'Bearer ' + authTokens?.access,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                }  
+
+            )
+            
+            setOrganization(response.data.data);
+            
+        } catch (error) {
+            console.log(error.response.data.message);
+        }
+    }
+
+    useEffect(() => {
+        fetchOrganizationData();
+    }, []);
 
     const handleToggleChange = (event, newValue) => {
-        console.log(id)
+        console.log("Something is happening")
         if(newValue != null) {
             setSelectedValue(newValue);
         }
     }
 
-
+    let [memberModalOpen, setMemberModalOpen] = useState(false);
+    const handleAddMemberModalOpen = () => {
+        console.log("handle Member modal open")
+        setMemberModalOpen(true);
+    }
+    const handleAddMemberModalClose = () => {
+        setMemberModalOpen(false);
+    }
     return (
         <>
             <Grid 
@@ -46,7 +79,7 @@ const OrganizationDetails = (props) => {
                 <Grid 
                     item
                     display={'flex'}
-                    xs={12} md={3}
+                    xs={12} md={4}
                     alignItems={"center"}
                     justifyContent={"flex-start"}
                 >
@@ -54,14 +87,14 @@ const OrganizationDetails = (props) => {
                         variant='h5'
                         sx={{ fontWeight: 'bold' }}
                         flexGrow={1}
-                        >
+                    >
                         {organization?.name}
                     </Typography>
                 </Grid>
                 <Grid 
                     item 
                     display={'flex'}
-                    xs={12} md={6}
+                    xs={12} md={4}
                     alignItems={"center"}
                     justifyContent={"center"}
                 >
@@ -75,7 +108,7 @@ const OrganizationDetails = (props) => {
                     >
                         <ToggleButton value="projects">
                             <Typography
-                                variant='h6'
+                                variant='button'
                                 flexGrow={1}
                             >
                                 projects
@@ -83,7 +116,7 @@ const OrganizationDetails = (props) => {
                         </ToggleButton>
                         <ToggleButton value="members">
                             <Typography
-                                variant='h6'
+                                variant='button'
                                 flexGrow={1}
                             >
                                 members
@@ -94,19 +127,28 @@ const OrganizationDetails = (props) => {
                 <Grid 
                     item
                     display={'flex'}
-                    xs={12} md={3}
+                    xs={12} md={4}
                     alignItems={'center'}
                     justifyContent={'flex-end'}
                 >
-                    <Button variant='contained' onClick={() => selectedValue === 'projects'? navigate('/add_projects') : navigate('/add_members')}>
-                        <AddRoundedIcon />
-                        {selectedValue}
+                    <Button variant='contained' 
+                        onClick={() => selectedValue === 'projects'? 
+                        navigate(`/organization/${organization?.id}/add-project`) 
+                        : 
+                        handleAddMemberModalOpen()} >
+                        <AddRoundedIcon />             
+                        {selectedValue === 'projects'? 'Project' : 'Member'}
                     </Button>
+                    <AddMemberModal
+                        open={memberModalOpen}
+                        id={id}
+                        handleClose={handleAddMemberModalClose}
+                    />
 
                 </Grid>
             
             </Grid>
-            { selectedValue === 'projects' ? <OrganizationProjects id={id} /> : <OrganizationMembers id={id} /> }
+            
         </>
     );
 };

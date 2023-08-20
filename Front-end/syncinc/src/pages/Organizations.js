@@ -76,7 +76,7 @@ const Organizations = () => {
                         variant='h5'
                         sx={{ fontWeight: 'bold' }}
                     >Your Organizations</Typography>
-                </Box>
+                </Box>  
                 <Button variant='contained' onClick={handleOpen}><AddRoundedIcon /> Organization</Button>
                 <CreateOrgModal open={isOpen} handleClose={handleClose} handleOpen={handleOpen} />
             </Box>
@@ -96,7 +96,7 @@ const Organizations = () => {
                             title={organization.name}
                             count={organization.num_projects}
                             name="Projects"
-                            onClick={() => navigate(`/organization/${organization.id}`, { state: {organization: organization } } ) }  
+                            onClick={() => navigate(`/organization/${organization.id}/projects` ) }  
                         >
                             <WorkIcon fontSize='large' color='primary' />
                         </SummaryCard>
