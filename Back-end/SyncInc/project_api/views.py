@@ -15,7 +15,7 @@ def get_organizations(request):
         user = User.objects.get(username=username)
 
         designations = user.designations.all()
-        organizations = [designation.organization for designation in designations if designation.invitationAccepted == True]
+        organizations = [designation.organization for designation in designations]
         serializer = OrganizationSerializer(organizations, many=True)
         
         return Response({

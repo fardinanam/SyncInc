@@ -23,9 +23,6 @@ import { IconButton } from "@mui/material";
 import ClearIcon from '@mui/icons-material/Clear';
 import AutocompleteTagInput from "./AutocompleteTagInput";
 import AutocompleteUserInput from "./AutocompleteUserInput";
-import storage from "../utils/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { v4 } from "uuid";
 
 const style = {
     position: 'absolute',
@@ -284,43 +281,30 @@ const  EditProfilePicModal = (props) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const body = new FormData()
+        body.append('profile_picture', selectedFile);
 
-        if (!selectedFile) {
-            props.handleClose();
-            return;
-        }
+        const config = {
+            headers:{
+            'Authorization': 'Bearer ' + authTokens?.access,
+            'Content-Disposition': 'attachment',
+            'filename': username.concat('.jpg'),
+            }
+        };
 
         setLoading(true);
-        
         try {
-            const imageRef = ref(storage, `profile_pictures/${username + v4()}.jpg`);
-
-            let response = await uploadBytes(imageRef, selectedFile);
-
-            const imageUrl = await getDownloadURL(response.ref);
-
-            console.log(imageUrl);
-            const body = {
-                path: imageUrl
-            }
-
-            const config = {
-                headers:{
-                    'Authorization': 'Bearer ' + authTokens?.access,
-                    'content-type': 'application/json',
-                }
-            };
-
-            response = await axios.put(
+            const response = await axios.put(
                 `${baseUrl}accounts/profile_info/update_profile_pic/`,
                 body,
                 config
             );
             
+            console.log("returned data: ", response.data.data);
             props.handleClose(response.data.data);
             notifyWithToast("success", "Profile picture updated successfully");
         } catch (error) {
-            console.log(error.response.data.message);
+            console.log(error.response.data.data);
             props.handleClose();
             notifyWithToast("error", error.response.data.message);
         }

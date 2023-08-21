@@ -132,6 +132,7 @@ class ProfileInfoView(APIView):
                 'data': {}
             }, status=status.HTTP_400_BAD_REQUEST)
 
+
 class UpdateProfilePicView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser,)
@@ -139,9 +140,8 @@ class UpdateProfilePicView(APIView):
     def put(self, request):
         try:
             user = get_data_from_token(request, 'user_id')
-            print(request.FILES)
             user = User.objects.get(id=user)
-            serializer = ProfilePicSerializer( instance=user, data=request.data)
+            serializer = ProfilePictureSerializer(data=request.data, context={'user': user})
 
             if serializer.is_valid():
                 serializer.save()
@@ -153,8 +153,8 @@ class UpdateProfilePicView(APIView):
                 return Response({
                     'message': 'Something went wrong',
                     'data': serializer.errors
-                }, status=status.HTTP_403_FORBIDDEN) 
-            
+                }, status=status.HTTP_403_FORBIDDEN)
+
         except Exception as e:
             print(e)
             return Response({
