@@ -92,7 +92,7 @@ class ProfilePictureSerializer(serializers.ModelSerializer):
             user.profile_picture = url
             user.save()
 
-            return {'profile_picture': url}
+            return user
         except Exception as e:
             print(e)
             raise serializers.ValidationError("Something went wrong")    

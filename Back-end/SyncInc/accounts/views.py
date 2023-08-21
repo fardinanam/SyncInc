@@ -147,7 +147,7 @@ class UpdateProfilePicView(APIView):
                 serializer.save()
                 return Response({
                     'message': 'Profile picture updated successfully',
-                    'data': serializer.data
+                    'data': {'profile_picture': user.profile_picture}
                 }, status=status.HTTP_200_OK)
             else:
                 return Response({
@@ -158,7 +158,7 @@ class UpdateProfilePicView(APIView):
         except Exception as e:
             print(e)
             return Response({
-                'message': str(e),
+                'message': 'Something went wrong',
                 'data': {}
             }, status=status.HTTP_400_BAD_REQUEST)
         
