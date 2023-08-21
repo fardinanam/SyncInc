@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.conf import settings
 from .models import *
 import uuid
+import pyrebase
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -13,7 +15,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['last_name'] = user.last_name
 
         try:
-            token['profile_picture'] = user.profile_picture.url 
+            token['profile_picture'] = user.profile_picture
         except Exception as e:
             print(e)           
 
@@ -62,12 +64,48 @@ class ProfileInfoSerializer(serializers.ModelSerializer):
     def get_tags(self, obj):
         return obj.tags.values_list('name', flat=True)
 
-class ProfilePicSerializer(serializers.ModelSerializer):
+class ProfilePictureSerializer(serializers.ModelSerializer):
+    profile_picture = serializers.ImageField()
+
     class Meta:
         model = User
         fields = ['profile_picture']
-    
-    # profile_picture = serializers.ImageField(max_length=None, use_url=False)
+
+    def create(self, validated_data):
+        try:
+            firebase = pyrebase.initialize_app(settings.FIREBASE_CONFIG)
+            storage = firebase.storage()
+            profile_picture = validated_data['profile_picture']
+            
+            user = self.context['user']
+
+            filename = f'profile_pictures/{user.username}/{uuid.uuid4()}.jpg'
+            storage.child(filename).put(profile_picture)
+            url = storage.child(filename).get_url(None)
+            print(url)
+
+            # if user.profile_picture:
+            #     auth = firebase.auth()
+            #     firebase_user = auth.sign_in_with_email_and_password(settings.FIREBASE_EMAIL, settings.FIREBASE_PASSWORD)
+            #     storage.delete(user.profile_picture.split('/')[-1])
+
+            user.profile_picture = url
+            user.save()
+
+            return user
+        except Exception as e:
+            print(e)
+            raise serializers.ValidationError("Something went wrong")    
+
+class ProfilePictureField(serializers.Field):
+    def to_internal_value(self, data):
+        if not data: 
+            return None
+
+        if not data.content_type.startswith('image'):
+            raise serializers.ValidationError("File type is not supported")
+
+        return 'profile_picture' 
 
 class PersonalInfoSerializer(serializers.ModelSerializer):
     class Meta:
