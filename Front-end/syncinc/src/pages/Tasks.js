@@ -33,6 +33,7 @@ const Tasks = () => {
             setTasks(response.data.data);
         } catch {
             notifyWithToast('error', 'Failed to fetch tasks');
+            navigate(-1);
         }
         setLoading(false);
     }

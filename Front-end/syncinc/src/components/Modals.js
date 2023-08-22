@@ -24,7 +24,6 @@ import ClearIcon from '@mui/icons-material/Clear';
 import AutocompleteTagInput from "./AutocompleteTagInput";
 import AutocompleteUserInput from "./AutocompleteUserInput";
 
-
 const style = {
     position: 'absolute',
     top: '50%',
@@ -301,10 +300,11 @@ const  EditProfilePicModal = (props) => {
                 config
             );
             
+            console.log("returned data: ", response.data.data);
             props.handleClose(response.data.data);
             notifyWithToast("success", "Profile picture updated successfully");
         } catch (error) {
-            console.log(error.response.data.message);
+            console.log(error.response.data.data);
             props.handleClose();
             notifyWithToast("error", error.response.data.message);
         }
@@ -336,7 +336,7 @@ const  EditProfilePicModal = (props) => {
                 </Typography>
                 <Avatar
                     alt="Profile Picture"
-                    src={selectedFile ? URL.createObjectURL(selectedFile) : baseUrl.concat(String(props.profile_picture))}
+                    src={selectedFile ? URL.createObjectURL(selectedFile) : props.profile_picture}
                     sx={{
                         width: 200,
                         height: 200,

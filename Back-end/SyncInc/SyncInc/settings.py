@@ -120,6 +120,17 @@ DATABASES = {
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+# Firebase settings
+FIREBASE_CONFIG = {
+    "apiKey": "AIzaSyDcIUeQAWgl6PmGCem497gcCPPFyqoIfFM",
+    "authDomain": "syncinc-3d861.firebaseapp.com",
+    "projectId": "syncinc-3d861",
+    "storageBucket": "syncinc-3d861.appspot.com",
+    "messagingSenderId": "404253910105",
+    "appId": "1:404253910105:web:b30866c59c45a0ea6c3d48",
+    "measurementId": "G-4XW1ME7ND8",
+    "databaseURL": ""
+}
 
 
 # Password validation

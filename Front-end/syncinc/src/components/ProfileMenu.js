@@ -49,7 +49,7 @@ const ProfileMenu = () => {
 
     return (
         <Toolbar sx={{ flexGrow: 0 }}>
-            <Avatar alt={user.first_name + ' ' + user.last_name} src={user.profile_picture && baseUrl.concat(String(user.profile_picture).substring(1))} />
+            <Avatar alt={user.first_name + ' ' + user.last_name} src={user.profile_picture && user.profile_picture} />
             <Typography ml={1}>
                 {user.first_name + " " + user.last_name}
             </Typography>

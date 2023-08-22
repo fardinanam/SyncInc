@@ -38,28 +38,13 @@ class User(AbstractUser):
 
     birth_date = models.DateField(null=True, blank=True)
     address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True, blank=True)
-    profile_picture = models.ImageField(
-        upload_to='profile_pictures/', blank=True)
+    profile_picture = models.URLField(max_length=254, null=True, blank=True)
     
     email_token = models.CharField(max_length=254, default='')
     is_email_verified = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
-
-    def save(self, *args, **kwargs):
-        try:
-            # Retrieve the current object from the database
-            old_instance = User.objects.get(pk=self.pk)
-        except User.DoesNotExist:
-            pass  # Object is new, so there's no previous file to delete
-        else:
-            # Delete the previous profile_picture file only if new profile_picture is uploaded
-            if old_instance.profile_picture and self.profile_picture and self.profile_picture != old_instance.profile_picture:
-                if os.path.isfile(old_instance.profile_picture.path):
-                    os.remove(old_instance.profile_picture.path)
-        
-        super(User, self).save(*args, **kwargs)
     
 
     def name(self):

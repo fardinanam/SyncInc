@@ -174,7 +174,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         client.save()
             
         return project
-       
+
 class ProjectDetailsSerializer(serializers.ModelSerializer):
     has_ended = serializers.SerializerMethodField()
     project_leader = serializers.SerializerMethodField()
@@ -197,7 +197,7 @@ class ProjectDetailsSerializer(serializers.ModelSerializer):
                 'email': project_leader.email,
                 'first_name': project_leader.first_name,
                 'last_name': project_leader.last_name,
-                'profile_picture': project_leader.profile_picture.url if project_leader.profile_picture else None
+                'profile_picture': project_leader.profile_picture
             } 
         
         return None
