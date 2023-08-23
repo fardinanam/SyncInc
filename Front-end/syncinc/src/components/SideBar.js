@@ -7,17 +7,12 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import DashboardIcon from '@mui/icons-material/Dashboard';
+import GridViewRoundedIcon from '@mui/icons-material/GridViewRounded';
 import DescriptionIcon from '@mui/icons-material/Description';
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 import WorkIcon from '@mui/icons-material/Work';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Divider } from '@mui/material';
-import {ColorModeContext} from '../context/ThemeContext';
-import IconButton from '@mui/material/IconButton';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
 
 const drawerWidth = 240;
 
@@ -41,7 +36,6 @@ const SideBar = (props) => {
     const navigate = useNavigate();
     const location = useLocation();
     const theme = useTheme();
-    const colorMode = useContext(ColorModeContext);
 
     const mainColor = theme.palette.main[theme.palette.mode]
 
@@ -68,7 +62,7 @@ const SideBar = (props) => {
                         sx={selectedStyle}
                     >
                         <ListItemIcon color='primary'>
-                            <DashboardIcon fontSize='small' 
+                            <GridViewRoundedIcon fontSize='small' 
                                 color={location.pathname.startsWith('/dashboard') ? 'primary' : ''}
                             />
                         </ListItemIcon>
@@ -123,23 +117,7 @@ const SideBar = (props) => {
                     </ListItemButton>
                 </ListItem>
             </List>
-            <Divider />
-            <Box
-                sx={{
-                    display: 'flex',
-                    width: '100%',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    bgcolor: 'background.default',
-                    color: 'text.primary',
-                    p: 3,
-                }}
-                >
-                {theme.palette.mode[0].toUpperCase() + theme.palette.mode.slice(1).toLowerCase()} Mode
-                <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
-                    {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-                </IconButton>
-            </Box>
+            
             </Box>
         </Drawer>
     )

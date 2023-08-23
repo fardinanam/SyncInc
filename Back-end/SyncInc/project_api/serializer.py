@@ -8,9 +8,18 @@ from django.utils import timezone
 class OrganizationSerializer(serializers.ModelSerializer):
     num_projects = serializers.SerializerMethodField()
     num_members = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField()
+
     class Meta:
         model = Organization
-        fields = ['id', 'name', 'num_projects', 'num_members']
+        fields = ['id', 'name', 'num_projects', 'num_members', 'role']
+    
+    def get_role(self, obj):
+        user = self.context['user']
+        designation = user.designations.get(organization=obj)
+        if designation and designation.role:
+            return designation.role
+        return None
     
     def get_num_projects(self, obj):
         return obj.projects.count()
@@ -59,17 +68,37 @@ class ProjectSummarySerializer(serializers.ModelSerializer):
 
     
 class OrganizationProjectsSerializer(serializers.ModelSerializer):
-    projects = ProjectSummarySerializer(many=True)
+    projects = serializers.SerializerMethodField()
     class Meta:
         model = Organization
         fields = ['id', 'name', 'projects']
         depth = 1
-        # The depth attribute inside the Meta class determines the depth of relationships that 
-        # should be included in the serialized output. The value 1 means that it will include 
-        # the related objects' data for fields with a ForeignKey or OneToOneField relationship 
-        # up to a depth of 1 level. In this case, if the projects field is a ForeignKey or 
-        # OneToOneField to another model, the related object's data will be included in the 
-        # serialized output.
+
+    def get_projects(self, obj):
+        user = self.context['user']
+        
+        projects = obj.projects.all()
+        project_list = []
+        for project in projects:
+            project_role = []
+            if project.project_leader and project.project_leader == user:
+                project_role.append('Project Leader')
+            
+            tasks = project.usertasks.filter(assignee=user)
+            if tasks.exists():
+                project_role.append('Assignee')
+
+            project_list.append({
+                'id': project.id,
+                'name': project.name,
+                'description': project.description,
+                'client': project.client.name,
+                'start_time': project.start_time,
+                'end_time': project.end_time,
+                'task_count': project.usertasks.count() + project.vendortasks.count(),
+                'roles': project_role
+            })
+        return project_list
     
 
 
@@ -178,11 +207,23 @@ class ProjectSerializer(serializers.ModelSerializer):
 class ProjectDetailsSerializer(serializers.ModelSerializer):
     has_ended = serializers.SerializerMethodField()
     project_leader = serializers.SerializerMethodField()
+    roles = serializers.SerializerMethodField()
     class Meta:
         model = Project
-        fields = ['name', 'organization', 'project_leader', 'client', 'description', 'has_ended']
+        fields = ['name', 'organization', 'project_leader', 'client', 'description', 'has_ended', 'roles']
         depth = 1
 
+    def get_roles(self, obj):
+        user = self.context['user']
+        designation = user.designations.get(organization=obj.organization)
+        project_role = []
+
+        if obj.project_leader and obj.project_leader == user:
+            project_role.append('Project Leader')
+        if designation and designation.role:
+            project_role.append(designation.role)
+        return project_role
+    
     def get_has_ended(self, obj):
         if obj.end_time and obj.end_time < datetime.now():
             return True

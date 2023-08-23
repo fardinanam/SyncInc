@@ -9,6 +9,7 @@ import { Grid, Typography } from '@mui/material';
 import SummaryCard from '../components/SummaryCard';
 import WorkIcon from '@mui/icons-material/Work';
 import notifyWithToast from '../utils/toast';
+import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
 
 import { baseUrl } from '../utils/config';
 import AuthContext from '../context/AuthContext';
@@ -98,7 +99,10 @@ const Organizations = () => {
                             name="Projects"
                             onClick={() => navigate(`/organization/${organization.id}/projects` ) }  
                         >
-                            <WorkIcon fontSize='large' color='primary' />
+                            {organization?.role && organization.role.toLowerCase() === "admin"
+                                ? <AdminPanelSettingsRoundedIcon fontSize='large' color='success' />
+                                : <WorkIcon fontSize='large' color='primary' />
+                            }
                         </SummaryCard>
                         </Grid>
                     ))

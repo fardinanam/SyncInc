@@ -11,7 +11,7 @@ import dayjs from 'dayjs';
 import UserInfo from './UserInfo';
 import { AddTaskModal } from './Modals';
 
-const CollapsibleTaskTable = ({title, initialTasks, role, organization_id, canAddTask}) => {
+const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canAddTask}) => {
     const [open, setOpen] = useState(true);
     const [isAssignTaskModalOpen, setIsAssignTaskModalOpen] = useState(false);
     const [modalData, setModalData] = useState({});
@@ -85,7 +85,7 @@ const CollapsibleTaskTable = ({title, initialTasks, role, organization_id, canAd
                         {title}
                 </Typography>
                 {
-                    canAddTask && String(role).toLowerCase() === "project leader" &&
+                    canAddTask && roles?.includes("Project Leader") &&
                     <Box 
                         display='flex'
                         flexDirection='column'
@@ -117,9 +117,6 @@ const CollapsibleTaskTable = ({title, initialTasks, role, organization_id, canAd
                     in={open}
                     timeout="auto"
                     unmountOnExit
-                    sx={{
-                        overflow: 'auto'
-                    }}
                 > 
                     <Divider />
                     { tasks.length > 0 ?
@@ -133,7 +130,7 @@ const CollapsibleTaskTable = ({title, initialTasks, role, organization_id, canAd
                             <TableCell  >Assignee</TableCell>
                             <TableCell  >Deadline</TableCell>
                             {
-                                String(role).toLowerCase() === "project leader" && 
+                                roles?.includes("project leader") && 
                                 <TableCell>Actions</TableCell>
                             }
                             <TableCell >status</TableCell>
@@ -161,7 +158,7 @@ const CollapsibleTaskTable = ({title, initialTasks, role, organization_id, canAd
                                             height: '2rem'
                                         }}
                                     />
-                                    : role === "Project Leader" ? <Button 
+                                    : roles?.includes("Project Leader") ? <Button 
                                         variant="outlined" 
                                         size="small"
                                         onClick={() => handleAssignTask(task)}
@@ -174,7 +171,7 @@ const CollapsibleTaskTable = ({title, initialTasks, role, organization_id, canAd
                             <TableCell  >{task.deadline? 
                                 dayjs(task.deadline).format('DD MMM, YYYY') : "No Deadline"}
                             </TableCell>
-                            {String(role).toLowerCase() === "project leader" && 
+                            {roles?.includes("project leader") && 
                                 <TableCell
                                     width='auto'
                                 >

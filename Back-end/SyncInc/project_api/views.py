@@ -16,7 +16,7 @@ def get_organizations(request):
 
         designations = user.designations.all()
         organizations = [designation.organization for designation in designations]
-        serializer = OrganizationSerializer(organizations, many=True)
+        serializer = OrganizationSerializer(organizations, many=True, context={'user': user})
         
         return Response({
             'message': f'Organizations of {user.username} fetched successfully',
@@ -98,17 +98,18 @@ def get_organization_projects(request, organization_id):
 
         organization = Organization.objects.get(id=organization_id)
 
-        serializer = OrganizationProjectsSerializer(organization)
+        serializer = OrganizationProjectsSerializer(organization, context={'user': user})
         data = serializer.data
-        designation = user.designations.filter(organization=organization).first()
-        role = designation.role
-        data['role'] = role
+        designation = Designation.objects.filter(organization=organization, employee=user).first()
 
         if not designation:
             return Response({
                 'message': 'You are not authorized to view this organization',
                 'data': None
             }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        role = designation.role
+        data['role'] = role
 
         return Response({
             'message': f'Projects of the organization {organization.name}',
@@ -568,33 +569,34 @@ def get_project(request, project_id):
         if not project:
             raise Exception('Project not found')
 
-        # check if the user is an admin of the organization
-        designation = user.designations.filter(organization=project.organization).first()
+        # # check if the user is an admin of the organization
+        # designation = user.designations.filter(organization=project.organization).first()
         
-        project_role = ''
+        # project_role = []
 
-        if project.project_leader == user:
-            project_role = 'Project Leader'
-        elif designation and designation.role == 'Admin':
-            project_role = 'Admin'
-        elif designation and designation.role == 'Employee':
-            project_role = 'Employee'
-        else:
+        # if project.project_leader == user:
+        #     project_role.append('Project Leader')
+        # if designation and designation.role:
+        #     project_role.append(designation.role)
+        # else:
+        #     return Response({
+        #         'message': 'You are not authorized to view this project',
+        #         'data': None
+        #     }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        serializer = ProjectDetailsSerializer(project, context={'user': user})
+        
+        # serializer.data['project_role'] = project_role
+
+        if serializer.data['roles'] == None:
             return Response({
                 'message': 'You are not authorized to view this project',
                 'data': None
             }, status=status.HTTP_401_UNAUTHORIZED)
         
-        serializer = ProjectDetailsSerializer(project)
-        
-        serializer.data['project_role'] = project_role
-        
         return Response({
             'message': 'Project details',
-            'data': {
-                'project': serializer.data, 
-                'role': project_role
-            }
+            'data': serializer.data
 
         }, status=status.HTTP_200_OK)
     except Exception as e:

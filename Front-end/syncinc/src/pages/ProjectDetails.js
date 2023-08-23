@@ -15,12 +15,12 @@ import UserInfo from "../components/UserInfo";
 const ProjectDetails = () => {
     const { id } = useParams();
     const { setLoading } = useLoading();
-    const { authTokens } = useContext(AuthContext);
+    const { authTokens, user } = useContext(AuthContext);
     const navigate = useNavigate();
     const [project, setProject] = useState({});
     const [userTasks, setUserTasks] = useState([]);
     const [vendorTasks, setVendorTasks] = useState([]);
-    const [role, setRole] = useState("");
+    const [roles, setRoles] = useState([]);
     const [openAssignProjectLeaderModal, setOpenAssignProjectLeaderModal] = useState(false);
 
     const fetchProjectDetails = async () => {
@@ -38,9 +38,9 @@ const ProjectDetails = () => {
                 `${baseUrl}get_project/${id}`,
                 config
             )
-            
-            setProject(response.data.data.project);
-            setRole(response.data.data.role);
+
+            setProject(response.data.data);
+            setRoles(response.data.data.roles);
             response = await axios.get(
                 `${baseUrl}user_tasks/${id}`,
                 config,
@@ -62,11 +62,19 @@ const ProjectDetails = () => {
     }
 
     const handleProjectLeaderModalClose = (project_leader) => {
+        console.log(project_leader);
         if (project_leader) {
             setProject(prevState => ({
                 ...prevState,
-                project_leader: project_leader
+                project_leader: project_leader,
             }));
+            
+            if(project_leader.username === user.username) {
+                setRoles(prevState => ([
+                    ...prevState,
+                    "Project Leader"
+                ]));
+            }
         }
         setOpenAssignProjectLeaderModal(false);
     }
@@ -117,8 +125,7 @@ const ProjectDetails = () => {
                         </> :
                         <>
                             {
-                            
-                                role === "Admin" ?
+                                roles.includes("Admin") ?
                                 <>
                                 <Button 
                                     size="small" 
@@ -133,6 +140,7 @@ const ProjectDetails = () => {
                                     memberType="project_leader"
                                     open={openAssignProjectLeaderModal}
                                     handleClose={handleProjectLeaderModalClose}
+                                    title="Assign Project Leader"
                                 />
                                 </>
                                 :
@@ -157,9 +165,9 @@ const ProjectDetails = () => {
             <CollapsibleTaskTable 
                 title="User Tasks"
                 initialTasks={userTasks}
-                role={role}
+                roles={roles}
                 organization_id={project?.organization?.id}
-                canAddTask={!project.has_ended && role === "Project Leader" ? true : false}
+                canAddTask={!project?.has_ended && roles?.includes("Project Leader") ? true : false}
             />
         </>
     );
