@@ -25,11 +25,9 @@ const OrganizationProjects = () => {
     const [completedProjects, setCompletedProjects] = useState([]);
 
     const categorizeProjects = (projects) => {
-   
+
         //projects that have no tasks is assigned to newProjects
         const today = new Date();
-        console.log(today);
-        console.log(projects);
         setNewProjects(projects.filter(project => project.task_count === 0));
 
         //projects that have tasks and if its end_time exists it is smaller than current date is assigned to projectsInProgress
@@ -53,9 +51,9 @@ const OrganizationProjects = () => {
                 }  
 
             )
-            setOrganizationName(response.data.data.name);
-            setRole(response.data.data.role)
-            categorizeProjects(response.data.data.projects);
+            setOrganizationName(response.data?.data?.name);
+            setRole(response.data?.data?.role)
+            categorizeProjects(response.data?.data?.projects);
         } catch (error) {
             navigate(-1);
             notifyWithToast("error", error.response.data.message);

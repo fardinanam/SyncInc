@@ -44,17 +44,17 @@ const AuthProvider = ({ children }) => {
                 body, config
             );
 
-            let data = await response.data;
+            let data = response.data;
 
             if (response.status === 200) {
                 setAuthTokens(data);
-                setUser(jwt_decode(data.access)); // decode the JWT token
+                setUser(jwt_decode(data?.access)); // decode the JWT token
                 localStorage.setItem('authTokens', JSON.stringify(data));
                 navigate('/dashboard');
             }
         } catch (error) {
             navigate('/login');
-            notifyWithToast("error", error.response.data.message);
+            notifyWithToast("error", error.response?.data?.message);
         }
 
         setLoading(false);

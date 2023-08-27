@@ -44,7 +44,7 @@ export default function ClippedDrawer() {
             setNumProjects(response.data?.data?.numProjects);
             setNumTasks(response.data?.data?.numTasks);
         } catch (error) {
-            console.log(error.response.data?.message);
+            console.log(error.response?.data?.message);
         }
         setLoading(false);
     }

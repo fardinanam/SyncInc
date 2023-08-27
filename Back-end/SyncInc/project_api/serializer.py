@@ -76,11 +76,16 @@ class OrganizationProjectsSerializer(serializers.ModelSerializer):
 
     def get_projects(self, obj):
         user = self.context['user']
-        
+        designation = Designation.objects.filter(organization = obj, employee = user).first()
+
         projects = obj.projects.all()
         project_list = []
         for project in projects:
             project_role = []
+
+            if designation and designation.role == "Admin":
+                project_role.append('Admin')
+                
             if project.project_leader and project.project_leader == user:
                 project_role.append('Project Leader')
             
