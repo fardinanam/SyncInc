@@ -4,11 +4,13 @@ import { useLoading } from "../context/LoadingContext";
 import axios from "axios";
 
 import { Box, Button, Grid } from "@mui/material";
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import AuthContext from '../context/AuthContext';
 import { baseUrl } from "../utils/config";
 import TitleBar from "../components/TitleBar";
 import ProjectsStack from '../components/ProjectsStack';
 import OrganizationNavMenu from "../components/OrganizationNavMenu";
+import notifyWithToast from "../utils/toast";
 
 const OrganizationProjects = () => {
     const  { id } = useParams();
@@ -23,11 +25,9 @@ const OrganizationProjects = () => {
     const [completedProjects, setCompletedProjects] = useState([]);
 
     const categorizeProjects = (projects) => {
-   
+
         //projects that have no tasks is assigned to newProjects
         const today = new Date();
-        console.log(today);
-        console.log(projects);
         setNewProjects(projects.filter(project => project.task_count === 0));
 
         //projects that have tasks and if its end_time exists it is smaller than current date is assigned to projectsInProgress
@@ -51,12 +51,12 @@ const OrganizationProjects = () => {
                 }  
 
             )
-            setOrganizationName(response.data.data.name);
-            setRole(response.data.data.role)
-            categorizeProjects(response.data.data.projects);
+            setOrganizationName(response.data?.data?.name);
+            setRole(response.data?.data?.role)
+            categorizeProjects(response.data?.data?.projects);
         } catch (error) {
-            console.log(error.response.data.message);
-            // window.location.href = '/organizations';
+            navigate(-1);
+            notifyWithToast("error", error.response.data.message);
         }
         setLoading(false);
     }
@@ -76,7 +76,9 @@ const OrganizationProjects = () => {
             {
                 role === 'Admin' &&
                 <Box display="flex" justifyContent="flex-end" m={1}>
-                    <Button variant="contained" onClick={() => {navigate(`/organization/${id}/add-project`)}}>Add New Project</Button>
+                    <Button variant="contained" onClick={() => {navigate(`/organization/${id}/add-project`)}}>
+                        <AddRoundedIcon/> Project
+                    </Button>
                 </Box>
             }
             <Grid  
@@ -94,7 +96,6 @@ const OrganizationProjects = () => {
                 </Grid>
             </Grid>
         </>
-          
     );
 };
 

@@ -4,7 +4,7 @@ import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { IconButton } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
+import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
 
 const NavMenu = (props) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -32,7 +32,7 @@ const NavMenu = (props) => {
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}
       >
-        <MenuIcon />
+        <MoreVertRoundedIcon />
       </IconButton>
       <Menu
         id="basic-menu"

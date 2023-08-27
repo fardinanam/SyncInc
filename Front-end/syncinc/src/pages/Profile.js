@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react"
+import { useState, useEffect, useContext, useLayoutEffect } from "react"
 import axios from "axios"
 
 import { Avatar, Box, Typography, Chip, Grid, Paper, Stack } from "@mui/material"
@@ -163,7 +163,7 @@ const Profile = () => {
         setLoading(false);
     }
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         fetchProfileInfo();
     }, [])
 

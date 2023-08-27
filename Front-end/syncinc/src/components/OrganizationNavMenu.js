@@ -1,5 +1,6 @@
 import NavMenu from './NavMenu';
 import { useNavigate } from 'react-router-dom';
+import { Box } from '@mui/material';
 
 const OrganizationNavMenu = ({organization_id}) => {
     const navigate = useNavigate();
@@ -15,7 +16,14 @@ const OrganizationNavMenu = ({organization_id}) => {
     }
 
     return (
-        <NavMenu menuItems={menuItems} handleMenuSelect={handleMenuSelect}/>
+        <Box 
+            diplay="flex" 
+            direction="column"
+            justifyContent="center"
+            alignItems="center"
+        >
+            <NavMenu menuItems={menuItems} handleMenuSelect={handleMenuSelect}/>
+        </Box>
     );
 }
 
