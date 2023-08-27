@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import { Typography, Box, Chip } from "@mui/material";
@@ -9,7 +10,18 @@ const ProjectCard = (props) => {
     const theme = useTheme();
     const backgroundColor = theme.palette.main[theme.palette.mode]
 
-    const {name, client, description, children, disabled, roles} = props;
+    const {name, client, description, children, roles} = props;
+    const [disabled, setDisabled] = useState(true);
+
+    
+    useEffect(() => {
+        console.log(roles);
+        if (roles?.includes("Project Leader") || roles?.includes("Assignee") || roles?.includes("Admin")) {
+            setDisabled(false);
+        }
+    }, [roles])
+        
+
     return (
         <Card
             elevation={0}

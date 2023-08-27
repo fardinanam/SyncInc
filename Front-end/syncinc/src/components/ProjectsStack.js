@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Grid, Stack, Typography, Paper, Collapse, IconButton } from '@mui/material';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
@@ -9,6 +9,10 @@ const ProjectsStack = ({title, projects}) => {
     const [open, setOpen] = useState(true);
     const navigate = useNavigate()
 
+    useEffect(() => {
+        console.log(projects);
+    }, [projects])
+    
     return (
         <>
             <Paper
@@ -44,7 +48,6 @@ const ProjectsStack = ({title, projects}) => {
                             client={project.client}
                             description={project.description}
                             roles={project?.roles}
-                            disabled={project?.roles?.length === 0}
                             onClick={() => navigate(`/project/${project.id}`)}
                         />
                         
