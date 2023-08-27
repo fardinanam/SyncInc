@@ -3,7 +3,6 @@ import CardContent from '@mui/material/CardContent';
 import { Typography, Box, Chip } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import notifyWithToast from '../utils/toast';
-import ListChips from './ListChips';
 import LockRoundedIcon from '@mui/icons-material/LockRounded';
 
 const ProjectCard = (props) => {
@@ -40,13 +39,13 @@ const ProjectCard = (props) => {
                     variant="h5"
                     fontWeight={'bold'}
                 >
-                    {name}
+                    {name && name}
                 </Typography>
-                {roles.length > 0 ? 
-                    roles.includes("Project Leader") ?
+                {roles?.length > 0 ? 
+                    roles?.includes("Project Leader") ?
                     <Chip color='success' label="Leader" size='small' /> :
                     <Chip color='primary' label="Member" size='small' /> :
-                    <LockRoundedIcon color='disabled'/>
+                    <LockRoundedIcon color='disabled' size='small'/>
                 }
                 </Box>
                 <Typography
@@ -63,7 +62,7 @@ const ProjectCard = (props) => {
                     }}
                     color="text.secondary" gutterBottom
                 >
-                    {description}
+                    {description && description}
                 </Typography>
             </CardContent>
         </Card>

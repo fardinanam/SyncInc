@@ -180,7 +180,7 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                                 </TableCell>
                             }
                             <TableCell  >
-                                <Chip size='small' label={task.status} color={task.status === "Completed" ? "success" : task.status=="Overdue" || task.status=="Rejected" ? "error" : "warning"} />
+                                <Chip size='small' label={task.status} color={task.status === "Completed" || task.status === "In Progress" ? "success" : task.status=="Overdue" || task.status=="Rejected" ? "error" : "warning"} />
                             </TableCell>
                         </TableRow>
                         ))}
