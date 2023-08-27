@@ -1,4 +1,4 @@
-import {  useEffect, useState, useContext } from 'react';
+import {  useEffect, useState } from 'react';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
@@ -180,7 +180,7 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                                 </TableCell>
                             }
                             <TableCell  >
-                                <Chip size='small' label={task.status} color={task.status === "Completed" || task.status === "In Progress" ? "success" : task.status=="Overdue" || task.status=="Rejected" ? "error" : "warning"} />
+                                <Chip size='small' label={task.status} color={task.status === "Completed" || task.status === "In Progress" ? "success" : task.status === "Overdue" || task.status === "Rejected" ? "error" : "warning"} />
                             </TableCell>
                         </TableRow>
                         ))}

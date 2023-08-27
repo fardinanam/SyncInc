@@ -1,4 +1,4 @@
-import { useEffect, useContext, useState } from "react";
+import { useLayoutEffect, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, Stack } from "@mui/material"
 import SummaryCard from "../components/SummaryCard";
@@ -38,7 +38,7 @@ const Tasks = () => {
         setLoading(false);
     }
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         fetchTasks();
     }, []);
 
@@ -68,24 +68,24 @@ const Tasks = () => {
                 {
                     tasks.map((task) => {
                         let count = dayjs(task.deadline).diff(dayjs(), 'day');
-                        let name = count == 1 ? "Day Left" : "Days Left";
+                        let name = count === 1 ? "Day Left" : "Days Left";
 
                         // if day is 0 then convert to hour
-                        if (count == 0) {
+                        if (count === 0) {
                             count = dayjs(task.deadline).diff(dayjs(), 'hour');
-                            name = count == 1 ? "Hour Left" : "Hours";
+                            name = count === 1 ? "Hour Left" : "Hours";
                         }
                         
                         // if hour is 0 then convert to minute
-                        if (count == 0) {
+                        if (count === 0) {
                             count = dayjs(task.deadline).diff(dayjs(), 'minute');
-                            name = count == 1 ? "Minute Left" : "Minutes Left";
+                            name = count === 1 ? "Minute Left" : "Minutes Left";
                         }
 
                         // if value is negative then show overdue
                         if (count < 0) {
                             count = dayjs().diff(task.deadline, 'day');
-                            name = count == 1 ? "Day Overdued" : "Days Overdued";
+                            name = count === 1 ? "Day Overdued" : "Days Overdued";
                         }
                         return (<SummaryCard
                             title={task.name}
