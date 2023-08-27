@@ -5,19 +5,17 @@ import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import { Avatar, ToggleButton, Autocomplete, TextField, Checkbox } from "@mui/material";
-import CheckIcon from '@mui/icons-material/Check';
+import { Avatar, Checkbox, TextField } from "@mui/material";
 import { baseUrl } from '../utils/config';
 import AuthContext from '../context/AuthContext';
 import axios from "axios";
-import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import notifyWithToast from "../utils/toast";
 import { useLoading } from "../context/LoadingContext";
-import NameAvatar from "./NameAvatar";
 import SearchSuggestion from "./SearchSuggestion";
 import { IconButton } from "@mui/material";
 import ClearIcon from '@mui/icons-material/Clear';
@@ -53,7 +51,13 @@ const AddMemberModal = ( props ) => {
         const inputText = event.target.value;
         if (inputText?.trim() !== '') {
             setFilteredOptions(
-                options.filter(option => option.username.toLowerCase().includes(inputText.toLowerCase()))
+                options.filter(option => {
+                    return option.username.toLowerCase().includes(inputText.toLowerCase()) 
+                        || option.first_name?.toLowerCase().includes(inputText.toLowerCase() 
+                        || option.last_name?.toLowerCase().includes(inputText.toLowerCase()) 
+                        || option.email?.toLowerCase().includes(inputText.toLowerCase())) 
+                        || option.name?.toLowerCase().includes(inputText.toLowerCase())
+                }) 
             );
         } else {
             setFilteredOptions([])
@@ -136,7 +140,7 @@ const AddMemberModal = ( props ) => {
 
                 handleClose(response.data.data);
                 if(memberType === "employee")
-                    notifyWithToast("success",memberType+" invited successfully");
+                    notifyWithToast("success", "Employee invited successfully");
                 else
                     notifyWithToast("success",memberType+" added successfully");
             } catch (error) {
@@ -160,7 +164,7 @@ const AddMemberModal = ( props ) => {
                     
                 >
                     <Typography id="parent-modal-title" variant="h5" align="center">
-                        Add Member
+                        {props.title? props.title : "Add Member"}
                     </Typography>
                     <Box
                     component="form"

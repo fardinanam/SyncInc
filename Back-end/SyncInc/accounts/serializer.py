@@ -79,7 +79,7 @@ class ProfilePictureSerializer(serializers.ModelSerializer):
             
             user = self.context['user']
 
-            filename = f'profile_pictures/{user.username}/{uuid.uuid4()}.jpg'
+            filename = f'profile_pictures/{user.username}/{profile_picture.name}'
             storage.child(filename).put(profile_picture)
             url = storage.child(filename).get_url(None)
             print(url)

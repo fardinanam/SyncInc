@@ -7,7 +7,8 @@ const TitleBar = ({title, subtitle, children}) => {
                     p: 2,
                     display: 'flex',
                     flexDirection: 'row',
-                    borderRadius: "0.5rem"
+                    borderRadius: "0.5rem",
+                    mb: 2,
                 }}
                 elevation={0}
             >

@@ -38,11 +38,11 @@ function App() {
                         <Route path="/register" element={<Register />} />
                         <Route path="/forgot-password" element={<ForgotPassword />} />
                         <Route path="/reset-password/:username/:token" element={<ResetPassword />} />
-                        <Route path="/" element={<Navigate to={"/dashboard"} />} />
                         <Route path="*" element={
                             <RequireAuth>
                                 <MainLayout>
                                     <Routes>
+                                        <Route path="/" element={<Navigate to="/dashboard" />} />
                                         <Route path="*" element={<ErrorPage />} />
                                         <Route path="/profile" element={<Profile />} exact />
                                         <Route path="/invites" element={<Invites />} exact />

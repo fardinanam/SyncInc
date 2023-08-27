@@ -23,10 +23,6 @@ const OrganizationDetails = (props) => {
     const { authTokens } = useContext(AuthContext);
     const navigate = useNavigate();
     const { id } = useParams();
-    
-    // const location = useLocation();
-    // const locationData = location.state.organization;
-   
 
     const [selectedValue, setSelectedValue] = useState('projects');
     const [organization, setOrganization] = useState();
@@ -45,10 +41,10 @@ const OrganizationDetails = (props) => {
 
             )
             
-            setOrganization(response.data.data);
+            setOrganization(response.data?.data);
             
         } catch (error) {
-            console.log(error.response.data.message);
+            console.log(error.response?.data?.message);
         }
     }
 

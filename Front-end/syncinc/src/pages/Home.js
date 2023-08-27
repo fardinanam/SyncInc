@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { useNavigate } from 'react-router-dom';
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useLayoutEffect } from 'react';
 import SummaryCard from '../components/SummaryCard';
 import { Grid } from '@mui/material';
 import FormatListNumberedRtlRoundedIcon from '@mui/icons-material/FormatListNumberedRtlRounded';
@@ -21,7 +21,7 @@ export default function ClippedDrawer() {
     const [numProjects, setNumProjects] = useState([]);
     const [numTasks, setNumTasks] = useState([]);
     const {setLoading} = useLoading();
-    useEffect(() => {
+    useLayoutEffect(() => {
         fetchNumberItems();
     }, []);
 
@@ -39,12 +39,12 @@ export default function ClippedDrawer() {
                 }  
 
             )
-            console.log(response.data.data);
-            setNumOrganizations(response.data.data.numOrganizations);
-            setNumProjects(response.data.data.numProjects);
-            setNumTasks(response.data.data.numTasks);
+            
+            setNumOrganizations(response.data?.data?.numOrganizations);
+            setNumProjects(response.data?.data?.numProjects);
+            setNumTasks(response.data?.data?.numTasks);
         } catch (error) {
-            console.log(error.response.data.message);
+            console.log(error.response?.data?.message);
         }
         setLoading(false);
     }
@@ -54,7 +54,7 @@ export default function ClippedDrawer() {
         <>
             <Box>
                 <Typography variant='h5' sx={{ fontWeight: 'bold' }}>
-                    Your Dashboard
+                    Dashboard
                 </Typography>
             </Box>
             <Grid  

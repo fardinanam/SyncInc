@@ -1,24 +1,24 @@
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useState, useLayoutEffect } from 'react';
 import jwt_decode from 'jwt-decode';
 import { baseUrl } from '../utils/config';
 import { useNavigate } from 'react-router-dom';
 import { refreshTokenDelay } from '../utils/config';
 import notifyWithToast from '../utils/toast';
 import { useLoading } from './LoadingContext';
+import axios from 'axios';
 
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
+    let [isStarting, setIsStarting] = useState(true); // to call updateToken() on start
     let [authTokens, setAuthTokens] = useState(() => 
             localStorage.getItem('authTokens') 
             ? JSON.parse(localStorage.getItem('authTokens')) 
             : null
         );
-    let [user, setUser] = useState(() => 
-            localStorage.getItem('authTokens') 
-            ? jwt_decode(localStorage.getItem('authTokens')) 
-            : null
-        );
+    let [user, setUser] = useState(
+        () => authTokens ? jwt_decode(authTokens.access) : null
+    );
     
     const {setLoading} = useLoading();
 
@@ -27,27 +27,34 @@ const AuthProvider = ({ children }) => {
     const loginUser = async (e) => {
         e.preventDefault();
         setLoading(true);
-        let response = await fetch(baseUrl + 'accounts/login/', {
-            method: 'POST',
+
+        const config = {
             headers: {
                 'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                'email': e.target.email.value,
-                'password': e.target.password.value
-            })
-        });
-        
-        let data = await response.json();
+            }
+        }
 
-        if (response.status === 200) {
-            setAuthTokens(data);
-            setUser(jwt_decode(data.access)); // decode the JWT token
-            localStorage.setItem('authTokens', JSON.stringify(data));
-            navigate('/dashboard');
-        } else {
+        const body = JSON.stringify({
+            'email': e.target.email.value,
+            'password': e.target.password.value
+        });
+
+        try {
+            let response = await axios.post(baseUrl + 'accounts/login/', 
+                body, config
+            );
+
+            let data = response.data;
+
+            if (response.status === 200) {
+                setAuthTokens(data);
+                setUser(jwt_decode(data?.access)); // decode the JWT token
+                localStorage.setItem('authTokens', JSON.stringify(data));
+                navigate('/dashboard');
+            }
+        } catch (error) {
             navigate('/login');
-            notifyWithToast("error", data.message);
+            notifyWithToast("error", error.response?.data?.message);
         }
 
         setLoading(false);
@@ -62,26 +69,31 @@ const AuthProvider = ({ children }) => {
 
     const updateToken = async () => {
         if (authTokens && authTokens.refresh) {
-            // setLoading(true);   
-            let response = await fetch(baseUrl + 'accounts/token/refresh/', {
-                method: 'POST',
+            const config = {
                 headers: {
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({'refresh': authTokens?.refresh})
-            })
-
-            let data = await response.json();
-
-            if (response.status === 200) {
-                setAuthTokens(data);
-                setUser(jwt_decode(data.access));
-                localStorage.setItem('authTokens', JSON.stringify(data));
-            } else {
-                logoutUser();
+                }
             }
 
-            // setLoading(false);
+            const body = JSON.stringify({'refresh': authTokens?.refresh});
+
+            try {
+                let response = await axios.post(baseUrl + 'accounts/token/refresh/', 
+                    body,
+                    config 
+                )
+
+                let data = await response.data;
+
+                if (response.status === 200) {
+                    setAuthTokens(data);
+                    localStorage.setItem('authTokens', JSON.stringify(data));
+                    setUser(jwt_decode(data.access));
+                } 
+            } catch (error) {
+                console.log("Error refreshing token");
+                logoutUser();
+            }
         }
     }
 
@@ -93,20 +105,25 @@ const AuthProvider = ({ children }) => {
         logoutUser: logoutUser
     }
 
+    useLayoutEffect(() => {
+        console.log("Should be called first");
+        if (isStarting) {
+            console.log("should be here then");
+            setLoading(true);
+            updateToken();
+            setLoading(false);
+            setIsStarting(false);
+        }}
+        , [isStarting])
+
     useEffect(() => {
         const interval = setInterval(updateToken, refreshTokenDelay);
         return () => clearInterval(interval);
     }, [authTokens]);
 
-    useEffect(() => {
-        setLoading(true);
-        updateToken();
-        setLoading(false);
-    }, []);
-
     return (
         <AuthContext.Provider value={contextData}>
-            {children}
+            {!isStarting && children}
         </AuthContext.Provider>
     )
 }
