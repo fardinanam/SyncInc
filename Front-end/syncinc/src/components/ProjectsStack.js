@@ -7,11 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 const ProjectsStack = ({title, projects}) => {
     const [open, setOpen] = useState(true);
-    const navigate = useNavigate()
-
-    useEffect(() => {
-        console.log(projects);
-    }, [projects])
+    const navigate = useNavigate();
     
     return (
         <>

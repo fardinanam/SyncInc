@@ -106,9 +106,7 @@ const AuthProvider = ({ children }) => {
     }
 
     useLayoutEffect(() => {
-        console.log("Should be called first");
         if (isStarting) {
-            console.log("should be here then");
             setLoading(true);
             updateToken();
             setLoading(false);

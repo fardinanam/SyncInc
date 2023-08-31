@@ -29,7 +29,6 @@ const Tasks = () => {
         setLoading(true);
         try {
             const response = await axios.get(`${baseUrl}get_all_tasks_of_user/`, config);
-
             setTasks(response.data.data);
         } catch {
             notifyWithToast('error', 'Failed to fetch tasks');
@@ -53,7 +52,7 @@ const Tasks = () => {
                     sx={{ fontWeight: 'bold' }}
                     flexGrow={1}
                 >
-                    Your Tasks
+                    My Tasks
                 </Typography>
             </Box>
             <Stack
@@ -63,7 +62,8 @@ const Tasks = () => {
                 alignItems='flex-start'
                 sx={{ marginTop: '1rem' }}
                 flexWrap='wrap'
-                spacing={2}
+                rowGap={2}
+                columnGap={2}
             >
                 {
                     tasks.map((task) => {

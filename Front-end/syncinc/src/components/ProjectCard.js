@@ -18,7 +18,6 @@ const ProjectCard = (props) => {
 
     
     useEffect(() => {
-        console.log(roles);
         if (roles?.includes("Project Leader") || roles?.includes("Assignee") || roles?.includes("Admin")) {
             setDisabled(false);
         }
@@ -64,7 +63,7 @@ const ProjectCard = (props) => {
                         spacing={0.5}
                     >
                         {roles?.includes("Admin") && <Tooltip title="Admin"> 
-                                <AdminPanelSettingsIcon size="small" color='success'/>
+                                <AdminPanelSettingsIcon size="small" color='primary'/>
                             </Tooltip>
                         }
                         {roles?.includes("Project Leader") && <Tooltip title="Leader"> 
@@ -72,7 +71,7 @@ const ProjectCard = (props) => {
                             </Tooltip>
                         }
                         {roles?.includes("Assignee") && <Tooltip title="Assignee">
-                                <SupervisedUserCircleIcon size="small" color='secondary'/>
+                                <SupervisedUserCircleIcon size="small" color='primary'/>
                             </Tooltip>
                         }
                     </Stack>

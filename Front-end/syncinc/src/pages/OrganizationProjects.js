@@ -25,7 +25,6 @@ const OrganizationProjects = () => {
     const [completedProjects, setCompletedProjects] = useState([]);
 
     const categorizeProjects = (projects) => {
-        console.log(projects);
         //projects that have no tasks is assigned to newProjects
         const today = new Date();
         setNewProjects(projects.filter(project => project.task_count === 0));

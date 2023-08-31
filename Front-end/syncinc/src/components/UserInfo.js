@@ -19,16 +19,16 @@ const UserInfo = ({sx, userInfo}) => {
 
     useEffect(() => {
         if (userInfo) {
-            if (userInfo.profile_picture) {
-                setProfilePicUrl(userInfo.profile_picture);
+            if (userInfo?.profile_picture) {
+                setProfilePicUrl(userInfo?.profile_picture);
             }
 
-            if (userInfo.name)
-                setName(userInfo.name);
-            else if (userInfo.first_name && userInfo.last_name)
-                setName(userInfo.first_name + ' ' + userInfo.last_name);
+            if (userInfo?.name)
+                setName(userInfo?.name);
+            else if (userInfo?.first_name && userInfo?.last_name)
+                setName(userInfo?.first_name + ' ' + userInfo.last_name);
             else 
-                setName(userInfo.username);
+                setName(userInfo?.username);
         }
     }, [userInfo]);
 
