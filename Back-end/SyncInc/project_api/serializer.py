@@ -8,13 +8,16 @@ from django.utils import timezone
 class OrganizationSerializer(serializers.ModelSerializer):
     num_projects = serializers.SerializerMethodField()
     num_members = serializers.SerializerMethodField()
-    role = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Organization
         fields = ['id', 'name', 'num_projects', 'num_members', 'role']
     
     def get_role(self, obj):
+        if not self.context.get('user'):
+            return None
+        
         user = self.context['user']
         designation = user.designations.get(organization=obj)
         if designation and designation.role:

@@ -39,7 +39,7 @@ def get_organization(request, organization_id):
 
         designations = user.designations.all()
         organization = Organization.objects.get(id=organization_id)
-        serializer = OrganizationSerializer(organization)
+        serializer = OrganizationSerializer(organization, context={'user': user})
         
         return Response({
             'message': f'Organization {organization.name} fetched successfully',
@@ -217,7 +217,9 @@ def create_organization(request):
         data = request.data
         data['username'] = username
         
-        serializer = OrganizationSerializer(data=data)
+        user = User.objects.get(username=username)
+
+        serializer = OrganizationSerializer(data=data, context={'user': user})
 
         if not serializer.is_valid():
             print(serializer.errors)
