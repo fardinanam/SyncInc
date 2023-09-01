@@ -67,7 +67,7 @@ export default function ClippedDrawer() {
                     item
                 >
                 <DashboardCard
-                    title="Your Organizations"
+                    title="My Organizations"
                     count={numOrganizations}
                     name="Organizations Managed"  
                     onClick={() => navigate('/organizations')}
@@ -82,7 +82,7 @@ export default function ClippedDrawer() {
                     item
                 >
                 <DashboardCard
-                    title="Your Projects"
+                    title="My Projects"
                     count={numProjects}
                     name="Projects Led"
                     onClick={() => navigate('/projects')}   
@@ -97,7 +97,7 @@ export default function ClippedDrawer() {
                     item
                 >
                 <DashboardCard
-                    title="Your Tasks"
+                    title="My Tasks"
                     count={numTasks}
                     name="Tasks Assigned"
                     onClick={() => navigate('/tasks')}

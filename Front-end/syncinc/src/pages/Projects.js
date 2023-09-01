@@ -43,7 +43,7 @@ const Projects = () => {
                         variant='h5'
                         sx={{ fontWeight: 'bold' }}
                     >
-                        Your Projects
+                        My Projects
                     </Typography>
             </Box>
             <Grid  

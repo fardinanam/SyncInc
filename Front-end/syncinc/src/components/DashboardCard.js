@@ -12,7 +12,7 @@ const DashboardCard = (props) => {
     return (
         <Card
             sx={{
-                borderRadius: 4,
+                borderRadius: '0.5rem',
                 width: 250,
                 '&:hover': {
                     cursor: 'pointer',

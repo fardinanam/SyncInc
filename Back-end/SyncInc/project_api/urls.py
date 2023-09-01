@@ -32,4 +32,5 @@ urlpatterns = [
     path('assign_project_leader/<int:project_id>/', views.assign_project_leader, name='assign_project_leader'),
     path('get_all_tasks_of_user/', views.get_all_tasks_of_user, name='get_all_tasks_of_user'),
     path('get_user_task/<int:task_id>/', views.get_user_task, name='get_task'),
+    path('update_user_task_details/<int:task_id>/', views.update_user_task_details, name='update_task'),
 ]
