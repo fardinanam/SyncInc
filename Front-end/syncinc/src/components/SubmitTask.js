@@ -147,7 +147,7 @@ const SubmitTask = ({task, onSubmitSuccess}) => {
                             }}
                         />
                     <Typography>
-                        Drag and drop files here, or click to select files
+                        Drag and drop a file here, or click to select a file
                     </Typography>
                     </>
                     }

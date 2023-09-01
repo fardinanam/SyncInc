@@ -376,6 +376,8 @@ const TaskDetails = () => {
                     </Box>
                 </InfoSection>
             }
+            { (task?.status === "Completed" ||
+            task?.status === "Rejected") &&
                 <Box
                     display='flex'
                     flexDirection='column'
@@ -420,7 +422,8 @@ const TaskDetails = () => {
                         value={rating} 
                         readOnly 
                     />  
-                </Box>                                    
+                </Box>  
+            }                                  
         </Stack>
         </>
     )
