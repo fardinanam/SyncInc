@@ -8,7 +8,7 @@ import { baseUrl } from "../utils/config"
 import AuthContext from "../context/AuthContext"
 import { useTheme } from "@mui/material/styles"
 
-import EditButton from "../components/EditButton"
+import { Button } from "@mui/material"
 import { EditProfilePicModal, EditPersonalInfoModal, EditAddressModal, ChangePasswordModal, AddTagModal } from "../components/Modals"
 import { useLoading } from "../context/LoadingContext"
 import ListChips from "../components/ListChips";
@@ -202,13 +202,14 @@ const Profile = () => {
                             display={"flex"}
                             alignItems={"center"}
                         >
-                            <EditButton 
+                            <Button 
                                 variant="outlined"
                                 size="small"
                                 onClick={handleEditProfilePicModalOpen}
+                                endIcon={<EditRoundedIcon fontSize="small" />}
                             >
-                                Edit <EditRoundedIcon fontSize="small"/>
-                            </EditButton>
+                                Edit 
+                            </Button>
                             <EditProfilePicModal 
                                 isOpen={isProfilePicModalOpen}
                                 handleClose={handleEditProfilePicModalClose}
@@ -232,11 +233,12 @@ const Profile = () => {
                         >
                             Personal Information
                         </Typography>
-                        <EditButton 
+                        <Button 
                             variant="outlined" 
                             size="small"
                             onClick={handleEditPersonalInfoModalOpen}
-                        >Edit <EditRoundedIcon fontSize="small" /> </EditButton>
+                            endIcon={<EditRoundedIcon fontSize="small" />}
+                        >Edit </Button>
                         <EditPersonalInfoModal
                             isOpen={isEditPersonalInfoModalOpen}
                             handleClose={handleEditPersonalInfoModalClose}
@@ -290,14 +292,14 @@ const Profile = () => {
                         >
                             Expertise
                         </Typography>
-                        <EditButton
+                        <Button
                             variant="outlined"
                             size="small"
                             onClick={handleAddTagModalOpen}
+                            endIcon={<EditRoundedIcon fontSize="small" />}
                         >
                             Edit
-                            <EditRoundedIcon fontSize="small" />
-                        </EditButton>
+                        </Button>
                         <AddTagModal 
                             tags={profileInfo.tags}
                             isOpen={isAddTagModalOpen}
@@ -327,14 +329,14 @@ const Profile = () => {
                         >
                             Address
                         </Typography>
-                        <EditButton
+                        <Button
                             variant="outlined"
                             size="small"
                             onClick={handleEditAddressModalOpen}
+                            endIcon={<EditRoundedIcon fontSize="small" />}
                         >
                             Edit 
-                            <EditRoundedIcon fontSize="small" /> 
-                        </EditButton>
+                        </Button>
                         <EditAddressModal 
                             isOpen={isEditAddressModalOpen}
                             handleClose={handleEditAddressModalClose}
@@ -429,14 +431,14 @@ const Profile = () => {
                         >
                             Account Security
                         </Typography>
-                        <EditButton
+                        <Button
                             variant="outlined"
                             size="small"
                             onClick={handleChangePassModalOpen}
+                            endIcon={<EditRoundedIcon fontSize="small" />}
                         >
                             Edit
-                            <EditRoundedIcon fontSize="small" />
-                        </EditButton>
+                        </Button>
                         <ChangePasswordModal
                             isOpen={isChangePassModalOpen}
                             handleClose={handleChangePassModalClose}

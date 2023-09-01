@@ -10,6 +10,7 @@ const InfoSection = ({title, children}) => {
         >
             <Box 
                 display='flex'
+                mb={1}
             >
                 <Typography
                     fontWeight={"bold"}

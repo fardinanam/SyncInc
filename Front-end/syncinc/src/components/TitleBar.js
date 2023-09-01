@@ -20,12 +20,12 @@ const TitleBar = ({title, subtitle, children}) => {
                         justifyContent: 'left',
                     }}
                 >
-                    <Typography variant="h5" fontWeight="bold">
+                    <Typography variant="h6" fontWeight="bold">
                         {title}
                     </Typography>
                     <Typography 
-                        variant="h6"
-                        color="primary"
+                        fontWeight="bold"
+                        color="text.secondary"
                     >
                         {subtitle}
                     </Typography>

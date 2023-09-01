@@ -128,11 +128,13 @@ const OrganizationDetails = (props) => {
                     justifyContent={'flex-end'}
                 >
                     <Button variant='contained' 
+                        size='small'
                         onClick={() => selectedValue === 'projects'? 
                         navigate(`/organization/${organization?.id}/add-project`) 
                         : 
-                        handleAddMemberModalOpen()} >
-                        <AddRoundedIcon />             
+                        handleAddMemberModalOpen()} 
+                        startIcon={<AddRoundedIcon fontSize="small"/>}
+                        >          
                         {selectedValue === 'projects'? 'Project' : 'Member'}
                     </Button>
                     <AddMemberModal

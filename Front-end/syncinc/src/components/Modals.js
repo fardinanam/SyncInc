@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import { Avatar, Checkbox, TextField } from "@mui/material";
+import { Avatar, Checkbox, TextField, Rating } from "@mui/material";
 import { baseUrl } from '../utils/config';
 import AuthContext from '../context/AuthContext';
 import axios from "axios";
@@ -23,7 +23,8 @@ import AutocompleteTagInput from "./AutocompleteTagInput";
 import AutocompleteUserInput from "./AutocompleteUserInput";
 import TelegramIcon from '@mui/icons-material/Telegram';
 import { modalStyle } from "../styles/styles";
-
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 
 const AddMemberModal = ( props ) => {
 
@@ -292,11 +293,9 @@ const  EditProfilePicModal = (props) => {
                 config
             );
             
-            console.log("returned data: ", response.data.data);
             props.handleClose(response.data.data);
             notifyWithToast("success", "Profile picture updated successfully");
         } catch (error) {
-            console.log(error.response.data.data);
             props.handleClose();
             notifyWithToast("error", error.response.data.message);
         }
@@ -1372,6 +1371,226 @@ const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
     )
 }
 
+const ConfirmAcceptTaskModal = ({isOpen, onClose, task, taskType}) => {
+    const {authTokens} = useContext(AuthContext);
+    const {setLoading} = useLoading();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`
+            }
+        }
+
+        const body = JSON.stringify({
+            status: 'Completed',
+        });
+
+        setLoading(true);
+        
+        try {
+            const response = await axios.put(
+                `${baseUrl}update_user_task_status/${task.id}/`,
+                body,
+                config
+            );
+
+            if (response.status === 200) {
+                onClose(response.data.data);
+                notifyWithToast('success', 'Task accepted successfully');
+            }
+        } catch (error) {
+            onClose();
+            notifyWithToast('error', 'Failed to mark task as completed');
+        }
+
+        setLoading(false);
+    }
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={() => onClose()}
+        >
+            <Box sx={modalStyle}>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <Typography variant="body1" align="center">
+                        Are you sure you want to accept this {taskType} task?
+                    </Typography>
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{ mt: 2 }}
+                        startIcon={<CheckRoundedIcon />}
+                    >
+                        Accept
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+
+const ConfirmRejectTaskModal = ({isOpen, onClose, task, taskType}) => {
+    const {authTokens} = useContext(AuthContext);
+    const {setLoading} = useLoading();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`
+            }
+        }
+
+        const body = JSON.stringify({
+            status: 'Rejected',
+        });
+
+        setLoading(true);
+        
+        try {
+            const response = await axios.put(
+                `${baseUrl}update_user_task_status/${task.id}/`,
+                body,
+                config
+            );
+
+            if (response.status === 200) {
+                onClose(response.data?.data);
+                notifyWithToast('success', 'Task rejected successfully');
+            }
+        } catch (error) {
+            onClose();
+            notifyWithToast('error', 'Failed to reject task');
+        }
+
+        setLoading(false);
+    }
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={() => onClose()}
+        >
+            <Box sx={modalStyle}>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <Typography variant="body1" align="center">
+                        Are you sure you want to reject this {taskType} task?
+                    </Typography>
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="error"
+                        sx={{ mt: 2 }}
+                        startIcon={<CloseRoundedIcon />}
+                    >
+                        Reject
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+
+const RateTaskModal = ({isOpen, onClose, task, taskType}) => {
+    const {authTokens} = useContext(AuthContext);
+    const {setLoading} = useLoading();
+    const [rating, setRating] = useState(0);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`
+            }
+        }
+
+        const body = JSON.stringify({
+            rating: rating,
+        });
+
+        setLoading(true);
+        try {
+            const response = await axios.put(
+                `${baseUrl}update_user_task_rating/${task.id}/`,
+                body,
+                config
+            );
+
+            if (response.status === 200) {
+                onClose(response.data?.data);
+                notifyWithToast('success', 'Task rated successfully');
+            }
+        } catch (error) {
+            onClose();
+            notifyWithToast('error', 'Failed to rate task');
+        }
+        
+        setLoading(false);
+    }
+
+    useEffect(() => {
+        setRating(task?.rating);
+    }, [task?.rating]);
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={() => onClose()}
+        >
+            <Box sx={modalStyle}>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    display={'flex'}
+                    flexDirection={'column'}
+                    justifyContent={'center'}
+                    alignItems={'center'}
+                >
+                    <Typography variant='h5' align="center">
+                        Rate {task?.name}
+                    </Typography>
+                    <Rating
+                        size="large"
+                        name="simple-controlled"
+                        value={rating}
+                        onChange={(event, newValue) => {
+                            setRating(newValue);
+                        }}
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{ mt: 2 }}
+                        startIcon={<CheckRoundedIcon />}
+                    >
+                        Submit
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+
 export {
     CreateOrgModal, 
     AddMemberModal, 
@@ -1383,4 +1602,7 @@ export {
     AddTaskModal,
     AssignTaskModal,
     EditTaskModal,
+    ConfirmAcceptTaskModal,
+    ConfirmRejectTaskModal,
+    RateTaskModal,
 };

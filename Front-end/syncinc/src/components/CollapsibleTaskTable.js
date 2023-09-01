@@ -103,8 +103,8 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                                 height: '2rem',
                                 marginRight: '1rem',
                             }}
+                            startIcon={<AddRoundedIcon fontSize='small'/>}
                         >
-                            <AddRoundedIcon />
                             Task
                         </Button>
 

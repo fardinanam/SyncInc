@@ -4,6 +4,8 @@ from accounts.models import User
 from django.db.models import Q, Avg, F
 from datetime import datetime
 from django.utils import timezone
+from django.conf import settings
+import pyrebase
 
 class OrganizationSerializer(serializers.ModelSerializer):
     num_projects = serializers.SerializerMethodField()
@@ -278,10 +280,9 @@ class GetUserTaskSerializer(serializers.ModelSerializer):
     project = serializers.SerializerMethodField()
     organization = serializers.SerializerMethodField()
     roles = serializers.SerializerMethodField()
-
     class Meta:
         model = UserTask
-        fields = ['id', 'name', 'tags', 'assignee', 'deadline', 'status', 'project', 'organization', 'description', 'roles']
+        fields = ['id', 'name', 'tags', 'assignee', 'deadline', 'status', 'project', 'organization', 'description', 'roles', 'file', 'end_time', 'rating']
 
     def get_roles(self, obj):
         if not self.context.get('user'):
@@ -387,23 +388,86 @@ class CreateUserTaskSerializer(serializers.ModelSerializer):
             instance.tags.add(tag)
         return instance
     
-# class UpdateUserTaskSerializer(serializers.ModelSerializer):
-#     tags = serializers.ListField(write_only=True)
-#     tags_details = TagSerializer(source='tags', many=True, read_only=True)
-#     class Meta:
-#         model = UserTask
-#         fields = '__all__'
+class SubmitUserTaskSerializer(serializers.ModelSerializer):
+    file = serializers.FileField(required=True, allow_empty_file=False)
+    class Meta:
+        model = UserTask
+        fields = ['id', 'status', 'file']
     
-#     def update(self, instance, validated_data):
-#         tags_data = validated_data.pop('tags')
-#         instance.name = validated_data.get('name', instance.name)
-#         instance.description = validated_data.get('description', instance.description)
-#         instance.deadline = validated_data.get('deadline', instance.deadline)
-#         instance.save()
+    def validate(self, data):
+        valid_data = super().validate(data)
+        task = self.instance
+        if task.status == 'Submitted':
+            raise serializers.ValidationError('Task already submitted')
+        if task.status == 'Completed':
+            raise serializers.ValidationError('Task already completed')
+        if task.status == 'Rejected':
+            raise serializers.ValidationError('Task already rejected')
+        if task.assignee is None:
+            raise serializers.ValidationError('Task is unassigned')
+        return valid_data
+    
+    def update(self, instance, validated_data):
+        try:
+            firebase = pyrebase.initialize_app(settings.FIREBASE_CONFIG)
+            storage = firebase.storage()
+            file = validated_data['file']
 
-#         instance.tags.clear()
-#         for tag_name in tags_data:
-#             tag, _ = Tag.objects.get_or_create(name=tag_name)
-#             instance.tags.add(tag)
-#         return instance
+            project = instance.project
+            organization = project.organization
+            filename = f'files/{organization.name}_{organization.id}/{project.name}/{instance.name}/{file.name}'
+            storage.child(filename).put(file)
+            url = storage.child(filename).get_url(None)
 
+            instance.file = url            
+            instance.status = 'Submitted'
+            instance.save()
+            
+            return instance
+        except Exception as e:
+            print(e)
+            raise serializers.ValidationError("Something went wrong")
+
+
+class UpdateUserTaskStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserTask
+        fields = ['status', 'end_time']
+    
+    def validate(self, data):
+        valid_data = super().validate(data)
+        task = self.instance
+
+        if valid_data['status'] != 'Completed' and valid_data['status'] != 'Rejected':
+            raise serializers.ValidationError('Invalid status')
+        if task.status == 'Completed':
+            raise serializers.ValidationError('Task already completed')
+        if task.status == 'Rejected':
+            raise serializers.ValidationError('Task already rejected')
+        if task.assignee is None:
+            raise serializers.ValidationError('Task is unassigned')
+        return valid_data
+    
+    def update(self, instance, validated_data):
+        instance.status = validated_data['status']
+        instance.end_time = timezone.now()
+        instance.save()
+        return instance
+
+class UpdateUserTaskRatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserTask
+        fields = ['rating']
+    
+    def validate(self, data):
+        valid_data = super().validate(data)
+        task = self.instance
+
+        if task.status != 'Completed' and task.status != 'Rejected':
+            raise serializers.ValidationError('Task is not completed')
+        return valid_data
+    
+    def update(self, instance, validated_data):
+        instance.rating = validated_data['rating']
+        instance.save()
+        return instance
