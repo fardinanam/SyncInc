@@ -78,7 +78,9 @@ const Organizations = () => {
                         sx={{ fontWeight: 'bold' }}
                     >My Organizations</Typography>
                 </Box>  
-                <Button variant='contained' onClick={handleOpen}><AddRoundedIcon /> Organization</Button>
+                <Button variant='contained' size='small' onClick={handleOpen}
+                    startIcon={<AddRoundedIcon fontSize="small"/>}
+                > Organization</Button>
                 <CreateOrgModal open={isOpen} handleClose={handleClose} handleOpen={handleOpen} />
             </Box>
             <Grid  

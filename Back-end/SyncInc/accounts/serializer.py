@@ -84,11 +84,6 @@ class ProfilePictureSerializer(serializers.ModelSerializer):
             url = storage.child(filename).get_url(None)
             print(url)
 
-            # if user.profile_picture:
-            #     auth = firebase.auth()
-            #     firebase_user = auth.sign_in_with_email_and_password(settings.FIREBASE_EMAIL, settings.FIREBASE_PASSWORD)
-            #     storage.delete(user.profile_picture.split('/')[-1])
-
             user.profile_picture = url
             user.save()
 

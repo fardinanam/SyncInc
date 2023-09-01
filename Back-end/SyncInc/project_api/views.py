@@ -1,7 +1,8 @@
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
 from .models import *
 from .serializer import *
 from .utils import *
@@ -1015,3 +1016,106 @@ def update_user_task_details(request, task_id):
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+@parser_classes((MultiPartParser, FormParser,))
+def submit_user_task(request, task_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        # get all the tasks assigned to the user
+        task = UserTask.objects.get(id=task_id)
+
+        # check if the user is the assignee of the task
+        if not task.assignee or task.assignee != user:
+            return Response({
+                'message': 'You are not authorized to submit this task',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        serializer = SubmitUserTaskSerializer(data=request.data, instance=task)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        serializer = GetUserTaskSerializer(task)
+        return Response({
+            'message': 'Task submitted successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_user_task_status(request, task_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        # get all the tasks assigned to the user
+        task = UserTask.objects.get(id=task_id)
+
+        # check if the user is a project leader
+        if not task.project.project_leader or task.project.project_leader != user:
+            return Response({
+                'message': 'You are not authorized to review this task',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        serializer = UpdateUserTaskStatusSerializer(data=request.data, instance=task)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        return Response({
+            'message': 'Task reviewed successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_user_task_rating(request, task_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        # get all the tasks assigned to the user
+        task = UserTask.objects.get(id=task_id)
+
+        # check if the user is the assignee of the task
+        if not task.project.project_leader or task.project.project_leader != user:
+            return Response({
+                'message': 'You are not authorized to rate this task',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        serializer = UpdateUserTaskRatingSerializer(data=request.data, instance=task)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        return Response({
+            'message': 'Task rated successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)

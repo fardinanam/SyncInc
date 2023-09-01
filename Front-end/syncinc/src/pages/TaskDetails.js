@@ -6,20 +6,24 @@ import { useNavigate } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
 import notifyWithToast from "../utils/toast";
 import axios from "axios";
-import { Grid, Paper, Stack, Typography, Box, Button, Chip } from "@mui/material";
+import { Grid, Paper, Stack, Typography, Box, Button, Chip, Rating } from "@mui/material";
 import { InfoSectionStyle } from "../styles/styles";
 import { useTheme } from "@mui/material/styles";
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
-import EditButton from "../components/EditButton";
 import StackField from "../components/StackField";
 import dayjs from "dayjs";
 import ListChips from "../components/ListChips";
 import UserInfo from "../components/UserInfo";
 import TitleBar from "../components/TitleBar";
 import AssignmentReturnedRoundedIcon from '@mui/icons-material/AssignmentReturnedRounded';
-import { AssignTaskModal, EditTaskModal } from "../components/Modals";
+import { AssignTaskModal, ConfirmAcceptTaskModal, ConfirmRejectTaskModal, EditTaskModal, RateTaskModal } from "../components/Modals";
 import StatusChip from "../components/StatusChip";
 import InfoSection from "../components/InfoSection";
+import SubmitTask from "../components/SubmitTask";
+import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import GradeRoundedIcon from '@mui/icons-material/GradeRounded';
 
 const TaskDetails = () => {
     const theme = useTheme();
@@ -33,8 +37,15 @@ const TaskDetails = () => {
     const [roles , setRoles] = useState([]);
 
     const [isEditTaskModalOpen, setIsEditTaskModalOpen] = useState(false);
+    const [isAcceptTaskModalOpen, setIsAcceptTaskModalOpen] = useState(false);
+    const [isRejectTaskModalOpen, setIsRejectTaskModalOpen] = useState(false);
+    const [isRateTaskModalOpen, setIsRateTaskModalOpen] = useState(false);
 
-    const mainColor = theme.palette.main
+    const [rating, setRating] = useState(0);
+
+    useEffect(() => {
+        setRating(task?.rating);
+    }, [task.rating]);
 
     const fetchTaskDetails = async () => {
         const config = {
@@ -48,7 +59,6 @@ const TaskDetails = () => {
         try {
             const response = await axios.get(`${baseUrl}get_user_task/${taskId}/`, config);
 
-            console.log(response.data?.data);
             setTask(response.data?.data);
             setRoles(response.data?.data?.roles);
         } catch {
@@ -58,18 +68,55 @@ const TaskDetails = () => {
         setLoading(false);
     }
 
+    const handleDownloadClick = () => {
+        // Create an anchor element to trigger the download
+        const link = document.createElement('a');
+        link.href = task?.file;
+        link.download = 'your_file_name.extension'; // Set the desired file name
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     const handleAssignTaskModalClose = (updatedTask) => {
         setIsAssignTaskModalOpen(false);
         if (updatedTask) {
-            console.log("Updated task: ", updatedTask);
             setTask(updatedTask);
         }
+    }
+
+    const handleRateTaskModalClose = (updatedTask) => {
+        setIsRateTaskModalOpen(false);
+        if (updatedTask) {
+            setTask(prevTask => ({
+                ...prevTask,
+                ...updatedTask
+            }));
+        }
+    }
+
+    const handleSubmitSuccess = (updatedTask) => {
+        setTask(prevTask => ({
+            ...prevTask,
+            ...updatedTask
+        }));
     }
 
     const handleEditTaskModalClose = (updatedTask) => {
         setIsEditTaskModalOpen(false);
         if (updatedTask) {
             setTask(updatedTask);
+        }
+    }
+
+    const handleTaskAcceptRejectModalClose = (updatedTask) => {
+        setIsAcceptTaskModalOpen(false);
+        setIsRejectTaskModalOpen(false);
+        if (updatedTask) {
+            setTask(prevTask => ({
+                ...prevTask,
+                ...updatedTask
+            }));
         }
     }
 
@@ -169,12 +216,16 @@ const TaskDetails = () => {
 
                     {roles?.includes("Project Leader") && 
                         task?.status !== "Completed" &&
+                        task?.status !== "Accepted" &&
+                        task?.status !== "Rejected" &&
+                        task?.status !== "Submitted" &&
                         <>
-                            <EditButton 
+                            <Button 
                                 variant="outlined" 
                                 size="small"
                                 onClick={() => setIsEditTaskModalOpen(true)}
-                            >Edit <EditRoundedIcon fontSize="small" /> </EditButton>
+                                endIcon={<EditRoundedIcon fontSize="small" />}
+                            >Edit </Button>
                             <EditTaskModal
                                 task={task}
                                 isOpen={isEditTaskModalOpen}
@@ -215,10 +266,20 @@ const TaskDetails = () => {
                         </Box>
                     </Grid>
                     <Grid item xs={12} md={6}>
-                        <StackField
-                            title="Deadline"
-                            value={dayjs(task?.deadline).format("DD MMM YYYY")}
-                        />
+                        {
+                            (task?.status === "Completed" ||
+                            task?.status === "Accepted" ||
+                            task?.status === "Rejected") ?
+                            <StackField
+                                title="End Date"
+                                value={dayjs(task?.end_date).format("DD MMM YYYY")}
+                            />
+                            :
+                            <StackField
+                                title="Deadline"
+                                value={dayjs(task?.deadline).format("DD MMM YYYY")}
+                            />
+                        }
                     </Grid>
                     <Grid item xs={12} md={6}>
                             <StackField
@@ -242,13 +303,124 @@ const TaskDetails = () => {
             </Box>
             {
                 (task?.status !== "Completed" 
-                    || task?.status !== "Accepted"
-                    || task?.status !== "Rejected") &&
+                    && task?.status !== "Accepted"
+                    && task?.status !== "Rejected"
+                    && task?.status !== "Submitted"
+                ) ?
                 <InfoSection title="Submit Task">
-                    
+                    <SubmitTask task={task} 
+                        onSubmitSuccess={handleSubmitSuccess}
+                    />
                 </InfoSection>                  
-                
+                : null
             }
+            {
+                (task?.status === "Submitted" ||
+                task?.status === "Accepted" ||
+                task?.status === "Rejected" ||
+                task?.status === "Completed") &&
+                <InfoSection title="Submission">
+                    <Box 
+                        display="flex"
+                        flexDirection="row"
+                        justifyContent="flex-start"
+                        alignItems="center"
+                        rowGap={1}
+                        columnGap={1}
+                    >
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            size="small"
+                            href={task?.submission?.file}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            startIcon={<DownloadRoundedIcon />}
+                            onClick={handleDownloadClick}
+                        >Download File </Button>
+                        {
+                            task?.roles?.includes("Project Leader") 
+                            && task?.status === "Submitted" &&
+                            <>
+                                <Button
+                                    variant="outlined"
+                                    color="success"
+                                    size="small"
+                                    onClick={() => setIsAcceptTaskModalOpen(true)}
+                                    startIcon={<CheckRoundedIcon />}
+                                >Mark as Accepted</Button>
+                                <Button
+                                    variant="outlined"
+                                    color="error"
+                                    size="small"
+                                    startIcon={<CloseRoundedIcon />}
+                                    onClick={() => setIsRejectTaskModalOpen(true)}
+                                >Mark as Rejected</Button>
+                                
+                                <ConfirmAcceptTaskModal
+                                    isOpen={isAcceptTaskModalOpen}
+                                    onClose={handleTaskAcceptRejectModalClose}
+                                    task={task}
+                                    taskType={"User"}
+                                />
+                                <ConfirmRejectTaskModal
+                                    isOpen={isRejectTaskModalOpen}
+                                    onClose={handleTaskAcceptRejectModalClose}
+                                    task={task}
+                                    taskType={"User"}
+                                />
+
+                            </>
+                        }
+                        
+                    </Box>
+                </InfoSection>
+            }
+                <Box
+                    display='flex'
+                    flexDirection='column'
+                    sx={InfoSectionStyle}
+                >
+                    <Box 
+                        display="flex"
+                        flexDirection="row"
+                        justifyContent="space-between"
+                        alignItems="center"
+                    >
+                        <Typography
+                            fontWeight={"bold"}
+                            flexGrow={1}
+                            mb={1}
+                        >
+                            Rating
+                        </Typography>
+                        
+                        {
+                            task?.roles?.includes("Project Leader") &&
+                            (task?.status === "Completed" ||
+                            task?.status === "Rejected" ) &&
+                            <>
+                            <Button 
+                                variant="outlined"
+                                color="primary"
+                                size="small"
+                                onClick={() => setIsRateTaskModalOpen(true)}
+                                startIcon={<GradeRoundedIcon />}
+                            >Rate</Button>  
+                            <RateTaskModal
+                                isOpen={isRateTaskModalOpen}
+                                onClose={handleRateTaskModalClose}
+                                task={task}
+                                taskType={"User"}
+                            />
+                            </>
+                        }
+                    </Box>
+                    <Rating name="read-only" 
+                        value={rating} 
+                        readOnly 
+                    />  
+                </Box>                                    
         </Stack>
         </>
     )

@@ -75,8 +75,11 @@ const OrganizationProjects = () => {
             {
                 role === 'Admin' &&
                 <Box display="flex" justifyContent="flex-end" m={1}>
-                    <Button variant="contained" onClick={() => {navigate(`/organization/${id}/add-project`)}}>
-                        <AddRoundedIcon/> Project
+                    <Button variant="contained" onClick={() => {navigate(`/organization/${id}/add-project`)}}
+                    size="small"
+                    startIcon={<AddRoundedIcon fontSize="small"/>}
+                    >
+                        Project
                     </Button>
                 </Box>
             }

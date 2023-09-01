@@ -131,8 +131,8 @@ const ProjectDetails = () => {
                                     size="small" 
                                     variant="contained"
                                     onClick={() => setOpenAssignProjectLeaderModal(true)}
+                                    startIcon={<AddRoundedIcon fontSize="small"/>}
                                 >
-                                    <AddRoundedIcon />
                                     Project Leader
                                 </Button> 
                                 <AddMemberModal 
