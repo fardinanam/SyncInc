@@ -6,6 +6,7 @@ from datetime import datetime
 from django.utils import timezone
 from django.conf import settings
 import pyrebase
+from django.db.models import Value
 
 class OrganizationSerializer(serializers.ModelSerializer):
     num_projects = serializers.SerializerMethodField()
@@ -61,16 +62,57 @@ class OrganizationSerializer(serializers.ModelSerializer):
 class ProjectSummarySerializer(serializers.ModelSerializer):
     task_count = serializers.SerializerMethodField()
     client = serializers.SerializerMethodField()
+    roles = serializers.SerializerMethodField()
     class Meta:
         model = Project
-        fields = ['id', 'name', 'description', 'client', 'start_time', 'end_time', 'task_count']
+        fields = ['id', 'name', 'description', 'client', 'start_time', 'end_time', 'task_count', 'roles']
 
     def get_task_count(self, obj):
         return obj.usertasks.count() + obj.vendortasks.count()
     def get_client(self, obj):
         return obj.client.name
+    def get_roles(self, obj):
+        return obj.roles
     
+class UserProjectsSerializer(serializers.ModelSerializer):
+    projects = serializers.SerializerMethodField()
+    class Meta:
+        model = User
+        fields = ['projects']
+    def get_projects(self, obj):
+         # get organizations where user is admin
+        user_organizations = obj.designations.filter(role='Admin').values('organization')
+        #get projects of these organizations
+        projects_as_admin = Project.objects.filter(organization__in=user_organizations)
+        #get projects where user is project leader
+        projects_as_leader = Project.objects.filter(project_leader=obj)
+        #get projects where user is employee
+        projects_id_as_employee = obj.usertasks.values('project').distinct()
+        # print("projects id as employee", projects_id_as_employee)
+        projects_as_employee = Project.objects.filter(id__in=projects_id_as_employee)
+        user_all_projects = projects_as_admin.union(projects_as_leader, projects_as_employee)
 
+        projects = []
+        for project in user_all_projects:
+            roles = []
+            if project in projects_as_admin:
+                roles.append('Admin')
+            if project in projects_as_leader:
+                roles.append('Project Leader')
+            if project in projects_as_employee:
+                roles.append('Assignee')
+            projects.append({
+                'id': project.id,
+                'name': project.name,
+                'description': project.description,
+                'client': project.client.name,
+                'start_time': project.start_time,
+                'end_time': project.end_time,
+                'task_count': project.usertasks.count() + project.vendortasks.count(),
+                'roles': roles
+            })
+        return projects
+       
     
 class OrganizationProjectsSerializer(serializers.ModelSerializer):
     projects = serializers.SerializerMethodField()

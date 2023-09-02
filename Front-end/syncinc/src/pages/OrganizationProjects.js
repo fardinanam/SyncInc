@@ -15,7 +15,7 @@ import notifyWithToast from "../utils/toast";
 const OrganizationProjects = () => {
     const  { id } = useParams();
     const { setLoading } = useLoading();
-    const { authTokens } = useContext(AuthContext);;
+    const { authTokens } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const [organizationName, setOrganizationName] = useState();
