@@ -10,14 +10,15 @@ const SearchSuggestion = ({ suggestion, selected }) => {
     return (
         <>
             <Grid item md={2}>
-                {
+                {/* {
                     suggestion.profile_picture
                     ? <Avatar 
                         alt={suggestion.username} 
                         src={suggestion.profile_picture && suggestion.profile_picture}
                     />
                     : <NameAvatar name={suggestion.username} />
-                }
+                } */}
+                <Avatar alt={suggestion.username} src={suggestion.profile_picture && suggestion.profile_picture} />
             </Grid>
             <Grid item md={9}>
                 <Grid item md={12}>

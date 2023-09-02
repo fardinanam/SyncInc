@@ -330,7 +330,7 @@ def get_employee_suggestions(request, organization_id):
             }, status=status.HTTP_401_UNAUTHORIZED)
         
         
-        employees = User.objects.exclude(designation__organization=organization).values( 'id','username', 'email')
+        employees = User.objects.exclude(designation__organization=organization).values( 'id','username', 'email', 'profile_picture')
 
         return Response({
             'message': f'New member suggestion for the organization {organization.name}',
