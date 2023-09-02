@@ -26,7 +26,6 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import GradeRoundedIcon from '@mui/icons-material/GradeRounded';
 
 const TaskDetails = () => {
-    const theme = useTheme();
     const taskId = useParams().id;
     const { setLoading } = useLoading();
     const { authTokens } = useContext(AuthContext);
@@ -40,12 +39,6 @@ const TaskDetails = () => {
     const [isAcceptTaskModalOpen, setIsAcceptTaskModalOpen] = useState(false);
     const [isRejectTaskModalOpen, setIsRejectTaskModalOpen] = useState(false);
     const [isRateTaskModalOpen, setIsRateTaskModalOpen] = useState(false);
-
-    const [rating, setRating] = useState(0);
-
-    useEffect(() => {
-        setRating(task?.rating);
-    }, [task.rating]);
 
     const fetchTaskDetails = async () => {
         const config = {
@@ -306,6 +299,7 @@ const TaskDetails = () => {
                     && task?.status !== "Accepted"
                     && task?.status !== "Rejected"
                     && task?.status !== "Submitted"
+                    && task?.roles?.includes("Assignee")
                 ) ?
                 <InfoSection title="Submit Task">
                     <SubmitTask task={task} 
@@ -418,9 +412,9 @@ const TaskDetails = () => {
                             </>
                         }
                     </Box>
-                    <Rating name="read-only" 
-                        value={rating} 
-                        readOnly 
+                    <Rating name="simple-controlled" 
+                        value={task?.rating} 
+                        readOnly
                     />  
                 </Box>  
             }                                  
