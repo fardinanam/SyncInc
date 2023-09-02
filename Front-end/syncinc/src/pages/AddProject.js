@@ -86,10 +86,10 @@ const AddProject = () => {
 
     };
     {
-        if(role !== "Admin") {
-            {console.log(role)}
-            return <ErrorPage />
-        } else {
+        // if(role !== "Admin") {
+        //     {console.log(role)}
+        //     return <ErrorPage />
+        // } else {
             return(
                 <AddItemLayout
                     title="Add Project"
@@ -143,7 +143,7 @@ const AddProject = () => {
                     </Grid>
                 </AddItemLayout>
             )
-        }
+       // }
     }
     
 }

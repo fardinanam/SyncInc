@@ -37,4 +37,6 @@ urlpatterns = [
 
     path('update_user_task_status/<int:task_id>/', views.update_user_task_status, name='update_task_status'),
     path('update_user_task_rating/<int:task_id>/', views.update_user_task_rating, name='update_task_rating'),
+
+    path('get_user_projects/', views.get_user_projects, name='user_projects'),
 ]

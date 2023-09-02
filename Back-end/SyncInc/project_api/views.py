@@ -8,6 +8,7 @@ from .serializer import *
 from .utils import *
 from datetime import date
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_organizations(request):
@@ -80,6 +81,27 @@ def get_organization_role(request, organization_id):
         
     except Exception as e:
         print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_projects(request):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        serializer = UserProjectsSerializer(user)
+        # print(serializer.data)
+        return Response({
+            'message': 'Projects fetched successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
         return Response({
             'message': 'Something went wrong',
             'data': None
@@ -1119,3 +1141,4 @@ def update_user_task_rating(request, task_id):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
+    
