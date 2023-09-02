@@ -5,7 +5,7 @@ import AuthContext from '../context/AuthContext';
 import notifyWithToast from "../utils/toast";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import { Typography } from "@mui/material";
+import { CssBaseline, Input, Typography } from "@mui/material";
 import Chip from "@mui/material/Chip";
 import {useDropzone} from 'react-dropzone';
 import DragAndDropIcon from "../assets/drag-and-drop-icon-17.jpg";
@@ -47,6 +47,8 @@ const SubmitTask = ({task, onSubmitSuccess}) => {
             notifyWithToast("error", "Too many files");
         }
         setFileRejections([]);
+
+        return fileRejections;
     });
 
     const handleCancel = () => {
@@ -114,8 +116,9 @@ const SubmitTask = ({task, onSubmitSuccess}) => {
             component="form"
             onSubmit={handleSubmit}
         >
-            <div {...getRootProps({ className: 'dropzone' })}>
-                <input {...getInputProps()} />
+        <CssBaseline />
+            <Box {...getRootProps({ className: 'dropzone' })}>
+                <Input {...getInputProps()} />
                 <Box
                     sx={{
                         border: '1px dashed grey',
@@ -130,8 +133,8 @@ const SubmitTask = ({task, onSubmitSuccess}) => {
                         // hover pointer
                         '&:hover': {
                             cursor: 'pointer',
-                            backgroundColor: 'grey.100',
-                        }
+                        },
+                        
                     }}
                 >
                     {acceptedFileItems?.length > 0 ?
@@ -139,20 +142,20 @@ const SubmitTask = ({task, onSubmitSuccess}) => {
                     :
                     <>
                     <Box 
-                            component="img"
-                            src={DragAndDropIcon}
-                            sx={{
-                                height: '3rem',
-                                width: '3rem',
-                            }}
-                        />
+                        component="img"
+                        src={DragAndDropIcon}
+                        sx={{
+                            height: '3rem',
+                            width: '3rem',
+                        }}
+                    />
                     <Typography>
-                        Drag and drop files here, or click to select files
+                        Drag and drop a file here, or click to select a file
                     </Typography>
                     </>
                     }
                 </Box>
-            </div>
+            </Box>
             <Box 
                 display="flex"
                 flexDirection="row"
