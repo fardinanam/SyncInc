@@ -178,10 +178,14 @@ class EmployeeSerializer(serializers.ModelSerializer):
         return avg_rating
         
     def get_avg_time(self, obj):
-        finished_tasks = obj.usertasks.filter(end_time__isnull=False)
+        finished_tasks = obj.usertasks.filter(status__in=['Completed','Rejected'])
         avg_time = finished_tasks.all().aggregate(avg_time=Avg(F('end_time') - F('start_time')))['avg_time']
+    
         if avg_time is None:
             return 'N/A'
+
+        # avg_time = datetime()
+        return avg_time
     
 class VendorSerializer(serializers.ModelSerializer):
     expertise = serializers.SerializerMethodField()
