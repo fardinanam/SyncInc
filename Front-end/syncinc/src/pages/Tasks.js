@@ -1,4 +1,4 @@
-import { useLayoutEffect, useContext, useState } from "react";
+import { useLayoutEffect, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, Stack } from "@mui/material"
 import SummaryCard from "../components/SummaryCard";
@@ -71,16 +71,16 @@ const Tasks = () => {
                         let name;
                         
                         if (task.status === 'Completed' || task.status === 'Rejected') {
-                            count = dayjs().diff(task.end_date, 'day');
+                            count = dayjs().diff(task.end_time, 'day');
                             name = count === 1 ? "Day Ago" : "Days Ago";
 
                             if (count === 0) {
-                                count = dayjs().diff(task.end_date, 'hour');
+                                count = dayjs().diff(task.end_time, 'hour');
                                 name = count === 1 ? "Hour Ago" : "Hours Ago";
                             }
 
                             if (count === 0) {
-                                count = dayjs().diff(task.end_date, 'minute');
+                                count = dayjs().diff(task.end_time, 'minute');
                                 name = count === 1 ? "Minute Ago" : "Minutes Ago";
                             }
 

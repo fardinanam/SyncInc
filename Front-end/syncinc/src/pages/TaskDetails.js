@@ -265,7 +265,7 @@ const TaskDetails = () => {
                             task?.status === "Rejected") ?
                             <StackField
                                 title="End Date"
-                                value={dayjs(task?.end_date).format("DD MMM YYYY")}
+                                value={dayjs(task?.end_time).format("DD MMM, YYYY")}
                             />
                             :
                             <StackField

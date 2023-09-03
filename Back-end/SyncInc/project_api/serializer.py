@@ -170,11 +170,12 @@ class EmployeeSerializer(serializers.ModelSerializer):
         tag_names = [tag.name for tag in tags]
         return tag_names
     def get_completed_tasks(self, obj):
-        return obj.usertasks.filter(end_time__isnull=False).count()
+        return obj.usertasks.filter(end_time__isnull=False, status='Completed').count()
     def get_avg_rating(self, obj):
         avg_rating = obj.usertasks.aggregate(Avg('rating'))['rating__avg']
         if avg_rating is None:
             return 0
+        return avg_rating
         
     def get_avg_time(self, obj):
         finished_tasks = obj.usertasks.filter(end_time__isnull=False)
