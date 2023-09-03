@@ -3,7 +3,7 @@ import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownR
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import BorderColorRoundedIcon from '@mui/icons-material/BorderColorRounded';
-import { Collapse, Divider, IconButton, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography, Button, Box, Chip } from '@mui/material';
+import { Collapse, Divider, IconButton, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography, Button, Box, Chip, TableContainer } from '@mui/material';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { AssignTaskModal } from './Modals';
 import ListChips from './ListChips';
@@ -123,9 +123,15 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                 > 
                     <Divider />
                     { tasks.length > 0 ?
-                    <Table sx={{ 
-                        minWidth: 650,
-                    }} aria-label="simple table">
+                    <TableContainer
+                        component={Box}
+                    >
+                    <Table 
+                        sx={{ 
+                            minWidth: 650,
+                        }} aria-label="a dense table"
+                        size="small"
+                    >
                     <TableHead>
                         <TableRow>
                             <TableCell  >Task Name</TableCell>
@@ -191,7 +197,8 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                         </TableRow>
                         ))}
                     </TableBody>
-                </Table> :
+                </Table>
+                </TableContainer> :
                 <Box
                     display='flex'
                     justifyContent='center'
