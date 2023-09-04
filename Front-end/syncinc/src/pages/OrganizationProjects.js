@@ -15,7 +15,7 @@ import notifyWithToast from "../utils/toast";
 const OrganizationProjects = () => {
     const  { id } = useParams();
     const { setLoading } = useLoading();
-    const { authTokens } = useContext(AuthContext);;
+    const { authTokens } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const [organizationName, setOrganizationName] = useState();
@@ -25,7 +25,6 @@ const OrganizationProjects = () => {
     const [completedProjects, setCompletedProjects] = useState([]);
 
     const categorizeProjects = (projects) => {
-        console.log(projects);
         //projects that have no tasks is assigned to newProjects
         const today = new Date();
         setNewProjects(projects.filter(project => project.task_count === 0));
@@ -76,8 +75,11 @@ const OrganizationProjects = () => {
             {
                 role === 'Admin' &&
                 <Box display="flex" justifyContent="flex-end" m={1}>
-                    <Button variant="contained" onClick={() => {navigate(`/organization/${id}/add-project`)}}>
-                        <AddRoundedIcon/> Project
+                    <Button variant="contained" onClick={() => {navigate(`/organization/${id}/add-project`)}}
+                    size="small"
+                    startIcon={<AddRoundedIcon fontSize="small"/>}
+                    >
+                        Project
                     </Button>
                 </Box>
             }

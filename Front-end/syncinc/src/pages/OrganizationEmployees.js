@@ -156,8 +156,9 @@ const OrganizationEmployees = (props) => {
                             sx={{
                                 mr: '1rem'
                             }}
-                            onClick={() => handleAddModalOpen()}>
-                            <AddRoundedIcon />
+                            onClick={() => handleAddModalOpen()}
+                            startIcon={<AddRoundedIcon fontSize="small"/>}
+                        >
                                 Employee
                         </Button>
                         <AddMemberModal id={id} memberType={'employee'} open={addModalOpen} handleClose={handleAddModalClose}/>

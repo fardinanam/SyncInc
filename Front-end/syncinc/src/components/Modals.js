@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import { Avatar, Checkbox, TextField } from "@mui/material";
+import { Avatar, Checkbox, TextField, Rating } from "@mui/material";
 import { baseUrl } from '../utils/config';
 import AuthContext from '../context/AuthContext';
 import axios from "axios";
@@ -21,21 +21,10 @@ import { IconButton } from "@mui/material";
 import ClearIcon from '@mui/icons-material/Clear';
 import AutocompleteTagInput from "./AutocompleteTagInput";
 import AutocompleteUserInput from "./AutocompleteUserInput";
-
-const style = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    borderRadius: '1rem',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    boxShadow: 24,
-    pt: 2,
-    px: 4,
-    pb: 3,
-};
-
+import TelegramIcon from '@mui/icons-material/Telegram';
+import { modalStyle } from "../styles/styles";
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 
 const AddMemberModal = ( props ) => {
 
@@ -158,7 +147,7 @@ const AddMemberModal = ( props ) => {
                 >
                 <Box 
                     sx={{ 
-                        ...style,
+                        ...modalStyle,
                         width: 400 
                     }}
                     
@@ -193,7 +182,7 @@ const AddMemberModal = ( props ) => {
                         <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
                             {memberType === "project_leader" ?
                                 "Assign"
-                            : "Invite"
+                            : <><TelegramIcon /> Invite</>
                             }
                         </Button>
                     </Box>
@@ -243,7 +232,7 @@ const CreateOrgModal = (props) => {
             >
             <Box 
                 sx={{ 
-                    ...style,
+                    ...modalStyle,
                     width: 400 
                 }}
                 
@@ -304,11 +293,9 @@ const  EditProfilePicModal = (props) => {
                 config
             );
             
-            console.log("returned data: ", response.data.data);
             props.handleClose(response.data.data);
             notifyWithToast("success", "Profile picture updated successfully");
         } catch (error) {
-            console.log(error.response.data.data);
             props.handleClose();
             notifyWithToast("error", error.response.data.message);
         }
@@ -332,7 +319,7 @@ const  EditProfilePicModal = (props) => {
             >
             <Box
                 component="form"
-                sx={style}
+                sx={modalStyle}
                 onSubmit={handleSubmit}
             >
                 <Typography id="parent-modal-title" variant="h5" align="center">
@@ -479,7 +466,7 @@ const EditPersonalInfoModal = (props) => {
                 open={props.isOpen}
                 onClose={() => props.handleClose()}
             >
-                <Box sx={style}>
+                <Box sx={modalStyle}>
                     <Typography id="personal-info-modal-title" variant="h5" align="center">
                         Edit Personal Information
                     </Typography>
@@ -640,7 +627,7 @@ const EditAddressModal = (props) => {
             open={props.isOpen}
             onClose={() => props.handleClose()}
         >
-            <Box sx={style}>
+            <Box sx={modalStyle}>
                 <Typography id="address-modal-title" variant="h5" align="center">
                     Edit Address
                 </Typography>
@@ -773,7 +760,7 @@ const ChangePasswordModal = (props) => {
             open={props.isOpen}
             onClose={() => props.handleClose()}
         >
-            <Box sx={style}>
+            <Box sx={modalStyle}>
                 <Typography id="change-password-modal-title" variant="h5" align="center">
                     Change Password
                 </Typography>
@@ -880,7 +867,7 @@ const AddTagModal = ({tags, isOpen, onClose}) => {
             open={isOpen}
             onClose={() => onClose()}
         >
-            <Box sx={style}>
+            <Box sx={modalStyle}>
                 <Typography id="add-tag-modal-title" variant="h5" align="center">
                     Edit Tags
                 </Typography>
@@ -894,6 +881,162 @@ const AddTagModal = ({tags, isOpen, onClose}) => {
                         onChange={handleChange}
                     />
 
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{ mt: 2 }}
+                        disabled={isSubmitDisabled}
+                    >
+                        Save
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+
+const EditTaskModal = ({isOpen, onClose, task, taskType}) => {
+    const {authTokens} = useContext(AuthContext);
+    const [deadline, setDeadline] = useState('');
+    const [selectedTags, setSelectedTags] = useState([]);
+    const {setLoading} = useLoading();
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
+
+    useEffect(() => {
+        setDeadline(task.deadline);
+        setSelectedTags(task.tags.map(tag => tag.name));
+        setName(task.name);
+        setDescription(task.description);
+    }, [task.deadline, task.tags, task.name, task.description]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const body = JSON.stringify({
+            'name': name,
+            'description': description,
+            'tags': selectedTags,
+            'deadline': dayjs(deadline).format('YYYY-MM-DD'),
+            'project': task.project.id,
+        });
+
+        const config = {
+            headers:{
+                'Authorization': 'Bearer ' + authTokens?.access,
+                'content-type': 'application/json',
+            }
+        }
+
+        setLoading(true);
+        try {
+            const response = await axios.put(
+                `${baseUrl}update_${taskType.toLowerCase()}_task_details/${task.id}/`,
+                body,
+                config
+            )
+
+            if (response.status === 200) {
+                onClose(response.data.data);
+                notifyWithToast("success", "Task updated successfully!");
+            }
+        } catch (error) {
+            console.log(error.response?.data?.message);
+            onClose();
+            notifyWithToast("error", error.response?.data?.message);
+        }
+        setLoading(false);
+
+    }
+
+    const handleNameChange = (e) => {
+        if (e.target.value !== task.name) {
+            setName(e.target.value);
+            setIsSubmitDisabled(false);
+        } else {
+            setIsSubmitDisabled(true);
+        }
+    }
+
+    const handleDescriptionChange = (e) => {
+        if (e.target.value !== task.description) {
+            setDescription(e.target.value);
+            setIsSubmitDisabled(false);
+        } else {
+            setIsSubmitDisabled(true);
+        }
+    }
+
+    const handleDeadlineChange = (date) => {
+        if (date !== task.deadline) {
+            setDeadline(date);
+            setIsSubmitDisabled(false);
+        } else {
+            setIsSubmitDisabled(true);
+        }
+    }
+
+    const handleTagsChange = (_, value) => {
+        setSelectedTags(value);
+        setIsSubmitDisabled(false);
+    }
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={() => onClose()}
+        >
+            <Box sx={modalStyle}>
+                <Typography id="edit-task-modal-title" variant="h5" align="center">
+                    Edit {taskType} Task
+                </Typography>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <TextField
+                        defaultValue={name}
+                        margin="normal"
+                        fullWidth
+                        id="task_name"
+                        label="Task Name"
+                        name="task_name"
+                        autoFocus
+                        onChange={handleNameChange}
+                    />
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                            label="Deadline"
+                            defaultValue={dayjs(deadline)}
+                            minDate={dayjs().add(1, 'day')}
+                            fullWidth
+                            id="deadline"
+                            name="deadline"
+                            onChange={handleDeadlineChange}
+                            sx={{
+                                width: '100%',
+                            }}
+                        />
+                    </LocalizationProvider>
+                    <TextField
+                        defaultValue={description}
+                        margin="normal"
+                        fullWidth
+                        id="task_description"
+                        label="Task Description"
+                        name="task_description"
+                        multiline
+                        maxRows={4}
+                        onChange={handleDescriptionChange}
+                    />
+                    <AutocompleteTagInput
+                        defaultTags={task?.tags.map(tag => tag.name)}
+                        isLoaded={isOpen}
+                        onChange={handleTagsChange}
+                    />
                     <Button
                         type="submit"
                         fullWidth
@@ -965,7 +1108,7 @@ const AddTaskModal = ({isOpen, onClose, taskType}) => {
             open={isOpen}
             onClose={() => onClose()}
         >
-            <Box sx={style}>
+            <Box sx={modalStyle}>
                 <Typography id="add-task-modal-title" variant="h5" align="center">
                     Add {taskType} Task
                 </Typography>
@@ -1074,7 +1217,7 @@ const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
             member.filtered_expertise = [];
 
             for (let i = 0; i < memberExpertises.length; i++) {
-                if (taskTags.includes(memberExpertises[i])) {
+                if (taskTags?.includes(memberExpertises[i])) {
                     member.filtered_expertise.push(memberExpertises[i]);
                 }
             }
@@ -1166,7 +1309,7 @@ const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
             onClose={() => {setIsTagSuggestionEnabled(true); handleClose()}}
         >
             <Box 
-                sx={style}
+                sx={modalStyle}
             >
                 <Typography id="assign-task-modal-title" variant="h5" align="center">
                     Assign Task
@@ -1228,6 +1371,226 @@ const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
     )
 }
 
+const ConfirmAcceptTaskModal = ({isOpen, onClose, task, taskType}) => {
+    const {authTokens} = useContext(AuthContext);
+    const {setLoading} = useLoading();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`
+            }
+        }
+
+        const body = JSON.stringify({
+            status: 'Completed',
+        });
+
+        setLoading(true);
+        
+        try {
+            const response = await axios.put(
+                `${baseUrl}update_user_task_status/${task.id}/`,
+                body,
+                config
+            );
+
+            if (response.status === 200) {
+                onClose(response.data.data);
+                notifyWithToast('success', 'Task accepted successfully');
+            }
+        } catch (error) {
+            onClose();
+            notifyWithToast('error', 'Failed to mark task as completed');
+        }
+
+        setLoading(false);
+    }
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={() => onClose()}
+        >
+            <Box sx={modalStyle}>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <Typography variant="body1" align="center">
+                        Are you sure you want to accept this {taskType} task?
+                    </Typography>
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{ mt: 2 }}
+                        startIcon={<CheckRoundedIcon />}
+                    >
+                        Accept
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+
+const ConfirmRejectTaskModal = ({isOpen, onClose, task, taskType}) => {
+    const {authTokens} = useContext(AuthContext);
+    const {setLoading} = useLoading();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`
+            }
+        }
+
+        const body = JSON.stringify({
+            status: 'Rejected',
+        });
+
+        setLoading(true);
+        
+        try {
+            const response = await axios.put(
+                `${baseUrl}update_user_task_status/${task.id}/`,
+                body,
+                config
+            );
+
+            if (response.status === 200) {
+                onClose(response.data?.data);
+                notifyWithToast('success', 'Task rejected successfully');
+            }
+        } catch (error) {
+            onClose();
+            notifyWithToast('error', 'Failed to reject task');
+        }
+
+        setLoading(false);
+    }
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={() => onClose()}
+        >
+            <Box sx={modalStyle}>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <Typography variant="body1" align="center">
+                        Are you sure you want to reject this {taskType} task?
+                    </Typography>
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="error"
+                        sx={{ mt: 2 }}
+                        startIcon={<CloseRoundedIcon />}
+                    >
+                        Reject
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+
+const RateTaskModal = ({isOpen, onClose, task, taskType}) => {
+    const {authTokens} = useContext(AuthContext);
+    const {setLoading} = useLoading();
+    const [rating, setRating] = useState(0);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`
+            }
+        }
+
+        const body = JSON.stringify({
+            rating: rating,
+        });
+
+        setLoading(true);
+        try {
+            const response = await axios.put(
+                `${baseUrl}update_user_task_rating/${task.id}/`,
+                body,
+                config
+            );
+
+            if (response.status === 200) {
+                onClose(response.data?.data);
+                notifyWithToast('success', 'Task rated successfully');
+            }
+        } catch (error) {
+            onClose();
+            notifyWithToast('error', 'Failed to rate task');
+        }
+        
+        setLoading(false);
+    }
+
+    useEffect(() => {
+        setRating(task?.rating);
+    }, [task?.rating]);
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={() => onClose()}
+        >
+            <Box sx={modalStyle}>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    display={'flex'}
+                    flexDirection={'column'}
+                    justifyContent={'center'}
+                    alignItems={'center'}
+                >
+                    <Typography variant='h5' align="center">
+                        Rate {task?.name}
+                    </Typography>
+                    <Rating
+                        size="large"
+                        name="simple-controlled"
+                        value={rating}
+                        onChange={(event, newValue) => {
+                            setRating(newValue);
+                        }}
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{ mt: 2 }}
+                        startIcon={<CheckRoundedIcon />}
+                    >
+                        Submit
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+
 export {
     CreateOrgModal, 
     AddMemberModal, 
@@ -1238,4 +1601,8 @@ export {
     AddTagModal,
     AddTaskModal,
     AssignTaskModal,
+    EditTaskModal,
+    ConfirmAcceptTaskModal,
+    ConfirmRejectTaskModal,
+    RateTaskModal,
 };

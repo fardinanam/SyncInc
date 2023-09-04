@@ -1,16 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
+import axios from "axios"
+import { useContext, useEffect, useState } from "react";
+import { useLoading } from "../context/LoadingContext";
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { Grid, Stack, Typography } from '@mui/material';
-import MainLayout from '../components/MainLayout';
 import { useNavigate } from 'react-router-dom';
-
-
-import SummaryCard from '../components/SummaryCard';
-import ProjectCard from '../components/ProjectCard';
+import AuthContext from '../context/AuthContext';
+import { baseUrl } from "../utils/config";
 import ProjectsStack from '../components/ProjectsStack';
-import WorkIcon from '@mui/icons-material/Work';
+import notifyWithToast from "../utils/toast";
 
 const columnStackStyle = {
     direction: "column",
@@ -18,19 +16,54 @@ const columnStackStyle = {
     width: 300,
 }
 
-const newProjects = [ {name: "Project 1", client: "Client 1", description: "This is a description of the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."},
-                {name: "Project 2", client: "Client 2", description: "This is a description of the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."},
-            ]
-
-const projectsInProgress = [ {name: "Project 3", client: "Client 3", description: "This is a description of the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."},
-                {name: "Project 4", client: "Client 4", description: "This is a description of the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."},
-            ]
-const completedProjects = [ {name: "Project 5", client: "Client 5", description: "This is a description of the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."},
-                {name: "Project 6", client: "Client 6", description: "This is a description of the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."},
-            ]
+    
 const Projects = () => {
+    const { setLoading } = useLoading();
+    const { authTokens } = useContext(AuthContext);
     const navigate = useNavigate();
-    // const [newProjects, setNewProjects] = useState([]);
+    const [newProjects, setNewProjects] = useState([]);
+    const [projectsInProgress, setProjectsInProgress] = useState([]);
+    const [completedProjects, setCompletedProjects] = useState([]);
+
+    const categorizeProjects = (projects) => {
+        //projects that have no tasks is assigned to newProjects
+        const today = new Date();
+        setNewProjects(projects.filter(project => project.task_count === 0));
+
+        //projects that have tasks and if its end_time exists it is smaller than current date is assigned to projectsInProgress
+        setProjectsInProgress(projects.filter(project => project.task_count > 0 && (project.end_time === null || new Date(project.end_time) > today)));
+
+        //projects that have end_time lower than current time is assigned to completedProjects
+        setCompletedProjects(projects.filter(project => project.end_time !== null && new Date(project.end_time) < today));
+    }
+
+    const fetchUserProjectDetails = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(
+                `${baseUrl}get_user_projects/`,  
+                {
+                    headers: {
+                        'Authorization': 'Bearer ' + authTokens?.access,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                }  
+
+            )
+            console.log(response)
+            console.log(response.data?.data?.projects);
+            categorizeProjects(response.data?.data?.projects);
+        } catch (error) {
+            navigate(-1);
+            notifyWithToast("error", error.response.data.message);
+        }
+        setLoading(false);
+    }
+
+    useEffect(() => {
+        fetchUserProjectDetails();
+    }, []);
 
     return (
         <>
@@ -43,7 +76,7 @@ const Projects = () => {
                         variant='h5'
                         sx={{ fontWeight: 'bold' }}
                     >
-                        Your Projects
+                        My Projects
                     </Typography>
             </Box>
             <Grid  

@@ -3,13 +3,13 @@ import { useState } from 'react';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import { IconButton } from '@mui/material';
+import { IconButton, Typography } from '@mui/material';
 import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
 
 const NavMenu = (props) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const { menuItems, handleMenuSelect } = props;
+  const { menuItems, handleMenuSelect, icons } = props;
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -45,7 +45,8 @@ const NavMenu = (props) => {
       >
         {menuItems?.map((item, index) => (
                     <MenuItem key={index} onClick={() => handleMenuClick(item)}>
-                        {item}
+                        {icons[index]}
+                        <Typography textAlign="center" ml={1}>{item}</Typography>
                     </MenuItem>
           ))}
         {/* <MenuItem onClick={() => handleMenuClick("Projects")}>Projects</MenuItem>

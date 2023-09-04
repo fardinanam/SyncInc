@@ -247,7 +247,7 @@ class UserTask(AbstractTask):
         on_delete=models.SET_NULL
     )
 
-    file = models.FileField(upload_to='files/', blank=True)
+    file = models.URLField(max_length=254, null=True, blank=True)
 
     def clean(self):
         if self.assignee and self.assignee not in self.project.organization.employees.all():

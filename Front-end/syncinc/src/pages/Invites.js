@@ -2,8 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
-import {Typography, Button, Grid, List, ListItem, Avatar, Box} from "@mui/material";
-import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import {Typography, Button, Stack, Box} from "@mui/material";
 
 import AuthContext from '../context/AuthContext';
 import { baseUrl } from "../utils/config";
@@ -27,8 +26,8 @@ const Invites = (props) => {
         fetchInvites();
     }, []);
 
-    setLoading(true);
     const fetchInvites = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(
                 `${baseUrl}get_invites/`,  
@@ -41,18 +40,18 @@ const Invites = (props) => {
                 }  
 
             )
-            console.log(response.data.data);
-            setInvites(response.data.data);
+            setInvites(response.data?.data);
         } catch (error) {
-            console.log(error.response.data.message);
+            console.log(error.response.data?.message);
             // window.location.href = '/organizations';
             notifyWithToast("error", "Something went wrong");
         }
 
+        setLoading(false);
     }
-    setLoading(false);
 
     const handleAccept = async (invitation_id) => {
+        setLoading(true);
         try {
             console.log("accept", `${baseUrl}accept_invite/${invitation_id}/`)
             const response = await axios.get(
@@ -68,16 +67,14 @@ const Invites = (props) => {
 
             notifyWithToast("success", "You have joined the organization successfully");
             setInvites(invites.filter((invite) => invite.id !== invitation_id));
-            
-            console.log(response.data.data);
         } catch (error) {
-            console.log(error.response.data.message);
-            // window.location.href = '/organizations';
+            console.log(error.response.data?.message);
         }
+        setLoading(false);
     }
 
     const handleReject = async (designation_id) => {
-        console.log("reject", designation_id)
+        setLoading(true);
         try {
             const response = await axios.delete(
                 `${baseUrl}reject_invite/${designation_id}/`,
@@ -91,58 +88,81 @@ const Invites = (props) => {
             )
             notifyWithToast("success", "Your rejection has been recorded successfully");
             setInvites(invites.filter((invite) => invite.id !== designation_id));
-            console.log(response.data.data);
         } catch (error) {
-            console.log(error.response.data.message);
+            console.log(error.response.data?.message);
         }
+
+        setLoading(false);
     }
 
     
     return (
         <>
+            <Typography variant='h5' sx={{ fontWeight: 'bold' }}>
+                My Invitations
+            </Typography>
             <Paper 
                 sx={{
-                    marginTop: '1.5rem',
-                    borderRadius: '0.5rem'
+                    marginTop: '1rem',
+                    borderRadius: '0.5rem',
+                    padding: '0.5rem',
                 }} 
                 elevation={0}
-            >
-                <Table aria-label="simple table">
-                        <TableBody>
-                            {invites?.map((invite) => (
-                            <TableRow
-                                display="flex"
-                                key={invite.id}
-                                sx={{alignItems:"flex-start"}}
-                            >   
-                                <TableCell width={"90%"}>
-                                <Box
-                                    display={"flex"}
-                                    flexDirection="row"
-                                    alignItems="center"
-                                    justifyContent="flex-start"
-                                >
-                                    <UserInfo userInfo={invite?.invited_by} />
+            >   {invites?.length > 0 ? 
+                <Stack
+                    spacing={1}
+                    flexDirection="column"
+                >
+                    {invites?.map((invite) => (
+                    <Stack
+                        flexDirection="row"
+                        justifyContent="space-between"
+                        key={invite.id}
+                        spacing={2}
+                    >   
+                        <Box
+                            display="flex"
+                            flexDirection="row"
+                            alignItems="center"
+                            justifyContent="flex-start"
+                            flexGrow={1}
+                        >
+                            <UserInfo userInfo={invite?.invited_by} />
 
-                                    <Typography>
-                                        {invite?.invited_by?.name} invited you to join {invite?.organization?.name} 
-                                    </Typography>
-                                </Box>
-                                </TableCell>
-                                <TableCell width={"20%"}>
-                                    <Button variant="contained" color="success" onClick={() => handleAccept(invite.id)}>
-                                        Accept
-                                    </Button>
-                                </TableCell>
-                                <TableCell >
-                                    <Button variant="contained" color="error" onClick={() =>  handleReject(invite.id)}>
-                                        Reject
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                            ))}
-                        </TableBody>
-                </Table>
+                            <Typography>
+                                {invite?.invited_by?.name} invited you to join {invite?.organization?.name} 
+                            </Typography>
+                        </Box>
+                        <Stack
+                            direction="row"
+                            justifyContent="center" spacing={1}
+                            style={{
+                                margin: 'auto',
+                            }}
+                        >
+                            <Button variant="contained" color="primary" size="small" onClick={() => handleAccept(invite.id)}
+                            >
+                                Accept
+                            </Button>
+                            <Button variant="outlined" color="primary" size="small" onClick={() =>  handleReject(invite.id)}>
+                                Reject
+                            </Button>
+                        </Stack>
+                    </Stack>
+                    ))}
+                </Stack>
+                :
+                <Box
+                    display='flex'
+                    justifyContent='center'
+                    alignItems='center'
+                    height='100%'
+                >
+                    <Typography variant='h6' color='text.secondary'>
+                        You don't have any invitation
+                    </Typography>
+                </Box>
+                }
             </Paper>
             
         </>

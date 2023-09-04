@@ -1,42 +1,19 @@
-import { useState, useEffect, useContext, useLayoutEffect } from "react"
+import { useState, useContext, useLayoutEffect } from "react"
 import axios from "axios"
 
-import { Avatar, Box, Typography, Chip, Grid, Paper, Stack } from "@mui/material"
+import { Avatar, Box, Typography, Stack, Grid } from "@mui/material"
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 
 import { baseUrl } from "../utils/config"
 import AuthContext from "../context/AuthContext"
 import { useTheme } from "@mui/material/styles"
 
-import EditButton from "../components/EditButton"
+import { Button } from "@mui/material"
 import { EditProfilePicModal, EditPersonalInfoModal, EditAddressModal, ChangePasswordModal, AddTagModal } from "../components/Modals"
-import AddRounded from '@mui/icons-material/AddRounded';
 import { useLoading } from "../context/LoadingContext"
 import ListChips from "../components/ListChips";
-
-const sectionStyle = {
-    borderRadius: 2,
-    border: 0.5,
-    borderColor: "grey.300",
-    p: 2
-}
-
-const StackField = (props) => {
-    return (
-        <Stack>
-            <Typography
-                fontWeight={"light"}
-                fontSize={"small"}
-            >
-                {props.title}
-            </Typography>
-            <Typography>
-                {props.value}
-            </Typography>
-        </Stack>
-
-    )
-}
+import { InfoSectionStyle } from "../styles/styles";
+import StackField from "../components/StackField";
 
 const Profile = () => {
     const { user, setUser, authTokens } = useContext(AuthContext);
@@ -174,12 +151,6 @@ const Profile = () => {
                     Account Settings
                 </Typography>
             </Box>
-            {/* <Paper 
-                elevation={0}
-                sx={{
-                    borderRadius: "0.5rem"
-                }}
-            > */}
             <Stack spacing={2}
                 bgcolor={mainColor}
                 sx={{
@@ -202,7 +173,7 @@ const Profile = () => {
                 <Box
                     display={"flex"}
                     flexDirection={"column"}
-                    sx={sectionStyle}
+                    sx={InfoSectionStyle}
                 >
                     <Box
                         display={"flex"}
@@ -231,13 +202,14 @@ const Profile = () => {
                             display={"flex"}
                             alignItems={"center"}
                         >
-                            <EditButton 
+                            <Button 
                                 variant="outlined"
                                 size="small"
                                 onClick={handleEditProfilePicModalOpen}
+                                endIcon={<EditRoundedIcon fontSize="small" />}
                             >
-                                Edit <EditRoundedIcon fontSize="small"/>
-                            </EditButton>
+                                Edit 
+                            </Button>
                             <EditProfilePicModal 
                                 isOpen={isProfilePicModalOpen}
                                 handleClose={handleEditProfilePicModalClose}
@@ -249,7 +221,7 @@ const Profile = () => {
                 <Box
                     display={"flex"}
                     flexDirection={"column"}
-                    sx={sectionStyle}
+                    sx={InfoSectionStyle}
                 >
                     <Box
                         display={"flex"}
@@ -261,11 +233,12 @@ const Profile = () => {
                         >
                             Personal Information
                         </Typography>
-                        <EditButton 
+                        <Button 
                             variant="outlined" 
                             size="small"
                             onClick={handleEditPersonalInfoModalOpen}
-                        >Edit <EditRoundedIcon fontSize="small" /> </EditButton>
+                            endIcon={<EditRoundedIcon fontSize="small" />}
+                        >Edit </Button>
                         <EditPersonalInfoModal
                             isOpen={isEditPersonalInfoModalOpen}
                             handleClose={handleEditPersonalInfoModalClose}
@@ -308,7 +281,7 @@ const Profile = () => {
                 <Box 
                     display={"flex"}
                     flexDirection={"column"}
-                    sx={sectionStyle}
+                    sx={InfoSectionStyle}
                 >
                     <Box
                         display={"flex"}
@@ -319,14 +292,14 @@ const Profile = () => {
                         >
                             Expertise
                         </Typography>
-                        <EditButton
+                        <Button
                             variant="outlined"
                             size="small"
                             onClick={handleAddTagModalOpen}
+                            endIcon={<EditRoundedIcon fontSize="small" />}
                         >
                             Edit
-                            <EditRoundedIcon fontSize="small" />
-                        </EditButton>
+                        </Button>
                         <AddTagModal 
                             tags={profileInfo.tags}
                             isOpen={isAddTagModalOpen}
@@ -345,7 +318,7 @@ const Profile = () => {
                 <Box 
                     display={"flex"}
                     flexDirection={"column"}
-                    sx={sectionStyle}
+                    sx={InfoSectionStyle}
                 >
                     <Box
                         display={"flex"}
@@ -356,14 +329,14 @@ const Profile = () => {
                         >
                             Address
                         </Typography>
-                        <EditButton
+                        <Button
                             variant="outlined"
                             size="small"
                             onClick={handleEditAddressModalOpen}
+                            endIcon={<EditRoundedIcon fontSize="small" />}
                         >
                             Edit 
-                            <EditRoundedIcon fontSize="small" /> 
-                        </EditButton>
+                        </Button>
                         <EditAddressModal 
                             isOpen={isEditAddressModalOpen}
                             handleClose={handleEditAddressModalClose}
@@ -417,7 +390,7 @@ const Profile = () => {
                 <Box
                     display={"flex"}
                     flexDirection={"column"}
-                    sx={sectionStyle}
+                    sx={InfoSectionStyle}
                 >
                     <Box
                         display={"flex"}
@@ -447,7 +420,7 @@ const Profile = () => {
                 <Box 
                     display={"flex"}
                     flexDirection={"column"}
-                    sx={sectionStyle}
+                    sx={InfoSectionStyle}
                 >
                     <Box
                         display={"flex"}
@@ -458,14 +431,14 @@ const Profile = () => {
                         >
                             Account Security
                         </Typography>
-                        <EditButton
+                        <Button
                             variant="outlined"
                             size="small"
                             onClick={handleChangePassModalOpen}
+                            endIcon={<EditRoundedIcon fontSize="small" />}
                         >
                             Edit
-                            <EditRoundedIcon fontSize="small" />
-                        </EditButton>
+                        </Button>
                         <ChangePasswordModal
                             isOpen={isChangePassModalOpen}
                             handleClose={handleChangePassModalClose}

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useContext, useState } from "react";
+import { useLayoutEffect, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, Stack } from "@mui/material"
 import SummaryCard from "../components/SummaryCard";
@@ -29,8 +29,7 @@ const Tasks = () => {
         setLoading(true);
         try {
             const response = await axios.get(`${baseUrl}get_all_tasks_of_user/`, config);
-
-            setTasks(response.data.data);
+            setTasks(response.data?.data);
         } catch {
             notifyWithToast('error', 'Failed to fetch tasks');
             navigate(-1);
@@ -53,7 +52,7 @@ const Tasks = () => {
                     sx={{ fontWeight: 'bold' }}
                     flexGrow={1}
                 >
-                    Your Tasks
+                    My Tasks
                 </Typography>
             </Box>
             <Stack
@@ -63,30 +62,49 @@ const Tasks = () => {
                 alignItems='flex-start'
                 sx={{ marginTop: '1rem' }}
                 flexWrap='wrap'
-                spacing={2}
+                rowGap={2}
+                columnGap={2}
             >
                 {
                     tasks.map((task) => {
-                        let count = dayjs(task.deadline).diff(dayjs(), 'day');
-                        let name = count === 1 ? "Day Left" : "Days Left";
-
-                        // if day is 0 then convert to hour
-                        if (count === 0) {
-                            count = dayjs(task.deadline).diff(dayjs(), 'hour');
-                            name = count === 1 ? "Hour Left" : "Hours";
-                        }
+                        let count;
+                        let name;
                         
-                        // if hour is 0 then convert to minute
-                        if (count === 0) {
-                            count = dayjs(task.deadline).diff(dayjs(), 'minute');
-                            name = count === 1 ? "Minute Left" : "Minutes Left";
+                        if (task.status === 'Completed' || task.status === 'Rejected') {
+                            count = dayjs().diff(task.end_time, 'day');
+                            name = count === 1 ? "Day Ago" : "Days Ago";
+
+                            if (count === 0) {
+                                count = dayjs().diff(task.end_time, 'hour');
+                                name = count === 1 ? "Hour Ago" : "Hours Ago";
+                            }
+
+                            if (count === 0) {
+                                count = dayjs().diff(task.end_time, 'minute');
+                                name = count === 1 ? "Minute Ago" : "Minutes Ago";
+                            }
+
+                        } else {
+                            count = dayjs(task.deadline).diff(dayjs(), 'day');
+                            name = count === 1 ? "Day Left" : "Days Left";
+                            if (count === 0) {
+                                count = dayjs(task.deadline).diff(dayjs(), 'hour');
+                                name = count === 1 ? "Hour Left" : "Hours Left";
+                            }
+                            
+                            // if hour is 0 then convert to minute
+                            if (count === 0) {
+                                count = dayjs(task.deadline).diff(dayjs(), 'minute');
+                                name = count === 1 ? "Minute Left" : "Minutes Left";
+                            }
+
+                            // if value is negative then show overdue
+                            if (count < 0) {
+                                count = dayjs().diff(task.deadline, 'day');
+                                name = count === 1 ? "Day Overdued" : "Days Overdued";
+                            }
                         }
 
-                        // if value is negative then show overdue
-                        if (count < 0) {
-                            count = dayjs().diff(task.deadline, 'day');
-                            name = count === 1 ? "Day Overdued" : "Days Overdued";
-                        }
                         return (<SummaryCard
                             title={task.name}
                             count={count}

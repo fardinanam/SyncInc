@@ -2,7 +2,7 @@ import React from 'react';
 import Chip from '@mui/material/Chip';
 import { Stack } from '@mui/material';
 
-const ListChips = ({ chipData, justifyContent }) => {
+const ListChips = ({ chipData, justifyContent, sx }) => {
   return (
     <Stack
       columnGap={0.5}
@@ -10,6 +10,7 @@ const ListChips = ({ chipData, justifyContent }) => {
       direction="row"
       flexWrap={'wrap'}
       justifyContent={justifyContent ? justifyContent : 'flex-start'}
+      sx={sx}
     >
       {chipData?.map((chip, index) => (
         <Chip

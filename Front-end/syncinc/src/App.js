@@ -24,7 +24,6 @@ import OrganizationProjects from "./pages/OrganizationProjects";
 import OrganizationEmployees from "./pages/OrganizationEmployees";
 import OrganizationVendors from "./pages/OrganizationVendors";
 import TaskDetails from "./pages/TaskDetails";
-import SubmitTask from "./pages/SubmitTask";
 import Invites from "./pages/Invites";
 
 function App() {
@@ -58,10 +57,8 @@ function App() {
                                         
                                         <Route path="/organization/:id/add-project" element={<AddProject />} exact />
                                         <Route path="/project/:id" element={<ProjectDetails />} exact />
-                                        {/* <Route path="/project/:id/add-task" element={<AddTask />} exact /> */}
                                         <Route path="/tasks" element={<Tasks />} exact />
                                         <Route path="/task/:id" element={<TaskDetails />} exact />
-                                        <Route path="/submit-task/:id" element={<SubmitTask />} exact />
                                     </Routes>
                                 </MainLayout>
                             </RequireAuth>

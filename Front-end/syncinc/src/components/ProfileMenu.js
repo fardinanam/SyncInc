@@ -7,14 +7,13 @@ import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import AddIcCallIcon from '@mui/icons-material/AddIcCall';
 
 import AuthContext from '../context/AuthContext';
 import { Toolbar } from '@mui/material';
 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
-
+import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
+import TelegramIcon from '@mui/icons-material/Telegram';
 import { baseUrl } from '../utils/config';
 
 
@@ -85,14 +84,14 @@ const ProfileMenu = () => {
                     key="invites" 
                     onClick={handleInvites}
                 >
-                    <AddIcCallIcon />
-                    <Typography textAlign="center" ml={1}>Invites</Typography>
+                    <TelegramIcon />
+                    <Typography textAlign="center" ml={1}>Invitations</Typography>
                 </MenuItem>
                 <MenuItem 
                     key="logout" 
                     onClick={handleLogout}
                 >
-                    <LogoutRoundedIcon />
+                    <ExitToAppRoundedIcon />
                     <Typography textAlign="center" ml={1}>Logout</Typography>
                 </MenuItem>
                 

@@ -1,11 +1,13 @@
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
 from .models import *
 from .serializer import *
 from .utils import *
 from datetime import date
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -39,7 +41,7 @@ def get_organization(request, organization_id):
 
         designations = user.designations.all()
         organization = Organization.objects.get(id=organization_id)
-        serializer = OrganizationSerializer(organization)
+        serializer = OrganizationSerializer(organization, context={'user': user})
         
         return Response({
             'message': f'Organization {organization.name} fetched successfully',
@@ -63,7 +65,6 @@ def get_organization_role(request, organization_id):
 
         organization = Organization.objects.get(id=organization_id)
         designation = user.designations.filter(organization=organization).first()
-        print(f'designation: {designation}')
 
         if not designation:
             return Response({
@@ -80,6 +81,27 @@ def get_organization_role(request, organization_id):
         
     except Exception as e:
         print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_projects(request):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        serializer = UserProjectsSerializer(user)
+        # print(serializer.data)
+        return Response({
+            'message': 'Projects fetched successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
         return Response({
             'message': 'Something went wrong',
             'data': None
@@ -217,7 +239,9 @@ def create_organization(request):
         data = request.data
         data['username'] = username
         
-        serializer = OrganizationSerializer(data=data)
+        user = User.objects.get(username=username)
+
+        serializer = OrganizationSerializer(data=data, context={'user': user})
 
         if not serializer.is_valid():
             print(serializer.errors)
@@ -306,7 +330,7 @@ def get_employee_suggestions(request, organization_id):
             }, status=status.HTTP_401_UNAUTHORIZED)
         
         
-        employees = User.objects.exclude(designation__organization=organization).values( 'id','username', 'email')
+        employees = User.objects.exclude(designation__organization=organization).values( 'id','username', 'email', 'profile_picture')
 
         return Response({
             'message': f'New member suggestion for the organization {organization.name}',
@@ -448,7 +472,6 @@ def accept_invite(request, invitation_id):
         user = User.objects.get(username=username)
 
         invitation = Invitation.objects.get(id=invitation_id)
-        print(invitation)
 
         if not invitation:
             return Response({
@@ -958,24 +981,14 @@ def get_user_task(request, task_id):
         # get all the tasks assigned to the user
         task = UserTask.objects.get(id=task_id)
 
-        role = ''
-        if task.assignee == user:
-            role = 'Assignee'
-        elif task.project.project_leader == user:
-            role = 'Project Leader'
-        elif task.project.organization.designations.filter(employee=user).first().role == 'Admin':
-            role = 'Admin'
+        serializer = GetUserTaskSerializer(task, context={'user': user})
 
-
-        if role == '':
+        if not serializer.data['roles']:
             return Response({
                 'message': 'You are not authorized to view this task',
                 'data': None
             }, status=status.HTTP_401_UNAUTHORIZED)
 
-        serializer = GetUserTaskSerializer(task)
-        serializer.data['role'] = role
-        print(serializer.data)
         
         return Response({
             'message': 'Task fetched successfully',
@@ -988,4 +1001,144 @@ def get_user_task(request, task_id):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_user_task_details(request, task_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
 
+        # get all the tasks assigned to the user
+        task = UserTask.objects.get(id=task_id)
+
+        # check if the user is a project leader
+        if not task.project.project_leader or task.project.project_leader != user:
+            return Response({
+                'message': 'You are not authorized to update this task',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        serializer = CreateUserTaskSerializer(data=request.data, instance=task)
+
+        serializer.is_valid(raise_exception=True)
+
+        serializer.save()
+        serializer = GetUserTaskSerializer(task)
+        
+        return Response({
+            'message': 'Task updated successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+@parser_classes((MultiPartParser, FormParser,))
+def submit_user_task(request, task_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        # get all the tasks assigned to the user
+        task = UserTask.objects.get(id=task_id)
+
+        # check if the user is the assignee of the task
+        if not task.assignee or task.assignee != user:
+            return Response({
+                'message': 'You are not authorized to submit this task',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        serializer = SubmitUserTaskSerializer(data=request.data, instance=task)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        serializer = GetUserTaskSerializer(task)
+        return Response({
+            'message': 'Task submitted successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_user_task_status(request, task_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        # get all the tasks assigned to the user
+        task = UserTask.objects.get(id=task_id)
+
+        # check if the user is a project leader
+        if not task.project.project_leader or task.project.project_leader != user:
+            return Response({
+                'message': 'You are not authorized to review this task',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        serializer = UpdateUserTaskStatusSerializer(data=request.data, instance=task)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        return Response({
+            'message': 'Task reviewed successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_user_task_rating(request, task_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        # get all the tasks assigned to the user
+        task = UserTask.objects.get(id=task_id)
+
+        # check if the user is the assignee of the task
+        if not task.project.project_leader or task.project.project_leader != user:
+            return Response({
+                'message': 'You are not authorized to rate this task',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        serializer = UpdateUserTaskRatingSerializer(data=request.data, instance=task)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        return Response({
+            'message': 'Task rated successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    

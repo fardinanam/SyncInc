@@ -16,6 +16,7 @@ import notifyWithToast from "../utils/toast";
 import { useLoading } from "../context/LoadingContext";
 import { useState, useEffect } from "react";
 import ErrorPage from "./ErrorPage";
+import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 
 const AddProject = () => {
     const { authTokens } = useContext(AuthContext);
@@ -86,14 +87,14 @@ const AddProject = () => {
 
     };
     {
-        if(role !== "Admin") {
-            {console.log(role)}
-            return <ErrorPage />
-        } else {
+        // if(role !== "Admin") {
+        //     {console.log(role)}
+        //     return <ErrorPage />
+        // } else {
             return(
                 <AddItemLayout
                     title="Add Project"
-                    onClose={() => navigate(`/organization/${id}`)}
+                    onClose={() => navigate(`/organization/${id}/projects`)}
                 >
                     <Grid container
                             spacing={2}
@@ -136,14 +137,22 @@ const AddProject = () => {
                                     justifyContent: 'end',
                                 }}
                             >
-                                <Button variant="contained" color="success" type="submit">Save</Button>
+                                <Button 
+                                    variant="contained" 
+                                    size="small" 
+                                    color="primary" 
+                                    type="submit"
+                                    startIcon={<SaveRoundedIcon />}
+                                >
+                                    Save
+                                </Button>
                                 {/* <Button variant="contained" color="secondary">Cancel</Button> */}
                             </Box>
                         </Grid>
                     </Grid>
                 </AddItemLayout>
             )
-        }
+       // }
     }
     
 }

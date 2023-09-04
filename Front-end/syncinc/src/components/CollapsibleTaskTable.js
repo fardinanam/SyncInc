@@ -3,28 +3,31 @@ import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownR
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import BorderColorRoundedIcon from '@mui/icons-material/BorderColorRounded';
-import { Collapse, Divider, IconButton, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography, Button, Box, Chip } from '@mui/material';
+import { Collapse, Divider, IconButton, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography, Button, Box, Chip, TableContainer } from '@mui/material';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { AssignTaskModal } from './Modals';
 import ListChips from './ListChips';
 import dayjs from 'dayjs';
 import UserInfo from './UserInfo';
 import { AddTaskModal } from './Modals';
+import { useNavigate } from 'react-router-dom';
+import StatusChip from './StatusChip';
 
 const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canAddTask}) => {
+    const navigate = useNavigate();
     const [open, setOpen] = useState(true);
     const [isAssignTaskModalOpen, setIsAssignTaskModalOpen] = useState(false);
-    const [modalData, setModalData] = useState({});
+    const [assignTaskModalData, setAssignTaskModalData] = useState({});
     const [tasks, setTasks] = useState([]);
     const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
 
     const handleAssignTask = (task) => {
-        setModalData(task);
+        setAssignTaskModalData(task);
         setIsAssignTaskModalOpen(true);
     }
 
     const handleModalClose = (updatedTask) => {
-        setModalData({});
+        setAssignTaskModalData({});
         setIsAssignTaskModalOpen(false);
 
         if (updatedTask) {
@@ -100,8 +103,8 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                                 height: '2rem',
                                 marginRight: '1rem',
                             }}
+                            startIcon={<AddRoundedIcon fontSize='small'/>}
                         >
-                            <AddRoundedIcon />
                             Task
                         </Button>
 
@@ -120,9 +123,15 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                 > 
                     <Divider />
                     { tasks.length > 0 ?
-                    <Table sx={{ 
-                        minWidth: 650,
-                    }} aria-label="simple table">
+                    <TableContainer
+                        component={Box}
+                    >
+                    <Table 
+                        sx={{ 
+                            minWidth: 650,
+                        }} aria-label="a dense table"
+                        size="small"
+                    >
                     <TableHead>
                         <TableRow>
                             <TableCell  >Task Name</TableCell>
@@ -145,7 +154,10 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                             key={`task-${task.id}`}
                             sx={{alignItems:"flex-start"}}
                         >   
-                            <TableCell  >{task.name}</TableCell>
+                            <TableCell 
+                                style={{cursor: 'pointer'}}
+                                onClick={() => navigate(`/task/${task.id}`)}
+                            >{task.name}</TableCell>
                             <TableCell  >
                                 <ListChips chipData={task.tags?.map((value, _) => value.name)} />
                             </TableCell>
@@ -180,12 +192,13 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                                 </TableCell>
                             }
                             <TableCell  >
-                                <Chip size='small' label={task.status} color={task.status === "Completed" || task.status === "In Progress" ? "success" : task.status === "Overdue" || task.status === "Rejected" ? "error" : "warning"} />
+                                <StatusChip status={task?.status} />
                             </TableCell>
                         </TableRow>
                         ))}
                     </TableBody>
-                </Table> :
+                </Table>
+                </TableContainer> :
                 <Box
                     display='flex'
                     justifyContent='center'
@@ -199,7 +212,7 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                 }
                 <AssignTaskModal
                     isOpen={isAssignTaskModalOpen}
-                    task={modalData}
+                    task={assignTaskModalData}
                     organization_id={organization_id}
                     onClose={handleModalClose}
                 />
