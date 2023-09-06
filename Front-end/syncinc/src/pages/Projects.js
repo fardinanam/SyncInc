@@ -51,8 +51,6 @@ const Projects = () => {
                 }  
 
             )
-            console.log(response)
-            console.log(response.data?.data?.projects);
             categorizeProjects(response.data?.data?.projects);
         } catch (error) {
             navigate(-1);

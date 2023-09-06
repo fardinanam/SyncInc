@@ -17,7 +17,7 @@ const AuthLayout = ({children}) => {
                 container
 
             >
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} md={6}>
                     <Box
                         sx={{
                             display: 'flex',
@@ -38,14 +38,17 @@ const AuthLayout = ({children}) => {
                         </Typography>
                     </Box>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} md={6}>
                     <Box
                         sx={{
+                            margin: '0 auto',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            height: '100vh'
+                            height: '100vh',
+                            padding: '10% 10%',
+                            maxWidth: '600px'
                         }}
                     >
                         {children}

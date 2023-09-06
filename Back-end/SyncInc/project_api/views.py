@@ -244,13 +244,13 @@ def create_organization(request):
         serializer = OrganizationSerializer(data=data, context={'user': user})
 
         if not serializer.is_valid():
-            print(serializer.errors)
+            print("serializer errors", serializer.errors)
             return Response({
-                'message': serializer.errors.get('non_field_errors')[0],
+                'message': 'Something went wrong',
                 'data': serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        organization = serializer.save()
+        serializer.save()
 
         return Response({
             'message': 'Organization created successfully',
@@ -1024,7 +1024,7 @@ def update_user_task_details(request, task_id):
         serializer.is_valid(raise_exception=True)
 
         serializer.save()
-        serializer = GetUserTaskSerializer(task)
+        serializer = GetUserTaskSerializer(task, context={'user': user})
         
         return Response({
             'message': 'Task updated successfully',
@@ -1061,7 +1061,7 @@ def submit_user_task(request, task_id):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         
-        serializer = GetUserTaskSerializer(task)
+        serializer = GetUserTaskSerializer(task, context={'user': user})
         return Response({
             'message': 'Task submitted successfully',
             'data': serializer.data
@@ -1118,18 +1118,19 @@ def update_user_task_rating(request, task_id):
         # get all the tasks assigned to the user
         task = UserTask.objects.get(id=task_id)
 
-        # check if the user is the assignee of the task
-        if not task.project.project_leader or task.project.project_leader != user:
+        # check if the user is the project leader or admin of the task
+        if not ((task.project.project_leader and task.project.project_leader == user) 
+                or user.designations.filter(organization=task.project.organization, role='Admin').exists()):
             return Response({
                 'message': 'You are not authorized to rate this task',
                 'data': None
             }, status=status.HTTP_401_UNAUTHORIZED)
 
-        serializer = UpdateUserTaskRatingSerializer(data=request.data, instance=task)
-
+        serializer = UpdateUserTaskRatingSerializer(data=request.data, instance=task, context={'user': user})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         
+        print("serializer saved", serializer.data)
         return Response({
             'message': 'Task rated successfully',
             'data': serializer.data

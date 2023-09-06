@@ -119,6 +119,7 @@ const AuthProvider = ({ children }) => {
         return () => clearInterval(interval);
     }, [authTokens]);
 
+
     return (
         <AuthContext.Provider value={contextData}>
             {!isStarting && children}

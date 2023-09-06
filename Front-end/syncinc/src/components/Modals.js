@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import { Avatar, Checkbox, TextField, Rating } from "@mui/material";
+import { Avatar, Checkbox, TextField, Rating, Switch } from "@mui/material";
 import { baseUrl } from '../utils/config';
 import AuthContext from '../context/AuthContext';
 import axios from "axios";
@@ -195,6 +195,7 @@ const AddMemberModal = ( props ) => {
 const CreateOrgModal = (props) => {
     const { authTokens } = useContext(AuthContext);
     const { setLoading } = useLoading();
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -220,7 +221,10 @@ const CreateOrgModal = (props) => {
 
             props.handleClose("success", response.data.data);
         } catch (error) {
-            props.handleClose("error", error.response.data);
+            if (error.response?.data?.data?.name)
+                notifyWithToast("error", error.response.data.data.name[0]);
+            else
+                props.handleClose("error", error.response.data);
         }
         setLoading(false);
     }
@@ -228,7 +232,11 @@ const CreateOrgModal = (props) => {
         <>
             <Modal
                 open={props.open}
-                onClose={() => props.handleClose("close")}
+                onClose={() => {
+                    setIsSubmitDisabled(true);
+                    props.handleClose("close")}
+                }
+                keepMounted={false}
             >
             <Box 
                 sx={{ 
@@ -254,8 +262,17 @@ const CreateOrgModal = (props) => {
                         label="Organization Name"
                         name="name"
                         autoFocus
+                        onChange={(e) => {
+                            if (e.target.value !== '') {
+                                setIsSubmitDisabled(false);
+                            } else {
+                                setIsSubmitDisabled(true);
+                            }
+                        }}
                     />
-                    <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+                    <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
+                        disabled={isSubmitDisabled}
+                    >
                         Create
                     </Button>
                 </Box>
@@ -1324,17 +1341,18 @@ const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
                         display="flex"
                         justifyContent="center"
                         alignItems="center"
+                        mb={1}
                     >
                     {!selectedOption &&
                         <>
-                            <Typography fontSize='xs'>Only show employees with matched tags 
-                            </Typography>
-                            <Checkbox 
+                            <Switch 
                                 color="success" 
                                 size="small" 
                                 checked={isTagSuggestionEnabled}
                                 onChange={() => setIsTagSuggestionEnabled(!isTagSuggestionEnabled)}
                             />
+                            <Typography fontSize='xs'>{isTagSuggestionEnabled ? 'Suggestion On' : 'Suggestion Off'}
+                            </Typography>
                         </>
                     }
                     </Box>
@@ -1507,10 +1525,11 @@ const ConfirmRejectTaskModal = ({isOpen, onClose, task, taskType}) => {
     )
 }
 
-const RateTaskModal = ({isOpen, onClose, task, taskType}) => {
+const RateTaskModal = ({isOpen, onClose, taskId, review, taskType}) => {
     const {authTokens} = useContext(AuthContext);
     const {setLoading} = useLoading();
     const [rating, setRating] = useState(0);
+    const [comment, setComment] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -1524,12 +1543,13 @@ const RateTaskModal = ({isOpen, onClose, task, taskType}) => {
 
         const body = JSON.stringify({
             rating: rating,
+            comment: comment ? comment : "",
         });
 
         setLoading(true);
         try {
             const response = await axios.put(
-                `${baseUrl}update_user_task_rating/${task.id}/`,
+                `${baseUrl}update_user_task_rating/${taskId}/`,
                 body,
                 config
             );
@@ -1547,8 +1567,12 @@ const RateTaskModal = ({isOpen, onClose, task, taskType}) => {
     }
 
     useEffect(() => {
-        setRating(task?.rating);
-    }, [task?.rating]);
+        setRating(review?.rating);
+    }, [review?.rating]);
+
+    useEffect(() => {
+        setComment(review?.comment);
+    }, [review?.comment]);
 
     return (
         <Modal
@@ -1565,7 +1589,7 @@ const RateTaskModal = ({isOpen, onClose, task, taskType}) => {
                     alignItems={'center'}
                 >
                     <Typography variant='h5' align="center">
-                        Rate {task?.name}
+                        Rate This Task
                     </Typography>
                     <Rating
                         size="large"
@@ -1574,6 +1598,21 @@ const RateTaskModal = ({isOpen, onClose, task, taskType}) => {
                         onChange={(event, newValue) => {
                             setRating(newValue);
                         }}
+                    />
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        id="comment"
+                        label="Comment"
+                        name="comment"
+                        multiline
+                        defaultValue={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        inputProps={{
+                            maxLength: 256,
+                        }}
+
+                        helperText={`${comment?.length}/256`}
                     />
                     <Button
                         type="submit"

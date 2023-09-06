@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
 import notifyWithToast from "../utils/toast";
 import axios from "axios";
-import { Grid, Paper, Stack, Typography, Box, Button, Chip, Rating } from "@mui/material";
+import { Grid, Paper, Stack, Typography, Box, Button, Chip, Rating, Card, Divider } from "@mui/material";
 import { InfoSectionStyle } from "../styles/styles";
 import { useTheme } from "@mui/material/styles";
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
@@ -28,7 +28,7 @@ import GradeRoundedIcon from '@mui/icons-material/GradeRounded';
 const TaskDetails = () => {
     const taskId = useParams().id;
     const { setLoading } = useLoading();
-    const { authTokens } = useContext(AuthContext);
+    const { authTokens, user } = useContext(AuthContext);
     const navigate = useNavigate();
     const [isAssignTaskModalOpen, setIsAssignTaskModalOpen] = useState(false);
 
@@ -39,6 +39,7 @@ const TaskDetails = () => {
     const [isAcceptTaskModalOpen, setIsAcceptTaskModalOpen] = useState(false);
     const [isRejectTaskModalOpen, setIsRejectTaskModalOpen] = useState(false);
     const [isRateTaskModalOpen, setIsRateTaskModalOpen] = useState(false);
+    const [viewersReview, setViewersReview] = useState({});
 
     const fetchTaskDetails = async () => {
         const config = {
@@ -51,7 +52,6 @@ const TaskDetails = () => {
         setLoading(true);
         try {
             const response = await axios.get(`${baseUrl}get_user_task/${taskId}/`, config);
-
             setTask(response.data?.data);
             setRoles(response.data?.data?.roles);
         } catch {
@@ -64,8 +64,7 @@ const TaskDetails = () => {
     const handleDownloadClick = () => {
         // Create an anchor element to trigger the download
         const link = document.createElement('a');
-        link.href = task?.file;
-        link.download = 'your_file_name.extension'; // Set the desired file name
+        link.href = task?.submission?.file;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -98,7 +97,10 @@ const TaskDetails = () => {
     const handleEditTaskModalClose = (updatedTask) => {
         setIsEditTaskModalOpen(false);
         if (updatedTask) {
-            setTask(updatedTask);
+            setTask(prevTask => ({
+                ...prevTask,
+                ...updatedTask
+            }));
         }
     }
 
@@ -116,6 +118,13 @@ const TaskDetails = () => {
     useEffect(() => {
         fetchTaskDetails();
     }, []);
+
+    useEffect(() => {
+        if (task?.user_task_reviews?.length > 0) {
+            const viewersReview = task?.user_task_reviews?.find((review) => review.reviewer.id === user.user_id);
+            setViewersReview(viewersReview);
+        }
+    }, [task?.user_task_reviews]);
 
     return (
         <>
@@ -314,6 +323,22 @@ const TaskDetails = () => {
                 task?.status === "Rejected" ||
                 task?.status === "Completed") &&
                 <InfoSection title="Submission">
+                    <Grid 
+                        container
+                        rowSpacing={2}
+                    >
+                    <Grid item xs={12} md={6}>
+                    <StackField
+                        title="Comment"
+                        value={task?.submission?.details ? task.submission.details : "-"}
+                    />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                    <StackField
+                        title="Submitted on"
+                        value={dayjs(task?.submission?.submission_time).format("DD MMM, YYYY")}
+                    />
+                    </Grid>
                     <Box 
                         display="flex"
                         flexDirection="row"
@@ -321,6 +346,7 @@ const TaskDetails = () => {
                         alignItems="center"
                         rowGap={1}
                         columnGap={1}
+                        mt={1}
                     >
                         <Button
                             variant="outlined"
@@ -368,6 +394,7 @@ const TaskDetails = () => {
                         }
                         
                     </Box>
+                    </Grid>
                 </InfoSection>
             }
             { (task?.status === "Completed" ||
@@ -388,11 +415,11 @@ const TaskDetails = () => {
                             flexGrow={1}
                             mb={1}
                         >
-                            Rating
+                            Reviews
                         </Typography>
                         
                         {
-                            task?.roles?.includes("Project Leader") &&
+                            (task?.roles?.includes("Project Leader") || task?.roles?.includes("Admin")) &&
                             (task?.status === "Completed" ||
                             task?.status === "Rejected" ) &&
                             <>
@@ -402,22 +429,116 @@ const TaskDetails = () => {
                                 size="small"
                                 onClick={() => setIsRateTaskModalOpen(true)}
                                 startIcon={<GradeRoundedIcon />}
-                            >Rate</Button>  
+                            >Review</Button>  
                             <RateTaskModal
                                 isOpen={isRateTaskModalOpen}
                                 onClose={handleRateTaskModalClose}
-                                task={task}
+                                taskId={task?.id}
+                                review={viewersReview}
                                 taskType={"User"}
                             />
                             </>
                         }
                     </Box>
-                    <Rating name="simple-controlled" 
+                    {/* <Rating name="simple-controlled" 
                         value={task?.rating} 
                         readOnly
-                    />  
+                    />  */}
+                    {task?.user_task_reviews?.length > 0 ?
+                    <Box 
+                        display="flex"
+                        flexDirection="row"
+                        justifyContent="flex-start"
+                        alignItems="flex-start"
+                        flexWrap="wrap"
+                        rowGap={1}
+                        columnGap={1}
+                    >
+                        {
+                            task?.user_task_reviews?.map((review) => (
+                                <Card key={review.id}
+                                    elevation={0}
+                                    sx={{
+                                        borderRadius: '0.5rem',
+                                        p: 1,
+                                        width: '25rem',
+                                    }}
+                                >
+                                    <Stack 
+                                        direction="row"
+                                        justifyContent="space-between"
+                                        alignItems="center"
+                                    >
+                                        <Stack
+                                            direction="row"
+                                            justifyContent="flex-start"
+                                            alignItems="center"
+                                            spacing={1}
+                                        >
+                                            <UserInfo userInfo={review.reviewer} />
+                                            <Stack 
+                                                direction="column"
+                                                justifyContent="center"
+                                            >
+                                                <Typography variant="subtitle2">
+                                                    {review.reviewer.name}
+                                                </Typography>
+                                                <Rating name="simple-controlled"
+                                                    value={review.rating}
+                                                    readOnly
+                                                />
+                                            </Stack>
+                                        </Stack>
+                                        <Typography variant="subtitle2">
+                                            {dayjs(review.review_time).format("DD MMM, YYYY")}
+                                        </Typography>
+                                    </Stack>
+                                    <Divider />
+                                    <Typography variant="subtitle2" mt={1}
+                                        textOverflow={"auto"}
+                                    >
+                                        {review.comment}
+                                    </Typography>
+
+                                </Card>
+                            ))
+                        }
+                    </Box>
+                    :
+                    <Typography variant="subtitle2">
+                        No review yet
+                    </Typography>
+                    }
                 </Box>  
-            }                                  
+            }          
+            <Box
+                display='flex'
+                justifyContent='flex-end'
+            >
+            {
+                task?.roles?.includes("Project Leader") && (task?.status === "Rejected" ||
+                task?.status === "Overdue") ?
+                <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    
+                >
+                    Terminate
+                </Button>
+            :
+                task?.roles?.includes("Project Leader") && ((task?.status === "Rejected" ||
+                task?.status === "Terminated")) &&
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                >
+                    Create New Version
+                </Button>
+
+            }                  
+            </Box>
         </Stack>
         </>
     )

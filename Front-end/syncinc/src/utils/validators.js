@@ -7,7 +7,7 @@ const isValidPassword = (password) => {
 }
 
 const isValidNumber = (number) => {
-    return /^01\d{9}$/.test(number);
+    return /^([0|\+[0-9]{1,5})?([0-9]{6,10})$/.test(number);
 }
 
 const isValidName = (name) => {
@@ -22,4 +22,4 @@ const isValidUsername = (username) => {
     return /^[a-zA-Z][a-zA-Z0-9_.]+$/.test(username);
 }
 
-export { isValidEmail, isValidPassword, isValidNumber };
+export { isValidEmail, isValidPassword, isValidNumber, isValidName, isValidUsername };
