@@ -270,7 +270,7 @@ class ProjectDetailsSerializer(serializers.ModelSerializer):
     task_count = serializers.SerializerMethodField()
     class Meta:
         model = Project
-        fields = ['name', 'organization', 'project_leader', 'client', 'description', 'roles', 'start_time', 'end_time', 'task_count']
+        fields = ['name', 'organization', 'project_leader', 'client', 'description', 'roles', 'start_time', 'end_time', 'task_count', 'deadline']
         depth = 1
 
     def get_task_count(self, obj):
@@ -572,7 +572,7 @@ class UpdateUserTaskRatingSerializer(serializers.ModelSerializer):
 class UpdateProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ['name', 'description']
+        fields = ['name', 'description', 'deadline']
     
     def validate(self, data):
         valid_data = super().validate(data)
@@ -585,5 +585,6 @@ class UpdateProjectSerializer(serializers.ModelSerializer):
         instance.name = validated_data.get('name', instance.name)
         instance.description = validated_data.get(
             'description', instance.description)
+        instance.deadline = validated_data.get('deadline', instance.deadline)
         instance.save()
         return instance

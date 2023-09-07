@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { useLoading } from "../context/LoadingContext";
 import AuthLayout from "../components/AuthLayout";
 import { isValidName } from "../utils/validators";
+import { Divider } from "@mui/material";
 
 const Register = () => {
     const navigate = useNavigate();
@@ -229,18 +230,27 @@ const Register = () => {
                             type="submit"
                             fullWidth
                             variant="contained"
-                            sx={{ mt: 3, mb: 2 }}
+                            sx={{ mt: 2, mb: 2 }}
                             disabled={isSubmitDisabled}
                         >
                             Sign Up
                         </Button>
                     </Grid>
                 </Grid>
-                <Grid container justifyContent="center">
-                    <Grid item>
-                        <Link to="/login">
-                        Already have an account? Sign in
-                        </Link>
+                <Divider>or</Divider>
+                <Grid container>
+                    <Grid item xs={12}>
+                        <Button
+                            component={Link}
+                            to="/login"
+                            variant="outlined"
+                            size="small"
+                            fullWidth
+                            sx={{ mt: 2}}
+                        >
+                            Already have an account? Sign in
+                        </Button>
+
                     </Grid>
                 </Grid>
             </Box>

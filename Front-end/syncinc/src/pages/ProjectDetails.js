@@ -47,7 +47,8 @@ const ProjectDetails = () => {
                 `${baseUrl}get_project/${id}`,
                 config
             )
-
+            
+            console.log(response.data.data);
             setProject(response.data.data);
             setRoles(response.data.data.roles);
             response = await axios.get(
@@ -296,12 +297,22 @@ const ProjectDetails = () => {
                             value={project?.client?.name}
                         />
                     </Grid>
-                    <Grid item xs={12} md={6}>
-                        <StackField
-                            title="Description"
-                            value={project?.description}
-                        />
-                    </Grid>
+                    {
+                        status === "Completed" ?
+                        <Grid item xs={12} md={6}>
+                            <StackField
+                                title="Completed On"
+                                value={dayjs(project?.end_time).format("DD MMM, YYYY")}
+                            />
+                        </Grid>
+                        :
+                        <Grid item xs={12} md={6}>
+                            <StackField
+                                title="Deadline"
+                                value={project?.deadline ? dayjs(project?.deadline).format("DD MMM, YYYY") : "Not Set"}
+                            />
+                        </Grid>
+                    }
                     <Grid item xs={12} md={6}>
                         <Box 
                             display="flex"
@@ -318,7 +329,13 @@ const ProjectDetails = () => {
                                 <StatusChip status={status} />
                             </Box>
                         </Box>
-                    </Grid>    
+                    </Grid>   
+                    <Grid item xs={12}>
+                        <StackField
+                            title="Description"
+                            value={project?.description}
+                        />
+                    </Grid>
                 </Grid>
             </Box>
             

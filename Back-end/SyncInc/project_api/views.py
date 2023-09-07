@@ -1204,7 +1204,7 @@ def complete_project(request, project_id):
                     'data': None
                 }, status=status.HTTP_400_BAD_REQUEST)
         
-        project.end_time = datetime.now()
+        project.end_time = timezone.now()
 
         project.save()
 

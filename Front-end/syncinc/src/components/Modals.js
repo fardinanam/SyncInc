@@ -1702,6 +1702,7 @@ const EditProjectModal = ({isOpen, onClose, project}) => {
     const projectId = useParams().id;
     const [initialProject, setInitialProject] = useState(null);
     const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
+    const [deadline, setDeadline] = useState(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -1716,7 +1717,10 @@ const EditProjectModal = ({isOpen, onClose, project}) => {
         const body = JSON.stringify({
             name: e.target.project_name.value,
             description: e.target.project_description.value,
+            deadline: dayjs(deadline).format('YYYY-MM-DD'),
         });
+
+        console.log(body);
 
         setLoading(true);
 
@@ -1740,7 +1744,8 @@ const EditProjectModal = ({isOpen, onClose, project}) => {
 
     useEffect(() => {
         setInitialProject(project);
-    }, [project.name, project.description]);
+        setDeadline(project.deadline);
+    }, [project.name, project.description, project?.deadline]);
 
     return (
         <Modal
@@ -1771,6 +1776,29 @@ const EditProjectModal = ({isOpen, onClose, project}) => {
                             }
                         }}
                     />
+                    <LocalizationProvider
+                        dateAdapter={AdapterDayjs}
+                    >
+                        <DatePicker
+                            label="Deadline"
+                            defaultValue={dayjs(project?.deadline)}
+                            minDate={dayjs().add(1, 'day')}
+                            id="deadline"
+                            name="deadline"
+                            onChange={(date) => {
+                                if (date !== project?.deadline) {
+                                    setIsSubmitDisabled(false);
+                                } else {
+                                    setIsSubmitDisabled(true);
+                                }
+
+                                setDeadline(date);
+                            }}
+                            sx={{
+                                width: '100%',
+                            }}
+                        />
+                    </LocalizationProvider>
                     <TextField
                         margin="normal"
                         fullWidth

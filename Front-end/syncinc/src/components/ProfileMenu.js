@@ -9,7 +9,7 @@ import MenuItem from '@mui/material/MenuItem';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import AuthContext from '../context/AuthContext';
-import { Toolbar } from '@mui/material';
+import { Divider, Toolbar } from '@mui/material';
 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
@@ -87,6 +87,7 @@ const ProfileMenu = () => {
                     <TelegramIcon />
                     <Typography textAlign="center" ml={1}>Invitations</Typography>
                 </MenuItem>
+                <Divider />
                 <MenuItem 
                     key="logout" 
                     onClick={handleLogout}
