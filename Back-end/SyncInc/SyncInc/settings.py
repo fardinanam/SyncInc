@@ -33,6 +33,8 @@ ALLOWED_HOSTS = ['127.0.0.1', 'syncinc.onrender.com']
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -84,6 +86,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'SyncInc.wsgi.application'
 
+ASGI_APPLICATION = "SyncInc.asgi.application"
+CHANNEL_LAYERS = {
+    'default':{
+        'BACKEND':'channels.layers.InMemoryChannelLayer'
+    }
+}
 
 # render.com database with external connection
 # PGPASSWORD=qU3u0dLIAdalFATVUyvxgJ5Y5R3ZHvk9 psql -h dpg-cjgrbik1ja0c73cahom0-a.oregon-postgres.render.com -U syncinc syncinc_8ynr

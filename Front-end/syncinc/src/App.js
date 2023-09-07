@@ -25,45 +25,49 @@ import OrganizationEmployees from "./pages/OrganizationEmployees";
 import OrganizationVendors from "./pages/OrganizationVendors";
 import TaskDetails from "./pages/TaskDetails";
 import Invites from "./pages/Invites";
+import { SocketProvider } from "./context/SocketContext";
 
 function App() {
+
     return (
         <ToggleColorMode>
         <LoadingProvider>
             <BrowserRouter>
                 <AuthProvider>
-                    <Routes>
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
-                        <Route path="/forgot-password" element={<ForgotPassword />} />
-                        <Route path="/reset-password/:username/:token" element={<ResetPassword />} />
-                        <Route path="*" element={
-                            <RequireAuth>
-                                <MainLayout>
-                                    <Routes>
-                                        <Route path="/" element={<Navigate to="/dashboard" />} />
-                                        <Route path="*" element={<ErrorPage />} />
-                                        <Route path="/profile" element={<Profile />} exact />
-                                        <Route path="/invites" element={<Invites />} exact />
-                                        <Route path="/dashboard" element={<Home />} exact />
-                                        <Route path="/projects" element={<Projects />} exact />
-                                        <Route path="/organizations" element={<Organizations />} exact />
+                    <SocketProvider>
+                        <Routes>
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/register" element={<Register />} />
+                            <Route path="/forgot-password" element={<ForgotPassword />} />
+                            <Route path="/reset-password/:username/:token" element={<ResetPassword />} />
+                            <Route path="*" element={
+                                <RequireAuth>
+                                    <MainLayout>
+                                        <Routes>
+                                            <Route path="/" element={<Navigate to="/dashboard" />} />
+                                            <Route path="*" element={<ErrorPage />} />
+                                            <Route path="/profile" element={<Profile />} exact />
+                                            <Route path="/invites" element={<Invites />} exact />
+                                            <Route path="/dashboard" element={<Home />} exact />
+                                            <Route path="/projects" element={<Projects />} exact />
+                                            <Route path="/organizations" element={<Organizations />} exact />
+                                            
                                         
-                                    
-                                        <Route path="/organization/:id/projects" element={<OrganizationProjects />} exact />
-                                        <Route path="/organization/:id/employees" element={<OrganizationEmployees />} exact />
-                                        <Route path="/organization/:id/vendors" element={<OrganizationVendors />} exact />
-                                        
-                                        
-                                        <Route path="/organization/:id/add-project" element={<AddProject />} exact />
-                                        <Route path="/project/:id" element={<ProjectDetails />} exact />
-                                        <Route path="/tasks" element={<Tasks />} exact />
-                                        <Route path="/task/:id" element={<TaskDetails />} exact />
-                                    </Routes>
-                                </MainLayout>
-                            </RequireAuth>
-                        } />
-                    </Routes>
+                                            <Route path="/organization/:id/projects" element={<OrganizationProjects />} exact />
+                                            <Route path="/organization/:id/employees" element={<OrganizationEmployees />} exact />
+                                            <Route path="/organization/:id/vendors" element={<OrganizationVendors />} exact />
+                                            
+                                            
+                                            <Route path="/organization/:id/add-project" element={<AddProject />} exact />
+                                            <Route path="/project/:id" element={<ProjectDetails />} exact />
+                                            <Route path="/tasks" element={<Tasks />} exact />
+                                            <Route path="/task/:id" element={<TaskDetails />} exact />
+                                        </Routes>
+                                    </MainLayout>
+                                </RequireAuth>
+                            } />
+                        </Routes>
+                    </SocketProvider>
                 </AuthProvider>
             </BrowserRouter>
             <Toaster />

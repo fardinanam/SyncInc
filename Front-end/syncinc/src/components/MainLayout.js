@@ -1,15 +1,19 @@
 import React from 'react';
+import { useContext } from "react";
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import Header from '../components/Header';
 import SideBar from '../components/SideBar';
 import Toolbar from '@mui/material/Toolbar';
 import { useTheme } from '@mui/material/styles';
+import SocketContext from '../context/SocketContext';
 
 const MainLayout = (props) => {
     const theme = useTheme();
     const background = theme.palette.background[theme.palette.mode]
     const mainColor = theme.palette.main[theme.palette.mode]
+    const {notifications, setNotifications} = useContext(SocketContext)
+    console.log('Notifications:', notifications)
 
     const {children} = props;
         return (

@@ -299,3 +299,10 @@ class Message(models.Model):
     
     def __str__(self):
         return self.text
+    
+class Notification(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_notifications")
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_notifications", default=1)
+    message = models.TextField()
+    sent_date = models.DateTimeField(auto_now_add=True)
+    read = models.BooleanField(default=False)

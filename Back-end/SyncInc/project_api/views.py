@@ -8,6 +8,7 @@ from .serializer import *
 from .utils import *
 from datetime import date
 
+# from websocket_apps import consumers
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -401,6 +402,8 @@ def invite_employee(request, organization_id):
         data = request.data
         member_id = data['id']
         employee = User.objects.get(id=member_id)
+
+        
         # check if the employee is already a member of the organization
 
         if not employee:
@@ -429,7 +432,16 @@ def invite_employee(request, organization_id):
 
         invitation.save()
         data = EmployeeSerializer(employee).data
+        
+        message = "You are invited to " + organization.name + " organization"
+       
+        Notification.objects.create(
+            sender = user,
+            recipient = employee,
+            message = message
+        )
 
+        send_notification_to_user(employee.username, message)
         return Response({
             'message': f'Invitation sent successfully to the {employee.name}',
             'data': data
@@ -485,9 +497,10 @@ def accept_invite(request, invitation_id):
                 'data': None
             }, status=status.HTTP_401_UNAUTHORIZED)
         
+        organization = invitation.organization
         designation = Designation.objects.create(
             employee=user,
-            organization=invitation.organization,
+            organization=organization,
             role='Employee',
             invitationAccepted=True
         )
@@ -495,6 +508,17 @@ def accept_invite(request, invitation_id):
         if designation:
             invitation.delete()
             designation.save()
+        
+        invited_by = invitation.invited_by
+        message = username + " accepted your invitation to join " + organization.name + " organization"
+       
+        Notification.objects.create(
+            sender = user,
+            recipient = invited_by,
+            message = message
+        )
+        
+        send_notification_to_user(invited_by.username, message)
 
         return Response({
             'message': f'Invite accepted successfully',
@@ -834,6 +858,16 @@ def assign_user_task(request):
 
         serializer = GetUserTaskSerializer(task)
 
+        message = "You are assigned a new task " + task.name + " in project "+ task.project.name
+       
+        Notification.objects.create(
+            sender = user,
+            recipient = assignee,
+            message = message
+        )
+        
+        send_notification_to_user(assignee.username, message)
+
         return Response({
             'message': 'Task assigned successfully',
             'data': serializer.data
@@ -859,6 +893,7 @@ def get_user_items_count(request):
         data['numOrganizations'] = Organization.objects.filter(designation__in=designations).count()
         data['numProjects'] = Project.objects.filter(project_leader=user).count()
         data['numTasks'] = UserTask.objects.filter(assignee=user).count()
+        print(data)
         return Response({
             'message': f'Item counts of {user.username} fetched successfully',
             'data': data

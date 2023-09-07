@@ -518,3 +518,11 @@ class UpdateUserTaskRatingSerializer(serializers.ModelSerializer):
         instance.rating = validated_data['rating']
         instance.save()
         return instance
+
+class CreateNotificationSerializer(serializers.ModelSerializer):
+    # a serializer to create a task of a project
+    
+    class Meta:
+        model = Notification
+        fields = '__all__'
+        
