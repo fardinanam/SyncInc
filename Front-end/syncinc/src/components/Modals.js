@@ -1076,6 +1076,7 @@ const AddTaskModal = ({isOpen, onClose, taskType}) => {
     const {setLoading} = useLoading();
     const [deadline, setDeadline] = useState('');
     const [selectedTags, setSelectedTags] = useState([]);
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -1118,6 +1119,10 @@ const AddTaskModal = ({isOpen, onClose, taskType}) => {
 
     const handleDeadlineChange = (date) => {
         setDeadline(date);
+
+        if (date !== '') {
+            setIsSubmitDisabled(false);
+        }
     }
 
     return (
@@ -1175,6 +1180,7 @@ const AddTaskModal = ({isOpen, onClose, taskType}) => {
                         variant="outlined"
                         color="success"
                         sx={{ mt: 2 }}
+                        disabled={isSubmitDisabled}
                     >
                         Save
                     </Button>

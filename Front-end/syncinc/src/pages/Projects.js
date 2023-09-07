@@ -104,13 +104,13 @@ const Projects = () => {
                 container 
                 spacing={3}
             >
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} lg={4}>
                     <ProjectsStack title="New Projects" projects={newProjects} />
                 </Grid>
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} lg={4}>
                     <ProjectsStack title="Projects in Progress" projects={projectsInProgress} />
                 </Grid>
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} lg={4}>
                     <ProjectsStack title="Completed Projects" projects={completedProjects} />
                 </Grid>
             </Grid>

@@ -269,8 +269,9 @@ const TaskDetails = () => {
                             size="small" 
                             variant="contained"
                             onClick={() => setIsAssignTaskModalOpen(true)}
+                            startIcon={<AssignmentReturnedRoundedIcon size="small"/>}
                         >
-                            <AssignmentReturnedRoundedIcon size="small"/> Assign
+                            Assign
                         </Button> 
                         <AssignTaskModal 
                             isOpen={isAssignTaskModalOpen}

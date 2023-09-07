@@ -17,6 +17,7 @@ import { useContext } from 'react';
 import { EnhancedTableHead } from './EnhancedTable';
 import { getComparator, stableSort } from '../utils/comparator';
 import SearchBar from './SearchBar';
+import AssignmentReturnedRoundedIcon from '@mui/icons-material/AssignmentReturnedRounded';
 
 const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canAddTask}) => {
     const [order, setOrder] = useState('asc');
@@ -102,7 +103,7 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
     return (
         <Paper 
             sx={{
-                marginTop: '1.5rem',
+                marginTop: '1rem',
                 borderRadius: '0.5rem'
             }} 
             elevation={0}
@@ -193,8 +194,8 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                         {visibleRows?.map((task) => {
                             let canSeeDetails = false;
                             if (task?.assignee?.id === user?.user_id || 
-                                roles?.includes("project leader") ||
-                                roles?.includes("admin"))
+                                roles?.includes("Project Leader") ||
+                                roles?.includes("Admin"))
                                 canSeeDetails = true;
 
                         return (
@@ -243,6 +244,7 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                                         variant="outlined" 
                                         size="small"
                                         onClick={() => handleAssignTask(task)}
+                                        startIcon={<AssignmentReturnedRoundedIcon fontSize='small'/>}
                                     >
                                         Assign
                                     </Button> 

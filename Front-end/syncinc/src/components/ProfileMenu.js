@@ -14,8 +14,6 @@ import { Divider, Toolbar } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
 import TelegramIcon from '@mui/icons-material/Telegram';
-import { baseUrl } from '../utils/config';
-
 
 const ProfileMenu = () => {
     let {user, logoutUser} = useContext(AuthContext);
