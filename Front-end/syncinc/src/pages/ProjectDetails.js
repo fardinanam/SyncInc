@@ -5,12 +5,17 @@ import { baseUrl } from "../utils/config";
 import AuthContext from "../context/AuthContext";
 import notifyWithToast from "../utils/toast";
 import axios from "axios";
-import { Box, Button, Chip, CssBaseline, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Chip, CssBaseline, Grid, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import CollapsibleTaskTable from "../components/CollapsibleTaskTable";
-import { AddMemberModal, AddTaskModal } from "../components/Modals";
+import { AddMemberModal, AddTaskModal, ConfirmProjectCompleteModal, EditProjectModal } from "../components/Modals";
 import TitleBar from "../components/TitleBar";
 import UserInfo from "../components/UserInfo";
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import StackField from "../components/StackField";
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
+import StatusChip from "../components/StatusChip";
+import dayjs from "dayjs";
 
 const ProjectDetails = () => {
     const { id } = useParams();
@@ -19,9 +24,13 @@ const ProjectDetails = () => {
     const navigate = useNavigate();
     const [project, setProject] = useState({});
     const [userTasks, setUserTasks] = useState([]);
-    const [vendorTasks, setVendorTasks] = useState([]);
+    const [status, setStatus] = useState();
     const [roles, setRoles] = useState([]);
     const [openAssignProjectLeaderModal, setOpenAssignProjectLeaderModal] = useState(false);
+    const [isEditProjectModalOpen, setIsEditProjectModalOpen] = useState(false);
+    const [canComplete, setCanComplete] = useState(false);
+    const [isCompleteProjectModalOpen, setIsCompleteProjectModalOpen] = useState(false);
+
 
     const fetchProjectDetails = async () => {
         const config = {
@@ -52,13 +61,23 @@ const ProjectDetails = () => {
                 config,
             )
 
-            setVendorTasks(response.data.data);
+            // setVendorTasks(response.data.data);
         } catch (error) {
             navigate(-1);
             notifyWithToast("error", error.response.data.message);
         }
 
         setLoading(false);
+    }
+
+    const handleEditProjectModalClose = (project) => {
+        if (project) {
+            setProject(prevProject => ({
+                ...prevProject,
+                ...project
+            }));
+        }
+        setIsEditProjectModalOpen(false);
     }
 
     const handleProjectLeaderModalClose = (project_leader) => {
@@ -79,16 +98,58 @@ const ProjectDetails = () => {
         setOpenAssignProjectLeaderModal(false);
     }
 
+    const handleCompleteProjectModalClose = (project) => {
+        if (project) {
+            // console.log(project);
+            setProject(prevProject => ({
+                ...prevProject,
+                ...project
+            }));
+        }
+        setIsCompleteProjectModalOpen(false);
+    }
+
     useEffect(() => {
         fetchProjectDetails();
     }, []);
+
+    useEffect(() => {
+        if (project?.end_time) {
+            setStatus("Completed");
+        } else if (project?.task_count > 0) {
+            setStatus("In Progress");
+        } else {
+            setStatus("New");
+        }
+    }, [project]);
+
+    useEffect(() => {
+        if (roles.includes("Project Leader") && !project?.has_ended) {
+            if (userTasks.every(task => task.status === "Completed"
+                || task.status === "Rejected" || task.status === "Terminated")) {
+                setCanComplete(true);
+                return;
+            }
+        }
+
+        setCanComplete(false);
+    }, [userTasks, roles, project]);
 
     return (
         <>
             <CssBaseline />
             <TitleBar 
                 title={project?.name}
-                subtitle={project?.organization?.name}
+                subtitleElement={
+                    <Typography variant="h7"
+                        fontWeight="bold"
+                        color="text.secondary"
+                        sx={{ cursor: "pointer" }}
+                        onClick={() => navigate("/organization/" + project?.organization?.id + "/projects/")}
+                    >
+                        {project?.organization?.name}
+                    </Typography>
+                }
             >
                 <Box
                     display={"flex"}
@@ -162,12 +223,111 @@ const ProjectDetails = () => {
 
                 </Box>
             </TitleBar>
+            <Box 
+                display="flex"
+                flexDirection="column"
+                sx={{
+                    borderRadius: "0.5rem",
+                    p: 2,
+                    backgroundColor: "main.main",
+                }}
+            >
+                <Box
+                    display={"flex"}
+                    
+                >
+                    <Typography
+                        fontWeight={"bold"}
+                        flexGrow={1}
+                        mb={1}
+                    >
+                        Project Details
+                    </Typography>
+                    {roles.includes("Project Leader") && status !== "Completed" &&
+                    <>
+                        <Button 
+                            size="small"
+                            variant="outlined"
+                            endIcon={<EditRoundedIcon fontSize="small"/>}
+                            onClick={() => setIsEditProjectModalOpen(true)}
+                        >
+                            Edit
+                        </Button>
+                        <EditProjectModal
+                            isOpen={isEditProjectModalOpen}
+                            onClose={handleEditProjectModalClose}
+                            project={project}
+                        />
+                        {canComplete &&
+                            <>
+                                <Button 
+                                    size="small"
+                                    variant="outlined"
+                                    color="success"
+                                    sx={{ ml: 1 }}
+                                    startIcon={<CheckRoundedIcon fontSize="small"/>}
+                                    onClick={() => setIsCompleteProjectModalOpen(true)}
+                                >
+                                    Mark As Completed
+                                </Button>
+                                <ConfirmProjectCompleteModal
+                                    isOpen={isCompleteProjectModalOpen}
+                                    onClose={handleCompleteProjectModalClose}
+                                    project={project}
+                                />
+                            </>
+                        }
+                    </>
+                    }
+                </Box>
+                <Grid
+                    container
+                    spacing={2}
+                >
+                    <Grid item xs={12} md={6}>
+                        <StackField
+                            title="Project Name"
+                            value={project?.name}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <StackField
+                            title="Client Name"
+                            value={project?.client?.name}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <StackField
+                            title="Description"
+                            value={project?.description}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                        <Box 
+                            display="flex"
+                            flexDirection="column"
+                            justifyContent="center"
+                        >
+                            <Typography fontSize="small" fontWeight="light">
+                                Status
+                            </Typography>
+                            <Box display="flex"
+                                flexDirection="row"
+                                justifyContent="flex-start"
+                            >
+                                <StatusChip status={status} />
+                            </Box>
+                        </Box>
+                    </Grid>    
+                </Grid>
+            </Box>
+            
             <CollapsibleTaskTable 
                 title="User Tasks"
                 initialTasks={userTasks}
                 roles={roles}
                 organization_id={project?.organization?.id}
-                canAddTask={!project?.has_ended && roles?.includes("Project Leader") ? true : false}
+                canAddTask={!(project?.end_time && status === "Completed") && roles?.includes("Project Leader") ? true : false}
             />
         </>
     );

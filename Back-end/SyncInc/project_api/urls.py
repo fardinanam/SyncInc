@@ -39,4 +39,7 @@ urlpatterns = [
     path('update_user_task_rating/<int:task_id>/', views.update_user_task_rating, name='update_task_rating'),
 
     path('get_user_projects/', views.get_user_projects, name='user_projects'),
+    path('update_project_details/<int:project_id>/', views.update_project_details, name='update_project_details'),
+
+    path('complete_project/<int:project_id>/', views.complete_project, name='complete_project'),
 ]

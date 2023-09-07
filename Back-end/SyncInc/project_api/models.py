@@ -172,7 +172,7 @@ class Project(models.Model):
     
     name = models.CharField(max_length=254)
     description = models.TextField(blank=True, null=True)
-    start_time = models.DateTimeField(blank=True, null=True)
+    start_time = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
     deadline = models.DateTimeField(blank=True, null=True)
 
@@ -194,6 +194,7 @@ class AbstractTask(models.Model):
         ('Submitted', 'Submitted'),
         ('Completed', 'Completed'),
         ('Rejected', 'Rejected'),
+        ('Terminated', 'Terminated'),
     ]
     project = models.ForeignKey(
         Project, 

@@ -1630,6 +1630,244 @@ const RateTaskModal = ({isOpen, onClose, taskId, review, taskType}) => {
     )
 }
 
+const TerminateTaskModal = ({isOpen, onClose, task, taskType}) => {
+    const {authTokens} = useContext(AuthContext);
+    const {setLoading} = useLoading();
+
+    const handleSubmit = async (e) => {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`
+            }
+        }
+
+        const body = JSON.stringify({
+            status: 'Terminated',
+        });
+
+        setLoading(true);
+
+        try {
+            const response = await axios.put(
+                `${baseUrl}update_user_task_status/${task.id}/`,
+                body,
+                config
+            );
+
+            if (response.status === 200) {
+                onClose(response.data?.data);
+                notifyWithToast('success', 'Task terminated successfully');
+            }
+        } catch (error) {
+            onClose();
+            notifyWithToast('error', 'Failed to terminate task');
+        }
+
+        setLoading(false);
+    }
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={onClose}
+        >
+            <Box sx={modalStyle}>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <Typography variant="body1" align="center">
+                        Are you sure you want to terminate {task?.name}?
+                    </Typography>
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="error"
+                        sx={{ mt: 2 }}
+                        startIcon={<CloseRoundedIcon />}
+                    >
+                        Terminate
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+
+const EditProjectModal = ({isOpen, onClose, project}) => {
+    const {authTokens} = useContext(AuthContext);
+    const {setLoading} = useLoading();
+    const projectId = useParams().id;
+    const [initialProject, setInitialProject] = useState(null);
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`
+            }
+        }
+
+        const body = JSON.stringify({
+            name: e.target.project_name.value,
+            description: e.target.project_description.value,
+        });
+
+        setLoading(true);
+
+        try {
+            const response = await axios.put(
+                `${baseUrl}update_project_details/${projectId}/`,
+                body,
+                config
+            );
+
+            if (response.status === 200) {
+                onClose(response.data?.data);
+                notifyWithToast('success', 'Project updated successfully');
+            }
+        } catch (error) {
+            notifyWithToast('error', error.response.data.message);
+        }
+
+        setLoading(false);
+    }
+
+    useEffect(() => {
+        setInitialProject(project);
+    }, [project.name, project.description]);
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={onClose}
+        >
+            <Box sx={modalStyle}>
+                <Box    
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <Typography variant="h5" align="center">
+                        Edit Project
+                    </Typography>
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        id="project_name"
+                        label="Project Name"
+                        name="project_name"
+                        defaultValue={project?.name}
+                        autoFocus
+                        onChange={(e) => {
+                            if (e.target.value !== project?.name) {
+                                setIsSubmitDisabled(false);
+                            } else {
+                                setIsSubmitDisabled(true);
+                            }
+                        }}
+                    />
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        id="project_description"
+                        label="Project Description"
+                        name="project_description"
+                        multiline
+                        defaultValue={project?.description}
+                        onChange={(e) => {
+                            if (e.target.value !== project?.description) {
+                                setIsSubmitDisabled(false);
+                            } else {
+                                setIsSubmitDisabled(true);
+                            }
+                        }}
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{ mt: 2 }}
+                        startIcon={<CheckRoundedIcon />}
+                        disabled={isSubmitDisabled}
+                    >
+                        Save
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+
+const ConfirmProjectCompleteModal = ({isOpen, onClose, project}) => {
+    const {authTokens} = useContext(AuthContext);
+    const {setLoading} = useLoading();
+    const projectId = useParams().id;
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`
+            }
+        }
+
+        setLoading(true);
+        try {
+            const response = await axios.put(
+                `${baseUrl}complete_project/${projectId}/`,
+                null,
+                config
+            );
+
+            if (response.status === 200) {
+                onClose(response.data?.data);
+                notifyWithToast('success', 'Project completed successfully');
+            }
+        } catch (error) {
+            notifyWithToast('error', error.response.data.message);
+        }
+        setLoading(false);
+    }
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={onClose}
+        >
+            <Box sx={modalStyle}>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <Typography variant="body1" align="center">
+                        Are you sure you want to complete {project?.name}?
+                    </Typography>
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{ mt: 2 }}
+                        startIcon={<CheckRoundedIcon />}
+                    >
+                        Complete
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+
+
+
 export {
     CreateOrgModal, 
     AddMemberModal, 
@@ -1644,4 +1882,7 @@ export {
     ConfirmAcceptTaskModal,
     ConfirmRejectTaskModal,
     RateTaskModal,
+    TerminateTaskModal,
+    EditProjectModal,
+    ConfirmProjectCompleteModal,
 };

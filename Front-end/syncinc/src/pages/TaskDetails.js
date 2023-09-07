@@ -16,7 +16,7 @@ import ListChips from "../components/ListChips";
 import UserInfo from "../components/UserInfo";
 import TitleBar from "../components/TitleBar";
 import AssignmentReturnedRoundedIcon from '@mui/icons-material/AssignmentReturnedRounded';
-import { AssignTaskModal, ConfirmAcceptTaskModal, ConfirmRejectTaskModal, EditTaskModal, RateTaskModal } from "../components/Modals";
+import { AssignTaskModal, ConfirmAcceptTaskModal, ConfirmRejectTaskModal, EditTaskModal, RateTaskModal, TerminateTaskModal } from "../components/Modals";
 import StatusChip from "../components/StatusChip";
 import InfoSection from "../components/InfoSection";
 import SubmitTask from "../components/SubmitTask";
@@ -29,8 +29,9 @@ const TaskDetails = () => {
     const taskId = useParams().id;
     const { setLoading } = useLoading();
     const { authTokens, user } = useContext(AuthContext);
-    const navigate = useNavigate();
     const [isAssignTaskModalOpen, setIsAssignTaskModalOpen] = useState(false);
+    const [isTerminateTaskModalOpen, setIsTerminateTaskModalOpen] = useState(false);
+    const navigate = useNavigate();
 
     const [task, setTask] = useState({});
     const [roles , setRoles] = useState([]);
@@ -40,6 +41,13 @@ const TaskDetails = () => {
     const [isRejectTaskModalOpen, setIsRejectTaskModalOpen] = useState(false);
     const [isRateTaskModalOpen, setIsRateTaskModalOpen] = useState(false);
     const [viewersReview, setViewersReview] = useState({});
+
+    const [canEdit, setCanEdit] = useState(false);
+    const [canSubmit, setCanSubmit] = useState(false);
+    const [canSeeSubmission, setCanSeeSubmission] = useState(false);
+    const [canReview, setCanReview] = useState(false);
+    const [canTerminate, setCanTerminate] = useState(false);
+    const [canCreateNewVersion, setCanCreateNewVersion] = useState(false);
 
     const fetchTaskDetails = async () => {
         const config = {
@@ -52,10 +60,16 @@ const TaskDetails = () => {
         setLoading(true);
         try {
             const response = await axios.get(`${baseUrl}get_user_task/${taskId}/`, config);
+
+            // console.log(response.data?.data);
             setTask(response.data?.data);
             setRoles(response.data?.data?.roles);
-        } catch {
-            notifyWithToast('error', 'Failed to fetch task details');
+        } catch (error) {
+            if (error.response.status === 401) {
+                navigate(-1);
+                notifyWithToast('error', 'You are not authorized to view this page');
+            } else
+                notifyWithToast('error', 'Failed to fetch task details');
         }
 
         setLoading(false);
@@ -74,6 +88,10 @@ const TaskDetails = () => {
         setIsAssignTaskModalOpen(false);
         if (updatedTask) {
             setTask(updatedTask);
+            setRoles(prevRoles => ([
+                ...prevRoles,
+                ...updatedTask?.roles]
+            ));
         }
     }
 
@@ -115,6 +133,16 @@ const TaskDetails = () => {
         }
     }
 
+    const handleTerminateTaskModalClose = (updatedTask) => {
+        setIsTerminateTaskModalOpen(false);
+        if (updatedTask) {
+            setTask(prevTask => ({
+                ...prevTask,
+                ...updatedTask
+            }));
+        }
+    }
+
     useEffect(() => {
         fetchTaskDetails();
     }, []);
@@ -126,11 +154,78 @@ const TaskDetails = () => {
         }
     }, [task?.user_task_reviews]);
 
+
+    useEffect(() => {
+        if (roles?.includes("Project Leader") && 
+            task?.status !== "Completed" &&
+            task?.status !== "Rejected" &&
+            task?.status !== "Submitted" &&
+            task.status !== "Terminated") 
+            setCanEdit(true);
+        else 
+            setCanEdit(false);
+        
+
+        if (task?.status !== "Completed"
+            && task?.status !== "Rejected"
+            && task?.status !== "Submitted"
+            && task?.status !== "Terminated"
+            && task?.roles?.includes("Assignee"))
+            setCanSubmit(true);
+        else
+            setCanSubmit(false);
+
+        if (task?.status === "Submitted" ||
+            task?.status === "Rejected" ||
+            task?.status === "Completed")
+            setCanSeeSubmission(true);
+        else
+            setCanSeeSubmission(false);
+
+        if (roles?.includes("Project Leader") || roles?.includes("Admin"))
+            setCanReview(true);
+        else
+            setCanReview(false);
+
+        if (task?.roles?.includes("Project Leader") && (task?.status === "In Progress" ||
+                task?.status === "Overdue"))
+            setCanTerminate(true);
+        else
+            setCanTerminate(false);
+
+        if (task?.roles?.includes("Project Leader") && ((task?.status === "Rejected" ||
+                task?.status === "Terminated")))
+            setCanCreateNewVersion(true);
+        else
+            setCanCreateNewVersion(false);
+        
+    }, [task?.status, roles]);
+
     return (
         <>
         <TitleBar
             title={task?.name}
             subtitle={task?.project?.name + " | " + task?.organization?.name}
+            subtitleElement={
+                <>
+                    
+                    <Typography 
+                        variant="h7"
+                        fontWeight="bold"
+                        color="text.secondary"
+                        onClick={() => navigate("/project/" + task?.project?.id)}
+                        sx={{ cursor: "pointer" }}
+                    >{task?.project?.name}</Typography>
+                    <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                    <Typography 
+                        variant="h7"
+                        fontWeight="bold"
+                        color="text.secondary"
+                        onClick={() => navigate("/organization/" + task?.organization?.id + "/projects/")}
+                        sx={{ cursor: "pointer" }}
+                    > {task?.organization?.name}</Typography>
+                </>
+            }   
         >
             <Stack direction="row" spacing={1}>
                 {task?.assignee ?
@@ -216,11 +311,7 @@ const TaskDetails = () => {
                         Task Details
                     </Typography>
 
-                    {roles?.includes("Project Leader") && 
-                        task?.status !== "Completed" &&
-                        task?.status !== "Accepted" &&
-                        task?.status !== "Rejected" &&
-                        task?.status !== "Submitted" &&
+                    {canEdit &&
                         <>
                             <Button 
                                 variant="outlined" 
@@ -271,7 +362,8 @@ const TaskDetails = () => {
                         {
                             (task?.status === "Completed" ||
                             task?.status === "Accepted" ||
-                            task?.status === "Rejected") ?
+                            task?.status === "Rejected") ||
+                            task?.status === "Terminated" ?
                             <StackField
                                 title="End Date"
                                 value={dayjs(task?.end_time).format("DD MMM, YYYY")}
@@ -304,24 +396,15 @@ const TaskDetails = () => {
                 </Grid>
             </Box>
             {
-                (task?.status !== "Completed" 
-                    && task?.status !== "Accepted"
-                    && task?.status !== "Rejected"
-                    && task?.status !== "Submitted"
-                    && task?.roles?.includes("Assignee")
-                ) ?
+                canSubmit &&
                 <InfoSection title="Submit Task">
                     <SubmitTask task={task} 
                         onSubmitSuccess={handleSubmitSuccess}
                     />
-                </InfoSection>                  
-                : null
+                </InfoSection>
             }
             {
-                (task?.status === "Submitted" ||
-                task?.status === "Accepted" ||
-                task?.status === "Rejected" ||
-                task?.status === "Completed") &&
+                canSeeSubmission &&
                 <InfoSection title="Submission">
                     <Grid 
                         container
@@ -419,9 +502,7 @@ const TaskDetails = () => {
                         </Typography>
                         
                         {
-                            (task?.roles?.includes("Project Leader") || task?.roles?.includes("Admin")) &&
-                            (task?.status === "Completed" ||
-                            task?.status === "Rejected" ) &&
+                            canReview &&
                             <>
                             <Button 
                                 variant="outlined"
@@ -440,10 +521,6 @@ const TaskDetails = () => {
                             </>
                         }
                     </Box>
-                    {/* <Rating name="simple-controlled" 
-                        value={task?.rating} 
-                        readOnly
-                    />  */}
                     {task?.user_task_reviews?.length > 0 ?
                     <Box 
                         display="flex"
@@ -484,6 +561,7 @@ const TaskDetails = () => {
                                                     {review.reviewer.name}
                                                 </Typography>
                                                 <Rating name="simple-controlled"
+                                                    size="small"
                                                     value={review.rating}
                                                     readOnly
                                                 />
@@ -516,27 +594,37 @@ const TaskDetails = () => {
                 justifyContent='flex-end'
             >
             {
-                task?.roles?.includes("Project Leader") && (task?.status === "Rejected" ||
-                task?.status === "Overdue") ?
-                <Button
-                    variant="outlined"
-                    color="error"
-                    size="small"
-                    
-                >
-                    Terminate
-                </Button>
-            :
-                task?.roles?.includes("Project Leader") && ((task?.status === "Rejected" ||
-                task?.status === "Terminated")) &&
-                <Button
-                    variant="outlined"
-                    color="primary"
-                    size="small"
-                >
-                    Create New Version
-                </Button>
-
+                canTerminate &&
+                <>
+                    <Button
+                        variant="outlined"
+                        color="error"
+                        size="small"
+                        startIcon={<CloseRoundedIcon />}
+                        onClick={() => setIsTerminateTaskModalOpen(true)}
+                    >
+                        Terminate
+                    </Button>
+                    <TerminateTaskModal
+                        isOpen={isTerminateTaskModalOpen}
+                        onClose={handleTerminateTaskModalClose}
+                        task={task}
+                        taskType={"User"}
+                    />
+                </>
+            }
+            {
+                canCreateNewVersion &&
+                <>
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        
+                    >
+                        Create New Version
+                    </Button>
+                </>
             }                  
             </Box>
         </Stack>

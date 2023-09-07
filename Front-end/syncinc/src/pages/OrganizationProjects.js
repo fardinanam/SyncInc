@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useLoading } from "../context/LoadingContext";
 import axios from "axios";
 
-import { Box, Button, Grid } from "@mui/material";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import AuthContext from '../context/AuthContext';
 import { baseUrl } from "../utils/config";
@@ -68,7 +68,14 @@ const OrganizationProjects = () => {
         <>  
             <TitleBar 
                 title={organizationName}
-                subtitle="Projects"
+                subtitleElement={
+                    <Typography variant="h7"
+                        fontWeight="bold"
+                        color="text.secondary"
+                    >
+                        Projects
+                    </Typography>
+                }
             >
                 <OrganizationNavMenu organization_id={id}/>
             </TitleBar>

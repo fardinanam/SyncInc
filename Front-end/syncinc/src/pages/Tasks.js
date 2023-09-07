@@ -1,6 +1,6 @@
 import { useLayoutEffect, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Typography, Stack } from "@mui/material"
+import { Box, Typography, Stack, Tooltip } from "@mui/material"
 import SummaryCard from "../components/SummaryCard";
 import AuthContext from "../context/AuthContext";
 import { useLoading } from "../context/LoadingContext";
@@ -11,6 +11,7 @@ import dayjs from "dayjs";
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AdjustIcon from '@mui/icons-material/Adjust';
+import IndeterminateCheckBoxRoundedIcon from '@mui/icons-material/IndeterminateCheckBoxRounded';
 
 const Tasks = () => {
     const { authTokens } = useContext(AuthContext);
@@ -70,7 +71,8 @@ const Tasks = () => {
                         let count;
                         let name;
                         
-                        if (task.status === 'Completed' || task.status === 'Rejected') {
+                        if (task.status === 'Completed' || task.status === 'Rejected' 
+                            || task.status === 'Terminated') {
                             count = dayjs().diff(task.end_time, 'day');
                             name = count === 1 ? "Day Ago" : "Days Ago";
 
@@ -114,10 +116,20 @@ const Tasks = () => {
                         >
                             {
                                 task.status === 'Overdue' || task.status === 'Rejected' 
-                                ? <CancelIcon color="error" fontSize="large" /> 
+                                ? <Tooltip title="Overdued or Rejected" >
+                                    <CancelIcon color="error" fontSize="large" /> 
+                                    </Tooltip>
                                 : task.status === 'Completed'
-                                ? <CheckCircleIcon color="success" fontSize="large" />
-                                : <AdjustIcon color="success" fontSize="large" />
+                                ? <Tooltip title="Completed" >
+                                    <CheckCircleIcon color="success" fontSize="large" />
+                                </Tooltip> 
+                                : task.status === 'Terminated' 
+                                ? <Tooltip title="Terminated" >
+                                    <IndeterminateCheckBoxRoundedIcon color="error" fontSize="large" />
+                                </Tooltip> 
+                                : <Tooltip title="In Progress" >
+                                    <AdjustIcon color="success" fontSize="large" />
+                                </Tooltip>
                             }
                         </SummaryCard>
                     )})
