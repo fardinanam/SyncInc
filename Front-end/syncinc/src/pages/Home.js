@@ -21,9 +21,12 @@ export default function ClippedDrawer() {
     const [numOrganizations, setNumOrganizations] = useState([]);
     const [numProjects, setNumProjects] = useState([]);
     const [numTasks, setNumTasks] = useState([]);
+    const [contributions, setContributions] = useState([]);
+
     const {setLoading} = useLoading();
     useLayoutEffect(() => {
         fetchNumberItems();
+        fetchContributions();
     }, []);
 
     const fetchNumberItems = async () => {
@@ -44,6 +47,26 @@ export default function ClippedDrawer() {
             setNumOrganizations(response.data?.data?.numOrganizations);
             setNumProjects(response.data?.data?.numProjects);
             setNumTasks(response.data?.data?.numTasks);
+        } catch (error) {
+            console.log(error.response?.data?.message);
+        }
+        setLoading(false);
+    }
+
+    const fetchContributions = async () => {
+        setLoading(true);
+        try {
+            let response = await axios.get(
+                `${baseUrl}get_user_contributions/`,
+                {
+                    headers: {
+                        'Authorization': 'Bearer ' + authTokens?.access,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                }
+            )
+            setContributions(response.data?.data);
         } catch (error) {
             console.log(error.response?.data?.message);
         }
@@ -109,7 +132,13 @@ export default function ClippedDrawer() {
                     />
                 </DashboardCard>
                 </Grid>
-            <ContributionGraph />
+                <Grid 
+                    item
+                >
+                    <ContributionGraph 
+                        contributions={contributions}
+                    />
+                </Grid>
             </Grid>
         </>
         // </MainLayout>

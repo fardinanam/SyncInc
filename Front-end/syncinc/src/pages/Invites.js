@@ -110,7 +110,8 @@ const Invites = (props) => {
                 elevation={0}
             >   {invites?.length > 0 ? 
                 <Stack
-                    spacing={1}
+                    rowGap={1}
+                    columnGap={1}
                     flexDirection="column"
                 >
                     {invites?.map((invite) => (
@@ -118,7 +119,8 @@ const Invites = (props) => {
                         flexDirection="row"
                         justifyContent="space-between"
                         key={invite.id}
-                        spacing={2}
+                        columnGap={1}
+                        rowGap={1}
                     >   
                         <Box
                             display="flex"
@@ -126,6 +128,8 @@ const Invites = (props) => {
                             alignItems="center"
                             justifyContent="flex-start"
                             flexGrow={1}
+                            columnGap={1}
+                            rowGap={1}
                         >
                             <UserInfo userInfo={invite?.invited_by} />
 

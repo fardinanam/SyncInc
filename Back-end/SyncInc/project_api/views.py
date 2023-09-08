@@ -1303,3 +1303,26 @@ def complete_project(request, project_id):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_contributions(request):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+        
+        # get all the end dates of the completed, rejected and submitted tasks of the user
+        tasks = UserTask.objects.filter(assignee=user, status__in=['Completed', 'Rejected', 'Submitted']).values('end_time', 'status')
+
+        return Response({
+            'message': 'Contributions fetched successfully',
+            'data': tasks
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
