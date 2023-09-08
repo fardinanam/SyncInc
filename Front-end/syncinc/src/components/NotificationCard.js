@@ -5,25 +5,8 @@ import { Avatar, Stack, Typography, Box } from '@mui/material';
 
 const NotificationCard = (props) => {
     const {notification} = props;
-
-    const getNotificationMessage = (notification) => {
-        let message = "";
-        switch(notification.type) {
-            case "General":
-                message = `${notification.description}`;
-                break;
-            case "Linked":
-                message = `${notification.description}`;
-                break;
-            default:
-                message = `Some notification ${notification.description}`;
-                break;
-        }
-        return message;
-    };
-
-
-
+    console.log(notification)
+    
     return (
         <Card
             elevation={0}
@@ -58,7 +41,7 @@ const NotificationCard = (props) => {
                         <Typography
                             variant="body1"
                         >
-                            {getNotificationMessage(notification)}
+                            {notification.message}
                         </Typography>
                     </Stack>
                 </Stack>

@@ -11,12 +11,21 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from channels.db import database_sync_to_async
 
-def send_notification_to_user(username, message):
+def notify_user(sender, receiver, type, message):
+    
+    notification = Notification.objects.create(
+            sender = sender,
+            receiver = receiver,
+            type = type,
+            message = message
+    )
+    receiver_name = receiver.username
+    notification_serializer = NotificationSerializer(notification)
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
-        f'ws_{username}', {
+        f'ws_{receiver_name}', {
             "type": "notification_message",
-            "message": message
+            "message": notification_serializer.data
         }
     )
 
@@ -443,16 +452,11 @@ def invite_employee(request, organization_id):
         invitation.save()
         data = EmployeeSerializer(employee).data
         
-        message = "You are invited to " + organization.name + " organization"
+        type = "organization_invite"
+        message = user.username +" has invited you to join " + organization.name + " organization"
        
-        notification = Notification.objects.create(
-            sender = user,
-            recipient = employee,
-            message = message
-        )
-        notification_serializer = NotificationSerializer(notification)
-        print("invite 454",notification_serializer.data)
-        send_notification_to_user(employee.username, notification_serializer.data)
+        
+        notify_user(user, employee, type, message)
         
         return Response({
             'message': f'Invitation sent successfully to the {employee.name}',
@@ -523,15 +527,8 @@ def accept_invite(request, invitation_id):
         
         invited_by = invitation.invited_by
         message = username + " accepted your invitation to join " + organization.name + " organization"
-       
-        notification = Notification.objects.create(
-            sender = user,
-            recipient = invited_by,
-            message = message
-        )
-        notification_serializer = NotificationSerializer(notification)
-        # print(notification.id)
-        send_notification_to_user(invited_by.username, notification_serializer.data)
+        type = "organization_invite_accepted"
+        notify_user(user, invited_by, type, message)
 
         return Response({
             'message': f'Invite accepted successfully',
@@ -872,14 +869,8 @@ def assign_user_task(request):
         serializer = GetUserTaskSerializer(task)
 
         message = "You are assigned a new task " + task.name + " in project "+ task.project.name
-       
-        notification = Notification.objects.create(
-            sender = user,
-            recipient = assignee,
-            message = message
-        )
-        notification_serializer = NotificationSerializer(notification)
-        send_notification_to_user(assignee.username, notification_serializer.data)
+        type = "task_assignement"
+        notify_user(user, assignee, type, message)
 
         return Response({
             'message': 'Task assigned successfully',
@@ -1202,9 +1193,8 @@ def get_user_notifications(request):
         username = get_data_from_token(request, 'username')
         user = User.objects.get(username=username)
         
-        notifications = Notification.objects.filter(recipient=user, read=False)
+        notifications = Notification.objects.filter(receiver=user, read=False)
         serializer = NotificationSerializer(notifications, many=True)
-
         return Response({
             'message': 'Unread notifications fetched successfully',
             'data': serializer.data
@@ -1218,14 +1208,14 @@ def get_user_notifications(request):
         }, status=status.HTTP_400_BAD_REQUEST)
     
 @database_sync_to_async
-def update_notification_status(status, id):
+def update_notification_status(notifications_data):
     print('update_notification_status')
-    notification = Notification.objects.get(id=id)
-    if(status == 'received'):
-        notification.sent = True
-    elif(status == 'read'):
-        notification.read = True
-    notification.save()
+    for notification_data in notifications_data:
+        print("1210", notification_data)
+        notification = Notification.objects.get(id=notification_data['id'])
+        if(notification_data['status'] == 'read'):
+            notification.read = True
+        notification.save()
     print('updated notification status')
 
     
