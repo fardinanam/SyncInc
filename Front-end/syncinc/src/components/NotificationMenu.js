@@ -41,7 +41,7 @@ const NotificationMenu = () => {
 
     return (
         <>
-            <IconButton sx={{ ml: 1 }} onClick={handleOpenNotificationMenu} color="inherit">
+            <IconButton onClick={handleOpenNotificationMenu} color="inherit">
             <Badge color="primary" badgeContent={notifications.length} max={9}>
                 <NotificationsIcon
                     fontSize="medium"
