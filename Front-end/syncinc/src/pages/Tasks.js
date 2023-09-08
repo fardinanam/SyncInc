@@ -22,6 +22,10 @@ const Tasks = () => {
     const [filteredTasks, setFilteredTasks] = useState([]);
     const navigate = useNavigate();
 
+    const filterOptions = [
+        'Completed', 'In Progress', 'Overdue', 'Terminated', 'Rejected'
+    ];
+
     const fetchTasks = async () => {
         const config = {
             headers: {
@@ -45,6 +49,15 @@ const Tasks = () => {
         const value = e.target.value.toLowerCase();
         const filtered = tasks.filter((task) => task.name.toLowerCase().includes(value));
         setFilteredTasks(filtered);
+    }
+
+    const handleFilterSelect = (filters) => {
+        if (filters.length === 0) {
+            setFilteredTasks(tasks);
+        } else {
+            const filtered = tasks.filter((task) => filters.includes(task.status));
+            setFilteredTasks(filtered);
+        }
     }
 
     useLayoutEffect(() => {
@@ -74,12 +87,16 @@ const Tasks = () => {
                     alignItems='center'
                     justifyContent='flex-end'
                     columnGap={1}
+                    rowGap={1}
                 >
                     <SearchBar 
                         placeholder='Search Tasks...'
                         onChange={handleSearchChange}
                     />
-                    {/* <FilterButton /> */}
+                    <FilterButton 
+                        options={filterOptions}
+                        onFilterSelect={handleFilterSelect}
+                    />
                 </Box>
 
             </Box>

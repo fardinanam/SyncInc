@@ -16,8 +16,12 @@ import StackField from "../components/StackField";
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import StatusChip from "../components/StatusChip";
 import dayjs from "dayjs";
+import { useTheme } from "@mui/material/styles";
+import ManageAccountsRoundedIcon from '@mui/icons-material/ManageAccountsRounded';
 
 const ProjectDetails = () => {
+    const theme = useTheme();
+    const mainColor = theme.palette.main[theme.palette.mode];
     const { id } = useParams();
     const { setLoading } = useLoading();
     const { authTokens, user } = useContext(AuthContext);
@@ -29,6 +33,7 @@ const ProjectDetails = () => {
     const [openAssignProjectLeaderModal, setOpenAssignProjectLeaderModal] = useState(false);
     const [isEditProjectModalOpen, setIsEditProjectModalOpen] = useState(false);
     const [canComplete, setCanComplete] = useState(false);
+    const [canChangeProjectLeader, setCanChangeProjectLeader] = useState(false);
     const [isCompleteProjectModalOpen, setIsCompleteProjectModalOpen] = useState(false);
 
 
@@ -94,6 +99,10 @@ const ProjectDetails = () => {
                     ...prevState,
                     "Project Leader"
                 ]));
+            } else {
+                setRoles(prevState => (
+                    prevState.filter(role => role !== "Project Leader")
+                ));
             }
         }
         setOpenAssignProjectLeaderModal(false);
@@ -125,15 +134,20 @@ const ProjectDetails = () => {
     }, [project]);
 
     useEffect(() => {
-        if (roles.includes("Project Leader") && !project?.has_ended) {
+        if (roles.includes("Project Leader") && !project?.end_time) {
             if (userTasks.every(task => task.status === "Completed"
                 || task.status === "Rejected" || task.status === "Terminated")) {
                 setCanComplete(true);
-                return;
+            } else {
+                setCanComplete(false);
             }
         }
 
-        setCanComplete(false);
+        if (roles.includes("Admin")  && project?.project_leader && !project?.end_time) {
+            setCanChangeProjectLeader(true);
+        } else {
+            setCanChangeProjectLeader(false);
+        }
     }, [userTasks, roles, project]);
 
     return (
@@ -156,7 +170,12 @@ const ProjectDetails = () => {
                     display={"flex"}
                     alignItems={"center"}
                 >
-                    <Stack direction="row" spacing={1}>
+                    <Stack direction="row"
+                        flexWrap="wrap"
+                        rowGap={1}
+                        columnGap={1}
+                        justifyContent="flex-end"
+                    >
                     {project?.project_leader ?
                         <>
                             <Box 
@@ -184,26 +203,37 @@ const ProjectDetails = () => {
                                     @{project.project_leader?.username}
                                 </Typography>
                             </Stack>
+                            {
+                                canChangeProjectLeader &&
+                                <Box 
+                                    display="flex"
+                                    flexDirection="column"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                >
+                                    <Button
+                                        size="small"
+                                        variant="outlined"
+                                        onClick={() => setOpenAssignProjectLeaderModal(true)}
+                                        startIcon={<ManageAccountsRoundedIcon fontSize="small"/>}
+                                    >
+                                        Change Leader
+                                    </Button>
+                                </Box>
+                            }
                         </> :
                         <>
                             {
                                 roles.includes("Admin") ?
                                 <>
-                                <Button 
-                                    size="small" 
-                                    variant="contained"
-                                    onClick={() => setOpenAssignProjectLeaderModal(true)}
-                                    startIcon={<AddRoundedIcon fontSize="small"/>}
-                                >
-                                    Project Leader
-                                </Button> 
-                                <AddMemberModal 
-                                    id={id}
-                                    memberType="project_leader"
-                                    open={openAssignProjectLeaderModal}
-                                    handleClose={handleProjectLeaderModalClose}
-                                    title="Assign Project Leader"
-                                />
+                                    <Button 
+                                        size="small" 
+                                        variant="contained"
+                                        onClick={() => setOpenAssignProjectLeaderModal(true)}
+                                        startIcon={<AddRoundedIcon fontSize="small"/>}
+                                    >
+                                        Project Leader
+                                    </Button> 
                                 </>
                                 :
                                 <Stack 
@@ -220,6 +250,13 @@ const ProjectDetails = () => {
                             }
                         </>
                     }
+                    <AddMemberModal 
+                        id={id}
+                        memberType="project_leader"
+                        open={openAssignProjectLeaderModal}
+                        handleClose={handleProjectLeaderModalClose}
+                        title="Assign Project Leader"
+                    />
                     </Stack> 
 
                 </Box>
@@ -230,7 +267,7 @@ const ProjectDetails = () => {
                 sx={{
                     borderRadius: "0.5rem",
                     p: 2,
-                    backgroundColor: "main.main",
+                    backgroundColor: mainColor,
                 }}
             >
                 <Box
