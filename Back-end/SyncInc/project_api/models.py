@@ -217,6 +217,7 @@ class AbstractTask(models.Model):
     previous_task = models.ForeignKey(
         'self', 
         related_name='updated_task',
+        related_query_name='updated_tasks',
         blank=True, 
         null=True, 
         on_delete=models.SET_NULL

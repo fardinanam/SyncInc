@@ -48,7 +48,7 @@ const ProjectDetails = () => {
                 config
             )
             
-            console.log(response.data.data);
+            // console.log(response.data.data);
             setProject(response.data.data);
             setRoles(response.data.data.roles);
             response = await axios.get(
@@ -82,7 +82,7 @@ const ProjectDetails = () => {
     }
 
     const handleProjectLeaderModalClose = (project_leader) => {
-        console.log(project_leader);
+        // console.log(project_leader);
         if (project_leader) {
             setProject(prevState => ({
                 ...prevState,
@@ -344,6 +344,7 @@ const ProjectDetails = () => {
                 initialTasks={userTasks}
                 roles={roles}
                 organization_id={project?.organization?.id}
+                project_id={id}
                 canAddTask={!(project?.end_time && status === "Completed") && roles?.includes("Project Leader") ? true : false}
             />
         </>

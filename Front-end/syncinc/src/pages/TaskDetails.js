@@ -16,7 +16,7 @@ import ListChips from "../components/ListChips";
 import UserInfo from "../components/UserInfo";
 import TitleBar from "../components/TitleBar";
 import AssignmentReturnedRoundedIcon from '@mui/icons-material/AssignmentReturnedRounded';
-import { AssignTaskModal, ConfirmAcceptTaskModal, ConfirmRejectTaskModal, EditTaskModal, RateTaskModal, TerminateTaskModal } from "../components/Modals";
+import { AddTaskModal, AssignTaskModal, ConfirmAcceptTaskModal, ConfirmRejectTaskModal, EditTaskModal, RateTaskModal, TerminateTaskModal } from "../components/Modals";
 import StatusChip from "../components/StatusChip";
 import InfoSection from "../components/InfoSection";
 import SubmitTask from "../components/SubmitTask";
@@ -24,24 +24,26 @@ import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import GradeRoundedIcon from '@mui/icons-material/GradeRounded';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
 
 const TaskDetails = () => {
     const taskId = useParams().id;
     const { setLoading } = useLoading();
     const { authTokens, user } = useContext(AuthContext);
-    const [isAssignTaskModalOpen, setIsAssignTaskModalOpen] = useState(false);
-    const [isTerminateTaskModalOpen, setIsTerminateTaskModalOpen] = useState(false);
     const navigate = useNavigate();
-
+    
     const [task, setTask] = useState({});
     const [roles , setRoles] = useState([]);
-
+    
+    const [isAssignTaskModalOpen, setIsAssignTaskModalOpen] = useState(false);
+    const [isTerminateTaskModalOpen, setIsTerminateTaskModalOpen] = useState(false);
     const [isEditTaskModalOpen, setIsEditTaskModalOpen] = useState(false);
     const [isAcceptTaskModalOpen, setIsAcceptTaskModalOpen] = useState(false);
     const [isRejectTaskModalOpen, setIsRejectTaskModalOpen] = useState(false);
     const [isRateTaskModalOpen, setIsRateTaskModalOpen] = useState(false);
+    const [isCreateNewVersionModalOpen, setIsCreateNewVersionModalOpen] = useState(false);
+    
     const [viewersReview, setViewersReview] = useState({});
-
     const [canEdit, setCanEdit] = useState(false);
     const [canSubmit, setCanSubmit] = useState(false);
     const [canSeeSubmission, setCanSeeSubmission] = useState(false);
@@ -122,6 +124,13 @@ const TaskDetails = () => {
         }
     }
 
+    const handleCreateNewVersionModalClose = (updatedTask) => {
+        setIsCreateNewVersionModalOpen(false);
+        if (updatedTask) {
+            navigate("/task/" + updatedTask?.id);
+        }
+    }
+
     const handleTaskAcceptRejectModalClose = (updatedTask) => {
         setIsAcceptTaskModalOpen(false);
         setIsRejectTaskModalOpen(false);
@@ -194,7 +203,7 @@ const TaskDetails = () => {
             setCanTerminate(false);
 
         if (task?.roles?.includes("Project Leader") && ((task?.status === "Rejected" ||
-                task?.status === "Terminated")))
+                task?.status === "Terminated")) && !task?.updated_task)
             setCanCreateNewVersion(true);
         else
             setCanCreateNewVersion(false);
@@ -340,6 +349,44 @@ const TaskDetails = () => {
                             value={task?.name}
                         />
                     </Grid>
+                    {
+                        task?.previous_task?.id &&
+                        <Grid item xs={12} md={6}>
+                            <StackField
+                                title="Previous Task"
+                                value={
+                                    <Typography
+                                        onClick={() => {
+                                            navigate("/task/" + task?.previous_task?.id)
+                                            navigate(0);
+                                        }}
+                                        sx={{ cursor: "pointer" }}
+                                    >
+                                        {task?.previous_task?.name}
+                                    </Typography>
+                                }
+                            />
+                        </Grid>
+                    }
+                    {
+                        task?.updated_task?.id &&
+                        <Grid item xs={12} md={6}>
+                            <StackField
+                                title="Updated Task"
+                                value={
+                                    <Typography
+                                        onClick={() => {
+                                            navigate("/task/" + task?.updated_task?.id);
+                                            navigate(0);
+                                        }}
+                                        sx={{ cursor: "pointer" }}
+                                    >
+                                        {task?.updated_task?.name}
+                                    </Typography>
+                                }
+                            />
+                        </Grid>
+                    }
                     <Grid item xs={12} md={6}>
                         <Box 
                             display="flex"
@@ -621,10 +668,18 @@ const TaskDetails = () => {
                         variant="outlined"
                         color="primary"
                         size="small"
-                        
+                        onClick={() => setIsCreateNewVersionModalOpen(true)}
+                        startIcon={<AutorenewIcon />}
                     >
                         Create New Version
                     </Button>
+                    <AddTaskModal
+                        isOpen={isCreateNewVersionModalOpen}
+                        onClose={handleCreateNewVersionModalClose}
+                        task={task}
+                        taskType={"User"}
+                        projectId={task?.project?.id}
+                    />
                 </>
             }                  
             </Box>

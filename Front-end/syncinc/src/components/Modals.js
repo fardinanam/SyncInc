@@ -1070,8 +1070,7 @@ const EditTaskModal = ({isOpen, onClose, task, taskType}) => {
     )
 }
 
-const AddTaskModal = ({isOpen, onClose, taskType}) => {
-    const {id} = useParams();
+const AddTaskModal = ({isOpen, onClose, taskType, task, projectId}) => {
     const {authTokens} = useContext(AuthContext);
     const {setLoading} = useLoading();
     const [deadline, setDeadline] = useState('');
@@ -1093,19 +1092,20 @@ const AddTaskModal = ({isOpen, onClose, taskType}) => {
             description: e.target.task_description.value,
             tags: selectedTags,
             deadline: deadline,
+            previous_task: task?.id,
         });
 
         setLoading(true);
 
         try {
             const response = await axios.post(
-                `${baseUrl}create_task/${id}/`, 
+                `${baseUrl}create_task/${projectId}/`, 
                 body, 
                 config
             );
 
             if (response.status === 201) {
-                onClose(response.data.data);
+                onClose(response.data?.data);
                 notifyWithToast('success', 'Task created successfully');
             }
         } catch (error) {
@@ -1124,6 +1124,12 @@ const AddTaskModal = ({isOpen, onClose, taskType}) => {
             setIsSubmitDisabled(false);
         }
     }
+
+    useEffect(() => {
+        if (task) {
+            setSelectedTags(task.tags?.map(tag => tag.name));
+        }
+    }, [task]);
 
     return (
         <Modal
@@ -1146,6 +1152,7 @@ const AddTaskModal = ({isOpen, onClose, taskType}) => {
                         name="task_name"
                         required
                         autoFocus
+                        defaultValue={task && task.name + ' v2'}
                     />
                     <LocalizationProvider dateAdapter={AdapterDayjs}>    
                         <DatePicker 
@@ -1169,10 +1176,12 @@ const AddTaskModal = ({isOpen, onClose, taskType}) => {
                         name="task_description"
                         multiline
                         required
+                        defaultValue={task?.description}
                     />
                     <AutocompleteTagInput
                         isLoaded={isOpen}
                         onChange={(_, value) => setSelectedTags(value)}
+                        defaultTags={task?.tags?.map(tag => tag.name)}                        
                     />
                     <Button
                         type="submit"

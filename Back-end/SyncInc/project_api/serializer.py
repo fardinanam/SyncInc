@@ -343,11 +343,13 @@ class GetUserTaskSerializer(serializers.ModelSerializer):
     roles = serializers.SerializerMethodField()
     submission = UserTaskSubmissionSerializer()
     user_task_reviews = UserTaskReviewSerializer(many=True)
+    previous_task = serializers.SerializerMethodField()
+    updated_task = serializers.SerializerMethodField()
 
     class Meta:
         model = UserTask
         fields = ['id', 'name', 'tags', 'assignee', 'deadline', 'status', 'project',
-                'organization', 'description', 'roles', 'submission', 'end_time', 'user_task_reviews']
+                'organization', 'description', 'roles', 'submission', 'end_time', 'user_task_reviews', 'previous_task', 'updated_task']
 
     def get_roles(self, obj):
         if not self.context.get('user'):
@@ -367,6 +369,24 @@ class GetUserTaskSerializer(serializers.ModelSerializer):
             roles.append('Admin')
         
         return roles
+    
+    def get_previous_task(self, obj):
+        if obj.previous_task:
+            return {
+                'id': obj.previous_task.id,
+                'name': obj.previous_task.name,
+            }
+        return None
+    
+    def get_updated_task(self, obj):
+        updated_task = UserTask.objects.filter(previous_task=obj).first()
+        
+        if updated_task:
+            return {
+                'id': updated_task.id,
+                'name': updated_task.name,
+            }
+        return None
         
 
     def get_status(self, obj):
@@ -427,6 +447,16 @@ class CreateUserTaskSerializer(serializers.ModelSerializer):
         project = valid_data['project']
         name = valid_data['name']
         task = self.instance
+        previous_task = valid_data.get('previous_task', None)
+
+        if previous_task and previous_task.project != project:
+            raise serializers.ValidationError('Previous task is not in the same project')
+        
+        hasUpdatedTask = UserTask.objects.filter(previous_task=previous_task).exists()
+        if previous_task and hasUpdatedTask:
+            print('updated task', previous_task.updated_task)
+            raise serializers.ValidationError('The previous task is already updated')
+        
         if not task and project.usertasks.filter(name=name).exists():
             raise serializers.ValidationError(f'Task named {name} already exists for this project')
         return valid_data

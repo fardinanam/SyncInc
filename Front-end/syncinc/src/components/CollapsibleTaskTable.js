@@ -19,7 +19,7 @@ import { getComparator, stableSort } from '../utils/comparator';
 import SearchBar from './SearchBar';
 import AssignmentReturnedRoundedIcon from '@mui/icons-material/AssignmentReturnedRounded';
 
-const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canAddTask}) => {
+const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canAddTask, project_id}) => {
     const [order, setOrder] = useState('asc');
     const [orderBy, setOrderBy] = useState('deadline');
 
@@ -29,7 +29,7 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
     const [isAssignTaskModalOpen, setIsAssignTaskModalOpen] = useState(false);
     const [assignTaskModalData, setAssignTaskModalData] = useState({});
     const [tasks, setTasks] = useState([]);
-    const [searchedTasks, setSearchedTasks] = useState([]);
+    const [newTasks, setNewTasks] = useState([]);
     const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
 
     const handleAssignTask = (task) => {
@@ -60,7 +60,13 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
     const handleAddTaskModalClose = (newTask) => {
         setIsAddTaskModalOpen(false);
         if (newTask) {
+            console.log("new Task: ", newTask);
             newTask["tags"] = newTask.tags_details;
+            setNewTasks(prevState => ([
+                ...prevState,
+                newTask
+            ]));
+
             setTasks(prevState => ([
                 ...prevState,
                 newTask
@@ -70,11 +76,13 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
 
     const handleSearch = (event) => {
         const searchedValue = event.target.value.toLowerCase();
+        const tasks = [...newTasks, ...initialTasks]
         const searchedTasks = tasks?.filter((task) => {
             return task.name.toLowerCase().includes(searchedValue) 
                 || task.status.toLowerCase().includes(searchedValue) ;
         });
-        setSearchedTasks(searchedTasks);
+
+        setTasks(searchedTasks);
     }
 
     const handleRequestSort = (event, property) => {
@@ -85,7 +93,6 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
 
     useEffect(() => {
         setTasks(initialTasks);
-        setSearchedTasks(initialTasks);
     }, [initialTasks]);
 
     const headCells = [
@@ -97,8 +104,8 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
     ];
 
     const visibleRows = useMemo(() => 
-        stableSort(searchedTasks, getComparator(order, orderBy)
-    ), [order, orderBy, searchedTasks]);
+        stableSort(tasks, getComparator(order, orderBy)
+    ), [order, orderBy, tasks]);
 
     return (
         <Paper 
@@ -162,6 +169,7 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                             isOpen={isAddTaskModalOpen}
                             onClose={handleAddTaskModalClose}
                             taskType={"User"}
+                            projectId={project_id}
                         />
                     </Box>
                 }
@@ -216,7 +224,6 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                                     <Stack 
                                         flexDirection="row"
                                         alignItems="center"
-                                        spacing={1}
                                     >
                                         <UserInfo
                                             userInfo={task.assignee}
@@ -225,20 +232,14 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                                                 height: '2rem'
                                             }}
                                         />
-                                        <Box 
-                                            display="flex"
-                                            flexDirection="column"
-                                            justifyContent="center"
-                                            alignItems="center"
-                                        >
                                         <Typography 
                                             sx={{
                                                 fontSize: '0.8rem',
+                                                marginLeft: '0.5rem'
                                             }}    
                                         >
                                             {task.assignee?.name}
                                         </Typography>
-                                        </Box>
                                     </Stack>
                                     : roles?.includes("Project Leader") ? <Button 
                                         variant="outlined" 

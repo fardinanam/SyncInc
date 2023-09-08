@@ -98,7 +98,7 @@ const Organizations = () => {
                         <SummaryCard
                             title={organization.name}
                             count={organization.num_projects}
-                            name="Projects"
+                            name= {organization.num_projects === 1 ? "Project" : "Projects"}
                             onClick={() => navigate(`/organization/${organization.id}/projects` ) }  
                         >
                             {organization?.role && organization.role.toLowerCase() === "admin"
