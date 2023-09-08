@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLoading } from "../context/LoadingContext";
-import axios from "axios";
+import axios, { all } from "axios";
 
-import { Box, Button, Grid } from "@mui/material";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import AuthContext from '../context/AuthContext';
 import { baseUrl } from "../utils/config";
@@ -11,6 +11,7 @@ import TitleBar from "../components/TitleBar";
 import ProjectsStack from '../components/ProjectsStack';
 import OrganizationNavMenu from "../components/OrganizationNavMenu";
 import notifyWithToast from "../utils/toast";
+import SearchBar from "../components/SearchBar";
 
 const OrganizationProjects = () => {
     const  { id } = useParams();
@@ -20,6 +21,7 @@ const OrganizationProjects = () => {
 
     const [organizationName, setOrganizationName] = useState();
     const [role, setRole] = useState();
+    const [projects, setProjects] = useState([]);
     const [newProjects, setNewProjects] = useState([]);
     const [projectsInProgress, setProjectsInProgress] = useState([]);
     const [completedProjects, setCompletedProjects] = useState([]);
@@ -52,7 +54,7 @@ const OrganizationProjects = () => {
             )
             setOrganizationName(response.data?.data?.name);
             setRole(response.data?.data?.role)
-            categorizeProjects(response.data?.data?.projects);
+            setProjects(response.data?.data?.projects);
         } catch (error) {
             navigate(-1);
             notifyWithToast("error", error.response.data.message);
@@ -60,40 +62,75 @@ const OrganizationProjects = () => {
         setLoading(false);
     }
 
+    const handleSearch = (e) => {
+        const searchValue = e.target.value.toLowerCase();
+        const filteredProjects = projects?.filter(project => {
+            return project.name?.toLowerCase().includes(searchValue) || project.client?.toLowerCase().includes(searchValue);
+        });
+
+        categorizeProjects(filteredProjects);
+    }
+
     useEffect(() => {
         fetchOrganizationProjectDetails();
     }, []);
+
+    useEffect(() => {
+        categorizeProjects(projects);
+    }, [projects]);
 
     return (
         <>  
             <TitleBar 
                 title={organizationName}
-                subtitle="Projects"
+                subtitleElement={
+                    <Typography variant="h7"
+                        fontWeight="bold"
+                        color="text.secondary"
+                    >
+                        Projects
+                    </Typography>
+                }
             >
                 <OrganizationNavMenu organization_id={id}/>
             </TitleBar>
+            <Box display="flex" 
+                justifyContent="flex-end" m={1}
+                rowGap={1}
+                columnGap={1}
+            >
+                <SearchBar 
+                    placeholder="Search by project or client name..."
+                    onChange={handleSearch}
+                />
             {
                 role === 'Admin' &&
-                <Box display="flex" justifyContent="flex-end" m={1}>
+                    <Box 
+                        display="flex"
+                        flexDirection="row"
+                        justifyContent="flex-end"
+                        alignItems="center"
+                    >
                     <Button variant="contained" onClick={() => {navigate(`/organization/${id}/add-project`)}}
                     size="small"
                     startIcon={<AddRoundedIcon fontSize="small"/>}
                     >
                         Project
                     </Button>
-                </Box>
+                    </Box>
             }
+            </Box>
             <Grid  
                 container 
                 spacing={3}
             >
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} lg={4}>
                     <ProjectsStack title="New Projects" projects={newProjects} />
                 </Grid>
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} lg={4}>
                     <ProjectsStack title="Projects in Progress" projects={projectsInProgress} />
                 </Grid>
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} lg={4}>
                     <ProjectsStack title="Completed Projects" projects={completedProjects} />
                 </Grid>
             </Grid>

@@ -18,30 +18,50 @@ const MemberTable = ({pageName, members}) => {
             >
                 <TableHead>
                     <TableRow>
-                        <TableCell width="25%">Name</TableCell>
-                        <TableCell width="25%">Expertise</TableCell>
-                        <TableCell width="20%">Completed Tasks</TableCell>
-                        <TableCell width="15%">Average Rating</TableCell>
-                        <TableCell width="15%">Average Time</TableCell>
+                        <TableCell>Name</TableCell>
+                        <TableCell>Expertise</TableCell>
+                        <TableCell>Completed Tasks</TableCell>
+                        <TableCell>Average Rating</TableCell>
+                        <TableCell>Average Time</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {members?.map((member) => (
-                    <TableRow
-                        key={member.id}
-                        sx={{alignItems:"flex-start"}}
-                    >   
-                        <TableCell width="25%">{member.username}</TableCell>
-                        <TableCell width="25%">
-                            <ListChips chipData={member.expertise} />
-                        </TableCell>
-                        <TableCell width="20%">{member.completed_tasks}</TableCell>
-                        <TableCell width="15%">
-                            <Rating name="average_rating" value={member.avg_rating} precision={0.25} readOnly/>
-                        </TableCell>
-                        <TableCell width="15%">{member.avg_time}</TableCell>
-                    </TableRow>
-                    ))}
+                    {members?.map((member) => {
+                        let averageTime = member.avg_time;
+                        let timeUnit = '';
+
+                        if (averageTime !== 'N/A') {
+                            // convert to hours
+                            averageTime = averageTime / 3600;
+                            timeUnit = 'hours';
+
+                            if (averageTime > 24) {
+                                // convert to days
+                                averageTime = averageTime / 24;
+                                timeUnit = 'days';
+                            }
+
+                            // convert to integer
+                            averageTime = Math.round(averageTime);
+                        }
+                        
+                        return (
+                            <TableRow
+                                key={member.id}
+                                sx={{alignItems:"flex-start"}}
+                            >   
+                                <TableCell>{member.username}</TableCell>
+                                <TableCell>
+                                    <ListChips chipData={member.expertise} />
+                                </TableCell>
+                                <TableCell>{member.completed_tasks}</TableCell>
+                                <TableCell>
+                                    <Rating name="average_rating" value={member.avg_rating} precision={0.25} readOnly/>
+                                </TableCell>
+                                <TableCell>{averageTime} {timeUnit}</TableCell>
+                            </TableRow>
+                        )
+                    })}
                 </TableBody>
             </Table>
         </TableContainer>  

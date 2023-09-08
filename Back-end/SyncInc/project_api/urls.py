@@ -41,4 +41,6 @@ urlpatterns = [
     path('get_user_projects/', views.get_user_projects, name='user_projects'),
 
     path('get_user_notifications/', views.get_user_notifications, name='user_notifications'),
+    path('update_project_details/<int:project_id>/', views.update_project_details, name='update_project_details'),
+    path('complete_project/<int:project_id>/', views.complete_project, name='complete_project'),
 ]

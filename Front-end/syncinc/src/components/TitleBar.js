@@ -1,6 +1,6 @@
 import { Box, Paper, Typography } from "@mui/material"
 
-const TitleBar = ({title, subtitle, children}) => {
+const TitleBar = ({title, subtitleElement, children}) => {
     return (
         <Paper
                 sx={{
@@ -23,12 +23,14 @@ const TitleBar = ({title, subtitle, children}) => {
                     <Typography variant="h6" fontWeight="bold">
                         {title}
                     </Typography>
-                    <Typography 
-                        fontWeight="bold"
-                        color="text.secondary"
+                    <Box 
+                        display="flex"
+                        flexDirection="row"
+                        justifyContent="flex-start"
+                        alignItems="center"
                     >
-                        {subtitle}
-                    </Typography>
+                    {subtitleElement}
+                    </Box>
                 </Box>
                 {children}
             </Paper>

@@ -37,15 +37,15 @@ const UserInfo = ({sx, userInfo}) => {
             <Tooltip 
                 title={name}
             >
-            <IconButton
+            <Avatar 
+                sx={{
+                    ...sx,
+                    cursor: 'pointer'
+                }}
+                alt={name && name}
+                src={profilePicUrl && profilePicUrl}
                 onClick={handleOpenUserMenu}
-            >
-                <Avatar 
-                    sx={sx}
-                    alt={name && name}
-                    src={profilePicUrl && profilePicUrl}
-                />
-            </IconButton>
+            />
             </Tooltip>
             <Menu
                 sx={{ 

@@ -1,9 +1,9 @@
-import {  useEffect, useState } from 'react';
+import {  useEffect, useMemo, useState } from 'react';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import BorderColorRoundedIcon from '@mui/icons-material/BorderColorRounded';
-import { Collapse, Divider, IconButton, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography, Button, Box, Chip, TableContainer } from '@mui/material';
+import { Collapse, Divider, IconButton, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography, Button, Box, Stack, TableContainer, TableSortLabel } from '@mui/material';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { AssignTaskModal } from './Modals';
 import ListChips from './ListChips';
@@ -12,13 +12,24 @@ import UserInfo from './UserInfo';
 import { AddTaskModal } from './Modals';
 import { useNavigate } from 'react-router-dom';
 import StatusChip from './StatusChip';
+import AuthContext from '../context/AuthContext';
+import { useContext } from 'react';
+import { EnhancedTableHead } from './EnhancedTable';
+import { getComparator, stableSort } from '../utils/comparator';
+import SearchBar from './SearchBar';
+import AssignmentReturnedRoundedIcon from '@mui/icons-material/AssignmentReturnedRounded';
 
-const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canAddTask}) => {
+const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canAddTask, project_id, deadline}) => {
+    const [order, setOrder] = useState('asc');
+    const [orderBy, setOrderBy] = useState('deadline');
+
+    const { user } = useContext(AuthContext);
     const navigate = useNavigate();
     const [open, setOpen] = useState(true);
     const [isAssignTaskModalOpen, setIsAssignTaskModalOpen] = useState(false);
     const [assignTaskModalData, setAssignTaskModalData] = useState({});
     const [tasks, setTasks] = useState([]);
+    const [newTasks, setNewTasks] = useState([]);
     const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
 
     const handleAssignTask = (task) => {
@@ -49,7 +60,13 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
     const handleAddTaskModalClose = (newTask) => {
         setIsAddTaskModalOpen(false);
         if (newTask) {
+            console.log("new Task: ", newTask);
             newTask["tags"] = newTask.tags_details;
+            setNewTasks(prevState => ([
+                ...prevState,
+                newTask
+            ]));
+
             setTasks(prevState => ([
                 ...prevState,
                 newTask
@@ -57,14 +74,43 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
         }
     }
 
+    const handleSearch = (event) => {
+        const searchedValue = event.target.value.toLowerCase();
+        const tasks = [...newTasks, ...initialTasks]
+        const searchedTasks = tasks?.filter((task) => {
+            return task.name.toLowerCase().includes(searchedValue) 
+                || task.status.toLowerCase().includes(searchedValue) ;
+        });
+
+        setTasks(searchedTasks);
+    }
+
+    const handleRequestSort = (event, property) => {
+        const isAsc = orderBy === property && order === 'asc';
+        setOrder(isAsc ? 'desc' : 'asc');
+        setOrderBy(property);
+    };
+
     useEffect(() => {
         setTasks(initialTasks);
     }, [initialTasks]);
 
+    const headCells = [
+        { id: 'name', numeric: false, disablePadding: false, label: 'Task Name', sortable: true },
+        { id: 'tags', numeric: false, disablePadding: false, label: 'Tags', sortable: false },
+        { id: 'assignee', numeric: false, disablePadding: false, label: 'Assignee', sortable: false },
+        { id: 'deadline', numeric: false, disablePadding: false, label: 'Deadline', sortable: true },
+        { id: 'status', numeric: false, disablePadding: false, label: 'Status', sortable: true },
+    ];
+
+    const visibleRows = useMemo(() => 
+        stableSort(tasks, getComparator(order, orderBy)
+    ), [order, orderBy, tasks]);
+
     return (
         <Paper 
             sx={{
-                marginTop: '1.5rem',
+                marginTop: '1rem',
                 borderRadius: '0.5rem'
             }} 
             elevation={0}
@@ -87,6 +133,18 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                     </IconButton>
                         {title}
                 </Typography>
+                <Stack 
+                    direction='row'
+                    alignItems='center'
+                    spacing={1}
+                    mr={1}
+                >
+                    {
+                        open && <SearchBar 
+                        onChange={handleSearch}
+                        placeholder="Search by name or status..."
+                    />
+                    }
                 {
                     canAddTask && roles?.includes("Project Leader") &&
                     <Box 
@@ -101,7 +159,6 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                             onClick={() => setIsAddTaskModalOpen(true)}
                             sx={{
                                 height: '2rem',
-                                marginRight: '1rem',
                             }}
                             startIcon={<AddRoundedIcon fontSize='small'/>}
                         >
@@ -112,9 +169,12 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                             isOpen={isAddTaskModalOpen}
                             onClose={handleAddTaskModalClose}
                             taskType={"User"}
+                            projectId={project_id}
+                            projectDeadline={deadline}
                         />
                     </Box>
                 }
+                </Stack>
             </Box>
                 <Collapse
                     in={open}
@@ -132,48 +192,61 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                         }} aria-label="a dense table"
                         size="small"
                     >
-                    <TableHead>
-                        <TableRow>
-                            <TableCell  >Task Name</TableCell>
-                            <TableCell  >Tags</TableCell>
-                            <TableCell  >Assignee</TableCell>
-                            <TableCell  >Deadline</TableCell>
-                            {
-                                roles?.includes("project leader") && 
-                                <TableCell>Actions</TableCell>
-                            }
-                            <TableCell >status</TableCell>
-
-                        </TableRow>
-                    </TableHead>
+                    <EnhancedTableHead
+                        headCells={headCells}
+                        rowCount={tasks?.length}
+                        order={order}
+                        orderBy={orderBy}
+                        onRequestSort={handleRequestSort}
+                    />
                     <TableBody>
-                        {tasks?.sort((taskA, taskB) => {
-                            return dayjs(taskA.deadline).isBefore(dayjs(taskB.deadline))? -1 : 1
-                        }).map((task) => (
+                        {visibleRows?.map((task) => {
+                            let canSeeDetails = false;
+                            if (task?.assignee?.id === user?.user_id || 
+                                roles?.includes("Project Leader") ||
+                                roles?.includes("Admin"))
+                                canSeeDetails = true;
+
+                        return (
                         <TableRow
                             key={`task-${task.id}`}
                             sx={{alignItems:"flex-start"}}
                         >   
                             <TableCell 
-                                style={{cursor: 'pointer'}}
-                                onClick={() => navigate(`/task/${task.id}`)}
+                                style={canSeeDetails ? {cursor: 'pointer'} : null}
+                                onClick={() => {canSeeDetails && navigate(`/task/${task.id}`)}
+                                }
                             >{task.name}</TableCell>
                             <TableCell  >
                                 <ListChips chipData={task.tags?.map((value, _) => value.name)} />
                             </TableCell>
                             <TableCell >
                                 {task.assignee ? 
-                                    <UserInfo
-                                        userInfo={task.assignee}
-                                        sx={{
-                                            width: '2rem',
-                                            height: '2rem'
-                                        }}
-                                    />
+                                    <Stack 
+                                        flexDirection="row"
+                                        alignItems="center"
+                                    >
+                                        <UserInfo
+                                            userInfo={task.assignee}
+                                            sx={{
+                                                width: '2rem',
+                                                height: '2rem'
+                                            }}
+                                        />
+                                        <Typography 
+                                            sx={{
+                                                fontSize: '0.8rem',
+                                                marginLeft: '0.5rem'
+                                            }}    
+                                        >
+                                            {task.assignee?.name}
+                                        </Typography>
+                                    </Stack>
                                     : roles?.includes("Project Leader") ? <Button 
                                         variant="outlined" 
                                         size="small"
                                         onClick={() => handleAssignTask(task)}
+                                        startIcon={<AssignmentReturnedRoundedIcon fontSize='small'/>}
                                     >
                                         Assign
                                     </Button> 
@@ -195,7 +268,7 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                                 <StatusChip status={task?.status} />
                             </TableCell>
                         </TableRow>
-                        ))}
+                        )})}
                     </TableBody>
                 </Table>
                 </TableContainer> :

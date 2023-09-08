@@ -1,5 +1,6 @@
 import React from 'react';
 import { useContext } from "react";
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import Header from '../components/Header';
@@ -14,6 +15,11 @@ const MainLayout = (props) => {
     const mainColor = theme.palette.main[theme.palette.mode]
     const {notifications, setNotifications} = useContext(SocketContext)
     console.log('Notifications:', notifications)
+    const [open, setOpen] = useState(false);
+
+    const handleDrawerToggle = () => {
+        setOpen(!open);
+    };
 
     const {children} = props;
         return (
@@ -24,8 +30,14 @@ const MainLayout = (props) => {
             }}
         >
             <CssBaseline />
-            <Header />
-            <SideBar />
+            <Header 
+                open={open}
+                onDrawerToggle={handleDrawerToggle}
+            />
+            <SideBar 
+                open={open}
+                onDrawerToggle={handleDrawerToggle}
+            />
             <Box 
                 component="main" 
                 sx={{ 

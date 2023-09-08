@@ -80,7 +80,7 @@ class UserProjectsSerializer(serializers.ModelSerializer):
         model = User
         fields = ['projects']
     def get_projects(self, obj):
-         # get organizations where user is admin
+        # get organizations where user is admin
         user_organizations = obj.designations.filter(role='Admin').values('organization')
         #get projects of these organizations
         projects_as_admin = Project.objects.filter(organization__in=user_organizations)
@@ -172,7 +172,10 @@ class EmployeeSerializer(serializers.ModelSerializer):
     def get_completed_tasks(self, obj):
         return obj.usertasks.filter(end_time__isnull=False, status='Completed').count()
     def get_avg_rating(self, obj):
-        avg_rating = obj.usertasks.aggregate(Avg('rating'))['rating__avg']
+        # avg_rating = obj.usertasks.aggregate(Avg('rating'))['rating__avg']
+        # calculate average rating from reviews
+        avg_rating = obj.reviews.all().aggregate(avg_rating=Avg('rating'))['avg_rating']
+
         if avg_rating is None:
             return 0
         return avg_rating
@@ -262,14 +265,17 @@ class ProjectSerializer(serializers.ModelSerializer):
         return project
 
 class ProjectDetailsSerializer(serializers.ModelSerializer):
-    has_ended = serializers.SerializerMethodField()
     project_leader = serializers.SerializerMethodField()
     roles = serializers.SerializerMethodField()
+    task_count = serializers.SerializerMethodField()
     class Meta:
         model = Project
-        fields = ['name', 'organization', 'project_leader', 'client', 'description', 'has_ended', 'roles']
+        fields = ['name', 'organization', 'project_leader', 'client', 'description', 'roles', 'start_time', 'end_time', 'task_count', 'deadline']
         depth = 1
 
+    def get_task_count(self, obj):
+        return obj.usertasks.count() + obj.vendortasks.count()
+    
     def get_roles(self, obj):
         user = self.context['user']
         designation = user.designations.get(organization=obj.organization)
@@ -280,11 +286,6 @@ class ProjectDetailsSerializer(serializers.ModelSerializer):
         if designation and designation.role:
             project_role.append(designation.role)
         return project_role
-    
-    def get_has_ended(self, obj):
-        if obj.end_time and obj.end_time < datetime.now():
-            return True
-        return False
     
     def get_project_leader(self, obj):
         project_leader = obj.project_leader
@@ -319,7 +320,20 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ['name']
+
+class UserTaskSubmissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserTaskSubmission
+        fields = ['file', 'details', 'submission_time']
     
+
+class UserTaskReviewSerializer(serializers.ModelSerializer):
+    reviewer = EmployeeSerializer(read_only=True)
+
+    class Meta:
+        model = UserTaskReview
+        fields = ['id', 'reviewer', 'rating', 'comment', 'review_time']
+
 class GetUserTaskSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     assignee = EmployeeSerializer()
@@ -327,9 +341,15 @@ class GetUserTaskSerializer(serializers.ModelSerializer):
     project = serializers.SerializerMethodField()
     organization = serializers.SerializerMethodField()
     roles = serializers.SerializerMethodField()
+    submission = UserTaskSubmissionSerializer()
+    user_task_reviews = UserTaskReviewSerializer(many=True)
+    previous_task = serializers.SerializerMethodField()
+    updated_task = serializers.SerializerMethodField()
+
     class Meta:
         model = UserTask
-        fields = ['id', 'name', 'tags', 'assignee', 'deadline', 'status', 'project', 'organization', 'description', 'roles', 'file', 'end_time', 'rating']
+        fields = ['id', 'name', 'tags', 'assignee', 'deadline', 'status', 'project',
+                'organization', 'description', 'roles', 'submission', 'end_time', 'user_task_reviews', 'previous_task', 'updated_task']
 
     def get_roles(self, obj):
         if not self.context.get('user'):
@@ -349,6 +369,24 @@ class GetUserTaskSerializer(serializers.ModelSerializer):
             roles.append('Admin')
         
         return roles
+    
+    def get_previous_task(self, obj):
+        if obj.previous_task:
+            return {
+                'id': obj.previous_task.id,
+                'name': obj.previous_task.name,
+            }
+        return None
+    
+    def get_updated_task(self, obj):
+        updated_task = UserTask.objects.filter(previous_task=obj).first()
+        
+        if updated_task:
+            return {
+                'id': updated_task.id,
+                'name': updated_task.name,
+            }
+        return None
         
 
     def get_status(self, obj):
@@ -363,6 +401,8 @@ class GetUserTaskSerializer(serializers.ModelSerializer):
             return 'Completed'
         elif obj.status == 'Rejected':
             return 'Rejected'
+        elif obj.status == 'Terminated':
+            return 'Terminated'
         elif obj.assignee is None:
             return 'Unassigned'
         elif obj.deadline < timezone.now():
@@ -407,6 +447,16 @@ class CreateUserTaskSerializer(serializers.ModelSerializer):
         project = valid_data['project']
         name = valid_data['name']
         task = self.instance
+        previous_task = valid_data.get('previous_task', None)
+
+        if previous_task and previous_task.project != project:
+            raise serializers.ValidationError('Previous task is not in the same project')
+        
+        hasUpdatedTask = UserTask.objects.filter(previous_task=previous_task).exists()
+        if previous_task and hasUpdatedTask:
+            print('updated task', previous_task.updated_task)
+            raise serializers.ValidationError('The previous task is already updated')
+        
         if not task and project.usertasks.filter(name=name).exists():
             raise serializers.ValidationError(f'Task named {name} already exists for this project')
         return valid_data
@@ -436,10 +486,10 @@ class CreateUserTaskSerializer(serializers.ModelSerializer):
         return instance
     
 class SubmitUserTaskSerializer(serializers.ModelSerializer):
-    file = serializers.FileField(required=True, allow_empty_file=False)
+    file = serializers.FileField(required=True, allow_empty_file=False, write_only=True)
     class Meta:
         model = UserTask
-        fields = ['id', 'status', 'file']
+        fields = ['id', 'status', 'submission', 'file']
     
     def validate(self, data):
         valid_data = super().validate(data)
@@ -465,8 +515,9 @@ class SubmitUserTaskSerializer(serializers.ModelSerializer):
             filename = f'files/{organization.name}_{organization.id}/{project.name}/{instance.name}/{file.name}'
             storage.child(filename).put(file)
             url = storage.child(filename).get_url(None)
+            # print metadata
 
-            instance.file = url            
+            instance.submission = UserTaskSubmission.objects.create(file=url, details=self.initial_data.get('details', None))    
             instance.status = 'Submitted'
             instance.save()
             
@@ -485,13 +536,15 @@ class UpdateUserTaskStatusSerializer(serializers.ModelSerializer):
         valid_data = super().validate(data)
         task = self.instance
 
-        if valid_data['status'] != 'Completed' and valid_data['status'] != 'Rejected':
+        if valid_data['status'] != 'Completed' and valid_data['status'] != 'Rejected' and valid_data['status'] != 'Terminated':
             raise serializers.ValidationError('Invalid status')
         if task.status == 'Completed':
             raise serializers.ValidationError('Task already completed')
         if task.status == 'Rejected':
             raise serializers.ValidationError('Task already rejected')
-        if task.assignee is None:
+        if task.status == 'Terminated':
+            raise serializers.ValidationError('Task already terminated')
+        if task.assignee is None and valid_data['status'] != 'Terminated':
             raise serializers.ValidationError('Task is unassigned')
         return valid_data
     
@@ -502,20 +555,47 @@ class UpdateUserTaskStatusSerializer(serializers.ModelSerializer):
         return instance
 
 class UpdateUserTaskRatingSerializer(serializers.ModelSerializer):
+    rating = serializers.IntegerField(min_value=1, max_value=5, write_only=True)
+    comment = serializers.CharField(max_length=256, write_only=True, allow_blank=True)
+    user_task_reviews = UserTaskReviewSerializer(read_only=True, many=True)
+
     class Meta:
         model = UserTask
-        fields = ['rating']
+        fields = ['user_task_reviews', 'rating', 'comment']
     
     def validate(self, data):
         valid_data = super().validate(data)
         task = self.instance
+        reviewer = self.context['user']
+
+        admin = Designation.objects.filter(organization=task.project.organization, employee=reviewer, role='Admin')
+
+        if reviewer != task.project.project_leader and not admin.exists():
+            raise serializers.ValidationError('Only project leader and admin can review')        
 
         if task.status != 'Completed' and task.status != 'Rejected':
             raise serializers.ValidationError('Task is not completed')
+
+        if valid_data['rating'] > 5 or valid_data['rating'] < 1:
+            raise serializers.ValidationError('Invalid rating')
+        
         return valid_data
     
     def update(self, instance, validated_data):
-        instance.rating = validated_data['rating']
+        review = UserTaskReview.objects.filter(task=instance, reviewer=self.context['user'])
+
+        if not review.exists():
+            review = UserTaskReview.objects.create(task=instance, reviewer=self.context['user'])
+        else:
+            review = review.first()
+
+        review.rating = validated_data['rating']
+        review.comment = validated_data['comment']
+        review.review_time = timezone.now()
+
+        review.save()
+        instance.review = review
+
         instance.save()
         return instance
 
@@ -523,3 +603,23 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = ['id', 'message']
+    
+class UpdateProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = ['name', 'description', 'deadline']
+    
+    def validate(self, data):
+        valid_data = super().validate(data)
+        project = self.instance
+        if project.end_time and project.end_time < timezone.now():
+            raise serializers.ValidationError('Project has already ended')
+        return valid_data
+    
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get(
+            'description', instance.description)
+        instance.deadline = validated_data.get('deadline', instance.deadline)
+        instance.save()
+        return instance

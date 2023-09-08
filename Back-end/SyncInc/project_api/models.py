@@ -41,7 +41,7 @@ class Vendor(models.Model):
         return self.name
     
 class Organization(models.Model):
-    name = models.CharField(max_length=127)
+    name = models.CharField(max_length=127, unique=True)
     employees = models.ManyToManyField(User, through='Designation')
     vendors = models.ManyToManyField(
         Vendor, 
@@ -91,6 +91,8 @@ class Designation(models.Model):
     )
     organization = models.ForeignKey(
         Organization,
+        related_name='designations',
+        related_query_name='designation',
         on_delete=models.CASCADE
     )
     role = models.CharField(
@@ -170,7 +172,7 @@ class Project(models.Model):
     
     name = models.CharField(max_length=254)
     description = models.TextField(blank=True, null=True)
-    start_time = models.DateTimeField(blank=True, null=True)
+    start_time = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
     deadline = models.DateTimeField(blank=True, null=True)
 
@@ -183,6 +185,7 @@ class Project(models.Model):
 
     def __str__(self):
         return self.name + ' - ' + self.organization.__str__()
+
     
 class AbstractTask(models.Model):
     STATUS_CHOICES = [
@@ -191,6 +194,7 @@ class AbstractTask(models.Model):
         ('Submitted', 'Submitted'),
         ('Completed', 'Completed'),
         ('Rejected', 'Rejected'),
+        ('Terminated', 'Terminated'),
     ]
     project = models.ForeignKey(
         Project, 
@@ -213,6 +217,7 @@ class AbstractTask(models.Model):
     previous_task = models.ForeignKey(
         'self', 
         related_name='updated_task',
+        related_query_name='updated_tasks',
         blank=True, 
         null=True, 
         on_delete=models.SET_NULL
@@ -222,7 +227,6 @@ class AbstractTask(models.Model):
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
     deadline = models.DateTimeField()
-    rating = models.IntegerField(blank=True, null=True)
 
     def clean(self):
         if self.previous_task and self.previous_task.project != self.project:
@@ -237,6 +241,14 @@ class AbstractTask(models.Model):
     class Meta:
         abstract = True
     
+class UserTaskSubmission(models.Model):
+    submission_time = models.DateTimeField(auto_now_add=True)
+    file = models.URLField(max_length=254, null=True, blank=True)
+    details = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.user_task.__str__() + ' - ' + self.submission_time.__str__()
+    
 class UserTask(AbstractTask):
     assignee = models.ForeignKey(
         User,
@@ -247,13 +259,43 @@ class UserTask(AbstractTask):
         on_delete=models.SET_NULL
     )
 
-    file = models.URLField(max_length=254, null=True, blank=True)
+    submission = models.OneToOneField(
+        UserTaskSubmission,
+        related_name='user_task',
+        related_query_name='user_task',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL
+    )
 
     def clean(self):
         if self.assignee and self.assignee not in self.project.organization.employees.all():
             raise ValidationError(
                 "The assignee must be an employee of the associated organization.")
         super().clean()
+        
+
+class UserTaskReview(models.Model):
+    task = models.ForeignKey(
+        UserTask,
+        related_name='user_task_reviews',
+        related_query_name='user_task_review',
+        on_delete=models.CASCADE
+    )
+
+    reviewer = models.ForeignKey(
+        User,
+        related_name='reviews',
+        related_query_name='review',
+        on_delete=models.CASCADE
+    )
+
+    review_time = models.DateTimeField(auto_now_add=True)
+    rating = models.IntegerField(blank=True, null=True)
+    comment = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.task.__str__() + ' - ' + self.review_time.__str__()
     
 class VendorTask(AbstractTask):
     vendor = models.ForeignKey(

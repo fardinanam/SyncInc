@@ -69,7 +69,7 @@ export default function ClippedDrawer() {
                 <DashboardCard
                     title="My Organizations"
                     count={numOrganizations}
-                    name="Organizations Managed"  
+                    name="Organizations Affiliated"  
                     onClick={() => navigate('/organizations')}
                 >
                     <Work 
@@ -84,7 +84,7 @@ export default function ClippedDrawer() {
                 <DashboardCard
                     title="My Projects"
                     count={numProjects}
-                    name="Projects Led"
+                    name="Projects Joined"
                     onClick={() => navigate('/projects')}   
                 >
                     <DescriptionIcon 
