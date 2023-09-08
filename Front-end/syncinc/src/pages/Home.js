@@ -23,10 +23,13 @@ export default function ClippedDrawer() {
     const [numOrganizations, setNumOrganizations] = useState([]);
     const [numProjects, setNumProjects] = useState([]);
     const [numTasks, setNumTasks] = useState([]);
+    const [contributions, setContributions] = useState([]);
+
     const {setLoading} = useLoading();
     const [percentProjectTasks, setPercentProjectTasks] = useState([]);
     useLayoutEffect(() => {
         fetchNumberItems();
+        fetchContributions();
         fetchPercentProjectTasks();
     }, []);
 
@@ -54,6 +57,26 @@ export default function ClippedDrawer() {
         setLoading(false);
     }
 
+    const fetchContributions = async () => {
+        setLoading(true);
+        try {
+            let response = await axios.get(
+                `${baseUrl}get_user_contributions/`,
+                {
+                    headers: {
+                        'Authorization': 'Bearer ' + authTokens?.access,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                }
+            )
+            setContributions(response.data?.data);
+        } catch (error) {
+            console.log(error.response?.data?.message);
+        }
+        setLoading(false);
+    }
+    
     const fetchPercentProjectTasks = async () => {
         setLoading(true);
         try {
@@ -61,12 +84,13 @@ export default function ClippedDrawer() {
                 `${baseUrl}get_user_projects_completed_task_percentage/`,
                 {
                     headers: {
-                        Authorization: 'Bearer ' + authTokens?.access,
+                        'Authorization': 'Bearer ' + authTokens?.access,
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
                     }
                 }
             )
+
             console.log(response.data?.data);
             setPercentProjectTasks(response.data?.data);
         } catch (error) {
@@ -74,9 +98,6 @@ export default function ClippedDrawer() {
         }
         setLoading(false);
     }
-
-
-
 
     return (
         // <MainLayout selected='dashboard'>
@@ -137,7 +158,13 @@ export default function ClippedDrawer() {
                     />
                 </DashboardCard>
                 </Grid>
-            <ContributionGraph />
+                <Grid 
+                    item
+                >
+                    <ContributionGraph 
+                        contributions={contributions}
+                    />
+                </Grid>
             </Grid>
             {/* add some infographics components */}
             <Grid

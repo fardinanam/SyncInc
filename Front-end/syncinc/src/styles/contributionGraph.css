@@ -3,7 +3,7 @@
 /* Grid-related CSS */
 
 :root {
-    --square-size: 15px;
+    --square-size: 10px;
     --square-gap: 5px;
     --week-width: calc(var(--square-size) + var(--square-gap));
 }
@@ -12,12 +12,24 @@
     grid-area: months;
 }
 
+.months > li, .days li {
+    font-size: 12px;
+}
+
 .days {
     grid-area: days;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+li::marker {
+    content: "";
 }
 
 .squares {
     grid-area: squares;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 .graph {
@@ -25,11 +37,13 @@
     grid-template-areas: "empty months"
         "days squares";
     grid-template-columns: auto 1fr;
-    grid-gap: 10px;
+    grid-gap: 5px;
 }
 
 .months {
     display: grid;
+    padding: 0 !important;
+    margin: 0 !important;
     grid-template-columns: calc(var(--week-width) * 4)
         /* Jan */
         calc(var(--week-width) * 4)
@@ -67,20 +81,18 @@
 .squares {
     grid-auto-flow: column;
     grid-auto-columns: var(--square-size);
+    
 }
 
 
 /* Other styling */
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    font-size: 12px;
-}
-
 .graph {
+    font-size: 0.2rem;
+    border-radius: 0.5rem;
     padding: 20px;
     border: 1px #e1e4e8 solid;
-    margin: 20px;
+    padding: 0.8rem;
 }
 
 .days li:nth-child(odd) {
@@ -89,10 +101,12 @@ body {
 
 .squares li {
     background-color: #ebedf0;
+    border-radius: 2px;
 }
 
 .squares li[data-level="1"] {
-    background-color: #c6e48b;
+    /* background-color: #c6e48b; */
+    background-color: #f7462f;
 }
 
 .squares li[data-level="2"] {
