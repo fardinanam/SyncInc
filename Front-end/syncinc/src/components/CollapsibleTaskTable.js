@@ -247,6 +247,9 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                                         size="small"
                                         onClick={() => handleAssignTask(task)}
                                         startIcon={<AssignmentReturnedRoundedIcon fontSize='small'/>}
+                                        sx={{
+                                            width: '40%'
+                                        }}
                                     >
                                         Assign
                                     </Button> 

@@ -8,6 +8,17 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import AuthContext from '../context/AuthContext';
 import NotificationCard from './NotificationCard';
 import { Stack } from '@mui/material';
+import { styled } from '@mui/material/styles';
+
+const StyledBadge = styled(Badge)(({ theme }) => ({
+    '& .MuiBadge-badge': {
+        right: 1,
+        top: 3,
+        border: `2px solid ${theme.palette.background.paper}`,
+        padding: '0 4px',
+    },
+}));
+
 
 const NotificationMenu = () => {
     let {user} = useContext(AuthContext);
@@ -42,11 +53,12 @@ const NotificationMenu = () => {
     return (
         <>
             <IconButton onClick={handleOpenNotificationMenu} color="inherit">
-            <Badge color="primary" badgeContent={notifications.length} max={9}>
+            <StyledBadge color="primary" 
+                badgeContent={notifications.length} max={9}>
                 <NotificationsIcon
                     fontSize="medium"
                 />
-            </Badge>
+            </StyledBadge>
             </IconButton>
             <Menu
                 sx={{ mt: '45px' }}
@@ -64,12 +76,7 @@ const NotificationMenu = () => {
                 open={Boolean(anchorElNotification)}
                 onClose={handleCloseNotificationMenu}
             >
-                {/* <MenuItem 
-                    onClick={handleCloseNotificationMenu}
-                >
-                    <NotificationCard notification={ notification } />
-                </MenuItem> */}
-                <Stack justifyContent="center" spacing={2} mt={2}>
+                <Stack justifyContent="center" spacing={1}>
                     {notifications?.map((notification, idx) => (
                         <MenuItem
                             key={`notification-${idx}`}

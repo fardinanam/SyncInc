@@ -937,7 +937,7 @@ def get_project_leader_suggestions(request, project_id):
             }, status=status.HTTP_401_UNAUTHORIZED)
 
         # get all the employees of the organization
-        employees = User.objects.filter(designation__organization=project.organization).values('id','username', 'email')
+        employees = User.objects.filter(designation__organization=project.organization).values('id','username', 'email', 'profile_picture')
 
         return Response({
             'message': 'Project leader suggestion fetched successfully',
