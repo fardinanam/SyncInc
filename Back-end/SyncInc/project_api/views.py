@@ -7,7 +7,18 @@ from .models import *
 from .serializer import *
 from .utils import *
 from datetime import date
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+from channels.db import database_sync_to_async
 
+def send_notification_to_user(username, message):
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f'ws_{username}', {
+            "type": "notification_message",
+            "message": message
+        }
+    )
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -401,6 +412,8 @@ def invite_employee(request, organization_id):
         data = request.data
         member_id = data['id']
         employee = User.objects.get(id=member_id)
+
+        
         # check if the employee is already a member of the organization
 
         if not employee:
@@ -429,7 +442,18 @@ def invite_employee(request, organization_id):
 
         invitation.save()
         data = EmployeeSerializer(employee).data
-
+        
+        message = "You are invited to " + organization.name + " organization"
+       
+        notification = Notification.objects.create(
+            sender = user,
+            recipient = employee,
+            message = message
+        )
+        notification_serializer = NotificationSerializer(notification)
+        print("invite 454",notification_serializer.data)
+        send_notification_to_user(employee.username, notification_serializer.data)
+        
         return Response({
             'message': f'Invitation sent successfully to the {employee.name}',
             'data': data
@@ -485,9 +509,10 @@ def accept_invite(request, invitation_id):
                 'data': None
             }, status=status.HTTP_401_UNAUTHORIZED)
         
+        organization = invitation.organization
         designation = Designation.objects.create(
             employee=user,
-            organization=invitation.organization,
+            organization=organization,
             role='Employee',
             invitationAccepted=True
         )
@@ -495,6 +520,18 @@ def accept_invite(request, invitation_id):
         if designation:
             invitation.delete()
             designation.save()
+        
+        invited_by = invitation.invited_by
+        message = username + " accepted your invitation to join " + organization.name + " organization"
+       
+        notification = Notification.objects.create(
+            sender = user,
+            recipient = invited_by,
+            message = message
+        )
+        notification_serializer = NotificationSerializer(notification)
+        # print(notification.id)
+        send_notification_to_user(invited_by.username, notification_serializer.data)
 
         return Response({
             'message': f'Invite accepted successfully',
@@ -834,6 +871,16 @@ def assign_user_task(request):
 
         serializer = GetUserTaskSerializer(task)
 
+        message = "You are assigned a new task " + task.name + " in project "+ task.project.name
+       
+        notification = Notification.objects.create(
+            sender = user,
+            recipient = assignee,
+            message = message
+        )
+        notification_serializer = NotificationSerializer(notification)
+        send_notification_to_user(assignee.username, notification_serializer.data)
+
         return Response({
             'message': 'Task assigned successfully',
             'data': serializer.data
@@ -859,6 +906,7 @@ def get_user_items_count(request):
         data['numOrganizations'] = Organization.objects.filter(designation__in=designations).count()
         data['numProjects'] = Project.objects.filter(organization__designation__in=designations).count()
         data['numTasks'] = UserTask.objects.filter(assignee=user).count()
+        print(data)
         return Response({
             'message': f'Item counts of {user.username} fetched successfully',
             'data': data
@@ -1142,6 +1190,40 @@ def update_user_task_rating(request, task_id):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_notifications(request):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+        
+        notifications = Notification.objects.filter(recipient=user, read=False)
+        serializer = NotificationSerializer(notifications, many=True)
+
+        return Response({
+            'message': 'Unread notifications fetched successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+@database_sync_to_async
+def update_notification_status(status, id):
+    print('update_notification_status')
+    notification = Notification.objects.get(id=id)
+    if(status == 'received'):
+        notification.sent = True
+    elif(status == 'read'):
+        notification.read = True
+    notification.save()
+    print('updated notification status')
+
     
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])

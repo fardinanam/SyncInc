@@ -598,6 +598,11 @@ class UpdateUserTaskRatingSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'message']
     
 class UpdateProjectSerializer(serializers.ModelSerializer):
     class Meta:
