@@ -87,8 +87,10 @@ li::marker {
 
 /* Other styling */
 
-.graph {
+.months .days {
     font-size: 0.2rem;
+}
+.graph {
     border-radius: 0.5rem;
     padding: 20px;
     border: 1px #e1e4e8 solid;
@@ -102,6 +104,10 @@ li::marker {
 .squares li {
     background-color: #ebedf0;
     border-radius: 2px;
+}
+
+.dark li {
+    background-color: #242424;
 }
 
 .squares li[data-level="1"] {

@@ -86,7 +86,7 @@ const Invites = (props) => {
                     }
                 }
             )
-            notifyWithToast("success", "Your rejection has been recorded successfully");
+            notifyWithToast("success", "You have rejected the invitation successfully");
             setInvites(invites.filter((invite) => invite.id !== designation_id));
         } catch (error) {
             console.log(error.response.data?.message);

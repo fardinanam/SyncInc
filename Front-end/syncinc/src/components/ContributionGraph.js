@@ -2,9 +2,11 @@ import { useEffect } from 'react';
 import '../styles/contributionGraph.css'
 import { CssBaseline } from '@mui/material';
 import dayjs from 'dayjs';
+import { useTheme } from '@mui/material/styles';
 
 const ContributionGraph = ({ contributions }) => {
     // get the current month number
+    const theme = useTheme();
     const currentMonth = dayjs().month();
     let currentDayInWeek = dayjs().day(); // 0 is Sunday
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct','Nov', 'Dec'];
@@ -70,7 +72,7 @@ const ContributionGraph = ({ contributions }) => {
             <li>Fri</li>
             <li>Sat</li>
             </ul>
-            <ul className="squares">
+            <ul className={`squares ${theme.palette.mode === "dark" && "dark"}`}>
             </ul>
         </div>
         </>
