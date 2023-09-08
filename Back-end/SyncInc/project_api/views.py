@@ -11,12 +11,21 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from channels.db import database_sync_to_async
 
-def send_notification_to_user(username, message):
+def notify_user(sender, receiver, type, message):
+    
+    notification = Notification.objects.create(
+            sender = sender,
+            receiver = receiver,
+            type = type,
+            message = message
+    )
+    receiver_name = receiver.username
+    notification_serializer = NotificationSerializer(notification)
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
-        f'ws_{username}', {
+        f'ws_{receiver_name}', {
             "type": "notification_message",
-            "message": message
+            "message": notification_serializer.data
         }
     )
 
@@ -443,16 +452,11 @@ def invite_employee(request, organization_id):
         invitation.save()
         data = EmployeeSerializer(employee).data
         
-        message = "You are invited to " + organization.name + " organization"
+        type = "organization_invite"
+        message = user.username +" has invited you to join " + organization.name + " organization"
        
-        notification = Notification.objects.create(
-            sender = user,
-            recipient = employee,
-            message = message
-        )
-        notification_serializer = NotificationSerializer(notification)
-        print("invite 454",notification_serializer.data)
-        send_notification_to_user(employee.username, notification_serializer.data)
+        
+        notify_user(user, employee, type, message)
         
         return Response({
             'message': f'Invitation sent successfully to the {employee.name}',
@@ -523,15 +527,8 @@ def accept_invite(request, invitation_id):
         
         invited_by = invitation.invited_by
         message = username + " accepted your invitation to join " + organization.name + " organization"
-       
-        notification = Notification.objects.create(
-            sender = user,
-            recipient = invited_by,
-            message = message
-        )
-        notification_serializer = NotificationSerializer(notification)
-        # print(notification.id)
-        send_notification_to_user(invited_by.username, notification_serializer.data)
+        type = "organization_invite_accepted"
+        notify_user(user, invited_by, type, message)
 
         return Response({
             'message': f'Invite accepted successfully',
@@ -872,14 +869,8 @@ def assign_user_task(request):
         serializer = GetUserTaskSerializer(task)
 
         message = "You are assigned a new task " + task.name + " in project "+ task.project.name
-       
-        notification = Notification.objects.create(
-            sender = user,
-            recipient = assignee,
-            message = message
-        )
-        notification_serializer = NotificationSerializer(notification)
-        send_notification_to_user(assignee.username, notification_serializer.data)
+        type = "task_assignement"
+        notify_user(user, assignee, type, message)
 
         return Response({
             'message': 'Task assigned successfully',
@@ -904,7 +895,11 @@ def get_user_items_count(request):
         
         data = {}
         data['numOrganizations'] = Organization.objects.filter(designation__in=designations).count()
-        data['numProjects'] = Project.objects.filter(organization__designation__in=designations).count()
+        data['numProjects'] = 0
+        for project in Project.objects.filter(organization__designation__in=designations):
+            designation = Designation.objects.filter(organization=project.organization, employee=user).first()
+            if designation.role == 'Admin' or project.project_leader == user or UserTask.objects.filter(project=project, assignee=user).exists():
+                data['numProjects'] += 1
         data['numTasks'] = UserTask.objects.filter(assignee=user).count()
         print(data)
         return Response({
@@ -1198,9 +1193,8 @@ def get_user_notifications(request):
         username = get_data_from_token(request, 'username')
         user = User.objects.get(username=username)
         
-        notifications = Notification.objects.filter(recipient=user, read=False)
+        notifications = Notification.objects.filter(receiver=user, read=False)
         serializer = NotificationSerializer(notifications, many=True)
-
         return Response({
             'message': 'Unread notifications fetched successfully',
             'data': serializer.data
@@ -1214,14 +1208,14 @@ def get_user_notifications(request):
         }, status=status.HTTP_400_BAD_REQUEST)
     
 @database_sync_to_async
-def update_notification_status(status, id):
+def update_notification_status(notifications_data):
     print('update_notification_status')
-    notification = Notification.objects.get(id=id)
-    if(status == 'received'):
-        notification.sent = True
-    elif(status == 'read'):
-        notification.read = True
-    notification.save()
+    for notification_data in notifications_data:
+        print("1210", notification_data)
+        notification = Notification.objects.get(id=notification_data['id'])
+        if(notification_data['status'] == 'read'):
+            notification.read = True
+        notification.save()
     print('updated notification status')
 
     
@@ -1304,7 +1298,6 @@ def complete_project(request, project_id):
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_contributions(request):
@@ -1326,3 +1319,40 @@ def get_user_contributions(request):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_projects_completed_task_percentage(request):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        # get all the projects led by the user
+        projects = Project.objects.filter(project_leader=user, end_time__isnull=True)
+        
+        data = []
+        for project in projects:
+            tasks = UserTask.objects.filter(project=project)
+            completed_tasks = UserTask.objects.filter(project=project, status='Completed')
+            if tasks.count() > 0:
+                data.append({
+                    'id': project.id,
+                    'name': project.name,
+                    'client': project.client.name,
+                    'deadline': project.deadline,
+                    'completed_tasks': completed_tasks.count(),
+                    'total_tasks': tasks.count(),
+                })
+            
+        return Response({
+            'message': 'Completed task percentage fetched successfully',
+            'data': data
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+
