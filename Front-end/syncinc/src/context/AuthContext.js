@@ -19,7 +19,7 @@ const AuthProvider = ({ children }) => {
     let [user, setUser] = useState(
         () => authTokens ? jwt_decode(authTokens.access) : null
     );
-    console.log("auth provider")
+    
     const {setLoading} = useLoading();
 
     let navigate = useNavigate();
