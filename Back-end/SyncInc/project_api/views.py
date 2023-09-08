@@ -857,7 +857,7 @@ def get_user_items_count(request):
         
         data = {}
         data['numOrganizations'] = Organization.objects.filter(designation__in=designations).count()
-        data['numProjects'] = Project.objects.filter(project_leader=user).count()
+        data['numProjects'] = Project.objects.filter(organization__designation__in=designations).count()
         data['numTasks'] = UserTask.objects.filter(assignee=user).count()
         return Response({
             'message': f'Item counts of {user.username} fetched successfully',
