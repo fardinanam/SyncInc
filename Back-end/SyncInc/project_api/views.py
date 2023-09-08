@@ -904,7 +904,11 @@ def get_user_items_count(request):
         
         data = {}
         data['numOrganizations'] = Organization.objects.filter(designation__in=designations).count()
-        data['numProjects'] = Project.objects.filter(organization__designation__in=designations).count()
+        data['numProjects'] = 0
+        for project in Project.objects.filter(organization__designation__in=designations):
+            designation = Designation.objects.filter(organization=project.organization, employee=user).first()
+            if designation.role == 'Admin' or project.project_leader == user or UserTask.objects.filter(project=project, assignee=user).exists():
+                data['numProjects'] += 1
         data['numTasks'] = UserTask.objects.filter(assignee=user).count()
         print(data)
         return Response({
@@ -1303,3 +1307,42 @@ def complete_project(request, project_id):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
+        
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_projects_completed_task_percentage(request):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        # get all the projects led by the user
+        projects = Project.objects.filter(project_leader=user, end_time__isnull=True)
+        
+        data = []
+        for project in projects:
+            tasks = UserTask.objects.filter(project=project)
+            completed_tasks = UserTask.objects.filter(project=project, status='Completed')
+            if tasks.count() > 0:
+                data.append({
+                    'id': project.id,
+                    'name': project.name,
+                    'client': project.client.name,
+                    'deadline': project.deadline,
+                    'completed_tasks': completed_tasks.count(),
+                    'total_tasks': tasks.count(),
+                })
+            
+        return Response({
+            'message': 'Completed task percentage fetched successfully',
+            'data': data
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+   
