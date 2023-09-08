@@ -8,36 +8,59 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import AuthContext from '../context/AuthContext';
 import NotificationCard from './NotificationCard';
 import { Stack } from '@mui/material';
+import SocketContext from '../context/SocketContext';
+
 
 const NotificationMenu = () => {
     let {user} = useContext(AuthContext);
     const [anchorElNotification, setAnchorElNotification] = useState(null);
     
     const navigate = useNavigate();
-
+    const {chatSocket, notifications, setNotifications} = useContext(SocketContext)
+    const [showNotifications, setShowNotifications] = useState(notifications);
+    console.log('chatSocket:', chatSocket)
     const handleOpenNotificationMenu = (event) => {
-        setAnchorElNotification(event.currentTarget);
+        if (notifications.length > 0) {
+            setShowNotifications(notifications);
+            const notificationData = notifications.map(notification => ({
+                id: notification.id,
+                status: 'read'
+            }));
+            console.log(notificationData)
+            chatSocket.send(JSON.stringify(notificationData));
+            setNotifications([]);
+            console.log('handleOpenNotificationMenu')
+            setAnchorElNotification(event.currentTarget);
+            
+        }
     };
 
     const handleCloseNotificationMenu = () => {
         setAnchorElNotification(null);
+        console.log('handleCloseNotificationMenu')
     };
 
-    const handleNotification = (link) => {
+    const handleNotification = (type) => {
         handleCloseNotificationMenu();
-        navigate(link);
+        if(type === 'org_invite') {
+            navigate('/invites');
+        } else if(type === 'org_invite_accept') {
+            navigate('/organizations');
+        }
     };
+
 
     // dummy notifications
-    let notifications = [
-        {
-            id: 1,
-            type: "Linked",
-            description: user?.username + " has invited you to join SyncInc.",
-            sender: user,
-            link: "/invites",
-        }
-    ]
+    // let notifications = [
+    //     {
+    //         id: 1,
+    //         type: "Linked",
+    //         description: user?.username + " has invited you to join SyncInc.",
+    //         sender: user,
+    //         link: "/invites",
+    //     }
+    // ]
+    console.log('Notifications:', notifications)
 
     return (
         <>
@@ -70,10 +93,10 @@ const NotificationMenu = () => {
                     <NotificationCard notification={ notification } />
                 </MenuItem> */}
                 <Stack justifyContent="center" spacing={2} mt={2}>
-                    {notifications?.map((notification, idx) => (
+                    {showNotifications?.map((notification, idx) => (
                         <MenuItem
                             key={`notification-${idx}`}
-                            onClick={handleNotification.bind(this, notification.link)}
+                            onClick={ () => {handleNotification(notification.type)} }
                         >
                             <NotificationCard notification={ notification } />
                         </MenuItem>

@@ -598,11 +598,16 @@ class UpdateUserTaskRatingSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
-
+class BasicUserInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'name', 'email', 'profile_picture']
+        
 class NotificationSerializer(serializers.ModelSerializer):
+    sender = BasicUserInfoSerializer()
     class Meta:
         model = Notification
-        fields = ['id', 'message']
+        fields = ['id', 'sender', 'type', 'message']
     
 class UpdateProjectSerializer(serializers.ModelSerializer):
     class Meta:
