@@ -345,6 +345,7 @@ const ProjectDetails = () => {
                 roles={roles}
                 organization_id={project?.organization?.id}
                 project_id={id}
+                deadline={project?.deadline}
                 canAddTask={!(project?.end_time && status === "Completed") && roles?.includes("Project Leader") ? true : false}
             />
         </>

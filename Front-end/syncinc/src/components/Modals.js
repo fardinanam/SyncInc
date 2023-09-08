@@ -1070,13 +1070,13 @@ const EditTaskModal = ({isOpen, onClose, task, taskType}) => {
     )
 }
 
-const AddTaskModal = ({isOpen, onClose, taskType, task, projectId}) => {
+const AddTaskModal = ({isOpen, onClose, taskType, task, projectId, projectDeadline}) => {
     const {authTokens} = useContext(AuthContext);
     const {setLoading} = useLoading();
     const [deadline, setDeadline] = useState('');
     const [selectedTags, setSelectedTags] = useState([]);
     const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
-
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log(selectedTags);
@@ -1166,6 +1166,7 @@ const AddTaskModal = ({isOpen, onClose, taskType, task, projectId}) => {
                         <DatePicker 
                             label="Deadline" 
                             minDate={dayjs().add(1, 'day')}
+                            maxDate={projectDeadline && dayjs(projectDeadline, 'YYYY-MM-DD')}
                             id="deadline"
                             name="deadline"
                             onChange={handleDeadlineChange}

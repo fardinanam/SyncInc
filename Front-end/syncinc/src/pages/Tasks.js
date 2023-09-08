@@ -12,11 +12,14 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AdjustIcon from '@mui/icons-material/Adjust';
 import IndeterminateCheckBoxRoundedIcon from '@mui/icons-material/IndeterminateCheckBoxRounded';
+import SearchBar from "../components/SearchBar";
+import FilterButton from "../components/FilterButton";
 
 const Tasks = () => {
     const { authTokens } = useContext(AuthContext);
     const { setLoading } = useLoading();
     const [tasks, setTasks] = useState([]);
+    const [filteredTasks, setFilteredTasks] = useState([]);
     const navigate = useNavigate();
 
     const fetchTasks = async () => {
@@ -38,15 +41,26 @@ const Tasks = () => {
         setLoading(false);
     }
 
+    const handleSearchChange = (e) => {
+        const value = e.target.value.toLowerCase();
+        const filtered = tasks.filter((task) => task.name.toLowerCase().includes(value));
+        setFilteredTasks(filtered);
+    }
+
     useLayoutEffect(() => {
         fetchTasks();
     }, []);
+
+    useEffect(() => {
+        setFilteredTasks(tasks);
+    }, [tasks]);
 
     return (
         <>
             <Box 
                 display= 'flex'                
                 alignItems='center'
+                justifyContent='space-between'
             >
                 <Typography
                     variant='h5'
@@ -55,6 +69,19 @@ const Tasks = () => {
                 >
                     My Tasks
                 </Typography>
+                <Box
+                    display='flex'
+                    alignItems='center'
+                    justifyContent='flex-end'
+                    columnGap={1}
+                >
+                    <SearchBar 
+                        placeholder='Search Tasks...'
+                        onChange={handleSearchChange}
+                    />
+                    {/* <FilterButton /> */}
+                </Box>
+
             </Box>
             <Stack
                 display='flex'
@@ -67,7 +94,7 @@ const Tasks = () => {
                 columnGap={2}
             >
                 {
-                    tasks.map((task) => {
+                    filteredTasks.map((task) => {
                         let count;
                         let name;
                         

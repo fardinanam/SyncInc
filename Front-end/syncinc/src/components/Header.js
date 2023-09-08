@@ -21,7 +21,7 @@ const Header = ({open, onDrawerToggle}) => {
             position="fixed" 
             sx={{ 
                 zIndex: (theme) => theme.zIndex.drawer + 1, 
-                }}
+            }}
             color={"main"}
             elevation={0}
         >

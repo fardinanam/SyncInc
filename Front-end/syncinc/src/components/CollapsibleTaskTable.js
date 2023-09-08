@@ -19,7 +19,7 @@ import { getComparator, stableSort } from '../utils/comparator';
 import SearchBar from './SearchBar';
 import AssignmentReturnedRoundedIcon from '@mui/icons-material/AssignmentReturnedRounded';
 
-const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canAddTask, project_id}) => {
+const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canAddTask, project_id, deadline}) => {
     const [order, setOrder] = useState('asc');
     const [orderBy, setOrderBy] = useState('deadline');
 
@@ -170,6 +170,7 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                             onClose={handleAddTaskModalClose}
                             taskType={"User"}
                             projectId={project_id}
+                            projectDeadline={deadline}
                         />
                     </Box>
                 }
