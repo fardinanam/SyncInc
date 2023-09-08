@@ -2,9 +2,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { useNavigate } from 'react-router-dom';
 import { useState, useContext, useLayoutEffect } from 'react';
-import SummaryCard from '../components/SummaryCard';
-import { CssBaseline, Grid } from '@mui/material';
-import FormatListNumberedRtlRoundedIcon from '@mui/icons-material/FormatListNumberedRtlRounded';
+import { Grid } from '@mui/material';
 import DashboardCard from '../components/DashboardCard';
 import AuthContext from '../context/AuthContext';
 import { baseUrl } from '../utils/config';
@@ -16,8 +14,12 @@ import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 import ContributionGraph from '../components/ContributionGraph';
 import ProgressBarCard from '../components/ProgressBarCard';
 import { Stack } from '@mui/material';
+import { useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 export default function ClippedDrawer() {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const navigate = useNavigate();
     const {authTokens} = useContext(AuthContext);
     const [numOrganizations, setNumOrganizations] = useState([]);
@@ -107,95 +109,119 @@ export default function ClippedDrawer() {
                     Dashboard
                 </Typography>
             </Box>
-            <Grid  
-                container 
-                spacing={3}
-                paddingTop={2}
-                columns={{ xs: 12, sm: 6, md: 3 }}
+            <Box
+                display='flex'
+                flexDirection="column"
+                justifyContent="flex-start"
+                alignItems="flex-start"
+                rowGap={2}
+                columnGap={2}
             >
-                <Grid 
-                    item
+                <Grid  
+                    container 
+                    spacing={2}
+                    paddingTop={2}
+                    columns={{ xs: 12, sm: 6, md: 3 }}
                 >
-                <DashboardCard
-                    title="My Organizations"
-                    count={numOrganizations}
-                    name="Organizations Affiliated"  
-                    onClick={() => navigate('/organizations')}
-                >
-                    <Work 
-                        color='primary'
-                        fontSize='large'
-                    />
-                </DashboardCard>
+                    <Grid 
+                        item
+                    >
+                    <DashboardCard
+                        title="My Organizations"
+                        count={numOrganizations}
+                        name="Organizations Affiliated"  
+                        onClick={() => navigate('/organizations')}
+                    >
+                        <Work 
+                            color='primary'
+                            fontSize='large'
+                        />
+                    </DashboardCard>
+                    </Grid>
+                    <Grid 
+                        item
+                    >
+                    <DashboardCard
+                        title="My Projects"
+                        count={numProjects}
+                        name="Projects Joined"
+                        onClick={() => navigate('/projects')}   
+                    >
+                        <DescriptionIcon 
+                            color='primary'
+                            fontSize='large'
+                        />
+                    </DashboardCard>
+                    </Grid>
+                    <Grid 
+                        item
+                    >
+                    <DashboardCard
+                        title="My Tasks"
+                        count={numTasks}
+                        name="Tasks Assigned"
+                        onClick={() => navigate('/tasks')}
+                    >
+                        <AssignmentRoundedIcon 
+                            color='primary'
+                            fontSize='large'
+                        />
+                    </DashboardCard>
+                    </Grid>
+                    
                 </Grid>
-                <Grid 
-                    item
+                { !isMobile &&
+                <Stack 
+                    justifyContent='flex-start'
+                    alignItems='flex-start'
                 >
-                <DashboardCard
-                    title="My Projects"
-                    count={numProjects}
-                    name="Projects Joined"
-                    onClick={() => navigate('/projects')}   
-                >
-                    <DescriptionIcon 
-                        color='primary'
-                        fontSize='large'
-                    />
-                </DashboardCard>
-                </Grid>
-                <Grid 
-                    item
-                >
-                <DashboardCard
-                    title="My Tasks"
-                    count={numTasks}
-                    name="Tasks Assigned"
-                    onClick={() => navigate('/tasks')}
-                >
-                    <AssignmentRoundedIcon 
-                        color='primary'
-                        fontSize='large'
-                    />
-                </DashboardCard>
-                </Grid>
-                <Grid 
-                    item
-                >
+                    <Typography 
+                        variant='h6' 
+                        sx={{ fontWeight: 'bold' }}
+                        mb={1}
+                    >
+                        Contributions In Last Year
+                    </Typography>
                     <ContributionGraph 
                         contributions={contributions}
                     />
-                </Grid>
-            </Grid>
-            {/* add some infographics components */}
-            <Grid
-                container
-                spacing={3}
-                paddingTop={2}
-                columns={{ xs: 12, sm: 6, md: 3 }}
-            >
-                <Grid
-                    item
-                >
-                    <Typography variant='h6' sx={{ fontWeight: 'bold' }}>
-                        Projects Progress
-                    </Typography>
-                    <Stack justifyContent="center" spacing={2} mt={2} direction="row">
-                        {percentProjectTasks?.map((project, idx) => (
-                                <ProgressBarCard
-                                    key={`project-${idx}`}
-                                    name={project.name}
-                                    client={project.client}
-                                    completed_tasks={project.completed_tasks}
-                                    total_tasks={project.total_tasks}
-                                    onClick={() => navigate(`/project/${project.id}`)}
-                                />
-                        ))}
-                    </Stack>
-                </Grid>
-
-            </Grid>
-
-            
+                </Stack>
+                }
+                { percentProjectTasks?.length > 0 &&
+                    <Grid
+                        container
+                        spacing={2}
+                        columns={{ xs: 12, sm: 6, md: 3 }}
+                    >
+                        <Grid
+                            item
+                        >
+                            <Typography variant='h6' sx={{ fontWeight: 'bold' }}>
+                                Projects Progress
+                            </Typography>
+                            <Stack 
+                                justifyContent="flex-start" 
+                                rowGap={2}
+                                columnGap={2}
+                                mt={1} direction="row"
+                                flexWrap='wrap'
+                            >
+                                {percentProjectTasks?.map((project, idx) => (
+                                        <ProgressBarCard
+                                            key={`project-${idx}`}
+                                            name={project?.name}
+                                            client={project?.client}
+                                            completed_tasks={project?.completed_tasks}
+                                            total_tasks={project?.total_tasks}
+                                            deadline={project?.deadline}
+                                            onClick={() => navigate(`/project/${project.id}`)}
+                                        />
+                                ))}
+                            </Stack>
+                        </Grid>
+                    </Grid>
+                }
+            </Box>
         </>
         // </MainLayout>
     );
