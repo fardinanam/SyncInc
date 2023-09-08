@@ -40,10 +40,11 @@ const ProjectsStack = ({title, projects}) => {
                     {projects?.map((project, idx) => (
                         <ProjectCard
                             key={`project-${idx}`}
-                            name={project.name}
-                            client={project.client}
-                            description={project.description}
+                            name={project?.name}
+                            client={project?.client}
+                            description={project?.description}
                             roles={project?.roles}
+                            task_count={project?.task_count}
                             onClick={() => navigate(`/project/${project.id}`)}
                         />
                         

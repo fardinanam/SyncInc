@@ -9,11 +9,10 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import SupervisedUserCircleIcon from '@mui/icons-material/SupervisedUserCircle';
 
-const ProjectCard = (props) => {
+const ProjectCard = ({name, client, description, children, roles, onClick, task_count}) => {
     const theme = useTheme();
     const backgroundColor = theme.palette.main[theme.palette.mode]
 
-    const {name, client, description, children, roles} = props;
     const [disabled, setDisabled] = useState(true);
 
     
@@ -40,7 +39,7 @@ const ProjectCard = (props) => {
             onClick={disabled ? () => {
                 notifyWithToast("error", "You are not allowed to view this project")
             }
-                : props.onClick}
+                : onClick}
         >
             <CardContent>
                 {children}
@@ -50,7 +49,7 @@ const ProjectCard = (props) => {
                     flexDirection='row'
                 >
                 <Typography
-                    variant="h5"
+                    variant="h6"
                     fontWeight={'bold'}
                 >
                     {name && name}
@@ -81,20 +80,15 @@ const ProjectCard = (props) => {
                 }
                 </Box>
                 <Typography
-                    sx={{
-                        fontSize: 16,
-                    }}
-                    color="text.secondary" gutterBottom
+                    color="text.secondary"
                 >
-                    {client}
+                    Client: {client}
                 </Typography>
                 <Typography
-                    sx={{
-                        fontSize: 14
-                    }}
-                    color="text.secondary" gutterBottom
+                    fontWeight="bold"
+                    color="text.secondary"
                 >
-                    {description && description}
+                    {task_count} {task_count === 1 ? "task" : "tasks"} 
                 </Typography>
             </CardContent>
         </Card>

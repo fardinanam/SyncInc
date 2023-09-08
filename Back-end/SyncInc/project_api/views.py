@@ -255,13 +255,13 @@ def create_organization(request):
         serializer = OrganizationSerializer(data=data, context={'user': user})
 
         if not serializer.is_valid():
-            print(serializer.errors)
+            print("serializer errors", serializer.errors)
             return Response({
-                'message': serializer.errors.get('non_field_errors')[0],
+                'message': 'Something went wrong',
                 'data': serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        organization = serializer.save()
+        serializer.save()
 
         return Response({
             'message': 'Organization created successfully',
@@ -904,7 +904,7 @@ def get_user_items_count(request):
         
         data = {}
         data['numOrganizations'] = Organization.objects.filter(designation__in=designations).count()
-        data['numProjects'] = Project.objects.filter(project_leader=user).count()
+        data['numProjects'] = Project.objects.filter(organization__designation__in=designations).count()
         data['numTasks'] = UserTask.objects.filter(assignee=user).count()
         print(data)
         return Response({
@@ -1072,7 +1072,7 @@ def update_user_task_details(request, task_id):
         serializer.is_valid(raise_exception=True)
 
         serializer.save()
-        serializer = GetUserTaskSerializer(task)
+        serializer = GetUserTaskSerializer(task, context={'user': user})
         
         return Response({
             'message': 'Task updated successfully',
@@ -1109,7 +1109,7 @@ def submit_user_task(request, task_id):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         
-        serializer = GetUserTaskSerializer(task)
+        serializer = GetUserTaskSerializer(task, context={'user': user})
         return Response({
             'message': 'Task submitted successfully',
             'data': serializer.data
@@ -1145,7 +1145,7 @@ def update_user_task_status(request, task_id):
         serializer.save()
         
         return Response({
-            'message': 'Task reviewed successfully',
+            'message': 'Task status updated successfully',
             'data': serializer.data
         }, status=status.HTTP_200_OK)
     
@@ -1166,18 +1166,19 @@ def update_user_task_rating(request, task_id):
         # get all the tasks assigned to the user
         task = UserTask.objects.get(id=task_id)
 
-        # check if the user is the assignee of the task
-        if not task.project.project_leader or task.project.project_leader != user:
+        # check if the user is the project leader or admin of the task
+        if not ((task.project.project_leader and task.project.project_leader == user) 
+                or user.designations.filter(organization=task.project.organization, role='Admin').exists()):
             return Response({
                 'message': 'You are not authorized to rate this task',
                 'data': None
             }, status=status.HTTP_401_UNAUTHORIZED)
 
-        serializer = UpdateUserTaskRatingSerializer(data=request.data, instance=task)
-
+        serializer = UpdateUserTaskRatingSerializer(data=request.data, instance=task, context={'user': user})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         
+        print("serializer saved", serializer.data)
         return Response({
             'message': 'Task rated successfully',
             'data': serializer.data
@@ -1224,3 +1225,81 @@ def update_notification_status(status, id):
     print('updated notification status')
 
     
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_project_details(request, project_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        # get all the tasks assigned to the user
+        project = Project.objects.get(id=project_id)
+
+        # check if the user is the project leader
+        if not project.project_leader or project.project_leader != user:
+            return Response({
+                'message': 'You are not authorized to update this project',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        serializer = UpdateProjectSerializer(data=request.data, instance=project)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        return Response({
+            'message': 'Project details updated successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': serializer.errors.get('non_field_errors')[0],
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def complete_project(request, project_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        # get all the tasks assigned to the user
+        project = Project.objects.get(id=project_id)
+
+        # check if the user is the project leader
+        if not project.project_leader or project.project_leader != user:
+            return Response({
+                'message': 'You are not authorized to update this project',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # check if all tasks of the project are completed or rejected or terminated
+        tasks = UserTask.objects.filter(project=project)
+        for task in tasks:
+            task_status = task.status
+            if task_status != 'Completed' and task_status != 'Rejected' and task_status != 'Terminated':
+                return Response({
+                    'message': 'All tasks of the project are not completed yet',
+                    'data': None
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        project.end_time = timezone.now()
+
+        project.save()
+
+        serializer = ProjectDetailsSerializer(project, context={'user': user})
+        
+        return Response({
+            'message': 'Project status updated successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)

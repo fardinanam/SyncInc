@@ -7,7 +7,7 @@ const toastStyle = {
     style: {
         background: 'main',
     },
-    duration: 3000,
+    duration: 4000,
 }
 const notifyWithToast = (type, message) => {
     if (type === 'error') {
@@ -20,6 +20,10 @@ const notifyWithToast = (type, message) => {
         const descStyle = {
             ...toastStyle,
             position: 'top-center',
+            
+            options:{
+                hideProgressBar: false,
+            }
         }
         toast(
             <div>
@@ -27,7 +31,7 @@ const notifyWithToast = (type, message) => {
                     {message}
                 </p>
             </div>, 
-            descStyle
+            descStyle,
         )
     } else {
         const infoStyle = {

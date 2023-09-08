@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import { Avatar, Checkbox, TextField, Rating } from "@mui/material";
+import { Avatar, Checkbox, TextField, Rating, Switch } from "@mui/material";
 import { baseUrl } from '../utils/config';
 import AuthContext from '../context/AuthContext';
 import axios from "axios";
@@ -195,6 +195,7 @@ const AddMemberModal = ( props ) => {
 const CreateOrgModal = (props) => {
     const { authTokens } = useContext(AuthContext);
     const { setLoading } = useLoading();
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -220,7 +221,10 @@ const CreateOrgModal = (props) => {
 
             props.handleClose("success", response.data.data);
         } catch (error) {
-            props.handleClose("error", error.response.data);
+            if (error.response?.data?.data?.name)
+                notifyWithToast("error", error.response.data.data.name[0]);
+            else
+                props.handleClose("error", error.response.data);
         }
         setLoading(false);
     }
@@ -228,7 +232,11 @@ const CreateOrgModal = (props) => {
         <>
             <Modal
                 open={props.open}
-                onClose={() => props.handleClose("close")}
+                onClose={() => {
+                    setIsSubmitDisabled(true);
+                    props.handleClose("close")}
+                }
+                keepMounted={false}
             >
             <Box 
                 sx={{ 
@@ -254,8 +262,17 @@ const CreateOrgModal = (props) => {
                         label="Organization Name"
                         name="name"
                         autoFocus
+                        onChange={(e) => {
+                            if (e.target.value !== '') {
+                                setIsSubmitDisabled(false);
+                            } else {
+                                setIsSubmitDisabled(true);
+                            }
+                        }}
                     />
-                    <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+                    <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}
+                        disabled={isSubmitDisabled}
+                    >
                         Create
                     </Button>
                 </Box>
@@ -1053,13 +1070,13 @@ const EditTaskModal = ({isOpen, onClose, task, taskType}) => {
     )
 }
 
-const AddTaskModal = ({isOpen, onClose, taskType}) => {
-    const {id} = useParams();
+const AddTaskModal = ({isOpen, onClose, taskType, task, projectId, projectDeadline}) => {
     const {authTokens} = useContext(AuthContext);
     const {setLoading} = useLoading();
     const [deadline, setDeadline] = useState('');
     const [selectedTags, setSelectedTags] = useState([]);
-
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log(selectedTags);
@@ -1075,19 +1092,20 @@ const AddTaskModal = ({isOpen, onClose, taskType}) => {
             description: e.target.task_description.value,
             tags: selectedTags,
             deadline: deadline,
+            previous_task: task?.id,
         });
 
         setLoading(true);
 
         try {
             const response = await axios.post(
-                `${baseUrl}create_task/${id}/`, 
+                `${baseUrl}create_task/${projectId}/`, 
                 body, 
                 config
             );
 
             if (response.status === 201) {
-                onClose(response.data.data);
+                onClose(response.data?.data);
                 notifyWithToast('success', 'Task created successfully');
             }
         } catch (error) {
@@ -1101,12 +1119,30 @@ const AddTaskModal = ({isOpen, onClose, taskType}) => {
 
     const handleDeadlineChange = (date) => {
         setDeadline(date);
+
+        if (date !== '') {
+            setIsSubmitDisabled(false);
+        }
     }
+
+    const handleClose = () => {
+        onClose();
+        setDeadline('');
+        setSelectedTags([]);
+        setIsSubmitDisabled(true);
+    }
+
+
+    useEffect(() => {
+        if (task) {
+            setSelectedTags(task.tags?.map(tag => tag.name));
+        }
+    }, [task]);
 
     return (
         <Modal
             open={isOpen}
-            onClose={() => onClose()}
+            onClose={handleClose}
         >
             <Box sx={modalStyle}>
                 <Typography id="add-task-modal-title" variant="h5" align="center">
@@ -1124,11 +1160,13 @@ const AddTaskModal = ({isOpen, onClose, taskType}) => {
                         name="task_name"
                         required
                         autoFocus
+                        defaultValue={task && task.name + ' v2'}
                     />
                     <LocalizationProvider dateAdapter={AdapterDayjs}>    
                         <DatePicker 
                             label="Deadline" 
                             minDate={dayjs().add(1, 'day')}
+                            maxDate={projectDeadline && dayjs(projectDeadline, 'YYYY-MM-DD')}
                             id="deadline"
                             name="deadline"
                             onChange={handleDeadlineChange}
@@ -1147,10 +1185,12 @@ const AddTaskModal = ({isOpen, onClose, taskType}) => {
                         name="task_description"
                         multiline
                         required
+                        defaultValue={task?.description}
                     />
                     <AutocompleteTagInput
                         isLoaded={isOpen}
                         onChange={(_, value) => setSelectedTags(value)}
+                        defaultTags={task?.tags?.map(tag => tag.name)}                        
                     />
                     <Button
                         type="submit"
@@ -1158,6 +1198,7 @@ const AddTaskModal = ({isOpen, onClose, taskType}) => {
                         variant="outlined"
                         color="success"
                         sx={{ mt: 2 }}
+                        disabled={isSubmitDisabled}
                     >
                         Save
                     </Button>
@@ -1324,17 +1365,18 @@ const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
                         display="flex"
                         justifyContent="center"
                         alignItems="center"
+                        mb={1}
                     >
                     {!selectedOption &&
                         <>
-                            <Typography fontSize='xs'>Only show employees with matched tags 
-                            </Typography>
-                            <Checkbox 
+                            <Switch 
                                 color="success" 
                                 size="small" 
                                 checked={isTagSuggestionEnabled}
                                 onChange={() => setIsTagSuggestionEnabled(!isTagSuggestionEnabled)}
                             />
+                            <Typography fontSize='xs'>{isTagSuggestionEnabled ? 'Suggestion On' : 'Suggestion Off'}
+                            </Typography>
                         </>
                     }
                     </Box>
@@ -1507,10 +1549,11 @@ const ConfirmRejectTaskModal = ({isOpen, onClose, task, taskType}) => {
     )
 }
 
-const RateTaskModal = ({isOpen, onClose, task, taskType}) => {
+const RateTaskModal = ({isOpen, onClose, taskId, review, taskType}) => {
     const {authTokens} = useContext(AuthContext);
     const {setLoading} = useLoading();
     const [rating, setRating] = useState(0);
+    const [comment, setComment] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -1524,12 +1567,13 @@ const RateTaskModal = ({isOpen, onClose, task, taskType}) => {
 
         const body = JSON.stringify({
             rating: rating,
+            comment: comment ? comment : "",
         });
 
         setLoading(true);
         try {
             const response = await axios.put(
-                `${baseUrl}update_user_task_rating/${task.id}/`,
+                `${baseUrl}update_user_task_rating/${taskId}/`,
                 body,
                 config
             );
@@ -1547,8 +1591,12 @@ const RateTaskModal = ({isOpen, onClose, task, taskType}) => {
     }
 
     useEffect(() => {
-        setRating(task?.rating);
-    }, [task?.rating]);
+        setRating(review?.rating);
+    }, [review?.rating]);
+
+    useEffect(() => {
+        setComment(review?.comment);
+    }, [review?.comment]);
 
     return (
         <Modal
@@ -1565,7 +1613,7 @@ const RateTaskModal = ({isOpen, onClose, task, taskType}) => {
                     alignItems={'center'}
                 >
                     <Typography variant='h5' align="center">
-                        Rate {task?.name}
+                        Rate This Task
                     </Typography>
                     <Rating
                         size="large"
@@ -1574,6 +1622,21 @@ const RateTaskModal = ({isOpen, onClose, task, taskType}) => {
                         onChange={(event, newValue) => {
                             setRating(newValue);
                         }}
+                    />
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        id="comment"
+                        label="Comment"
+                        name="comment"
+                        multiline
+                        defaultValue={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        inputProps={{
+                            maxLength: 256,
+                        }}
+
+                        helperText={`${comment?.length}/256`}
                     />
                     <Button
                         type="submit"
@@ -1591,6 +1654,272 @@ const RateTaskModal = ({isOpen, onClose, task, taskType}) => {
     )
 }
 
+const TerminateTaskModal = ({isOpen, onClose, task, taskType}) => {
+    const {authTokens} = useContext(AuthContext);
+    const {setLoading} = useLoading();
+
+    const handleSubmit = async (e) => {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`
+            }
+        }
+
+        const body = JSON.stringify({
+            status: 'Terminated',
+        });
+
+        setLoading(true);
+
+        try {
+            const response = await axios.put(
+                `${baseUrl}update_user_task_status/${task.id}/`,
+                body,
+                config
+            );
+
+            if (response.status === 200) {
+                onClose(response.data?.data);
+                notifyWithToast('success', 'Task terminated successfully');
+            }
+        } catch (error) {
+            onClose();
+            notifyWithToast('error', 'Failed to terminate task');
+        }
+
+        setLoading(false);
+    }
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={onClose}
+        >
+            <Box sx={modalStyle}>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <Typography variant="body1" align="center">
+                        Are you sure you want to terminate {task?.name}?
+                    </Typography>
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="error"
+                        sx={{ mt: 2 }}
+                        startIcon={<CloseRoundedIcon />}
+                    >
+                        Terminate
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+
+const EditProjectModal = ({isOpen, onClose, project}) => {
+    const {authTokens} = useContext(AuthContext);
+    const {setLoading} = useLoading();
+    const projectId = useParams().id;
+    const [initialProject, setInitialProject] = useState(null);
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
+    const [deadline, setDeadline] = useState(null);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`
+            }
+        }
+
+        const body = JSON.stringify({
+            name: e.target.project_name.value,
+            description: e.target.project_description.value,
+            deadline: dayjs(deadline).format('YYYY-MM-DD'),
+        });
+
+        console.log(body);
+
+        setLoading(true);
+
+        try {
+            const response = await axios.put(
+                `${baseUrl}update_project_details/${projectId}/`,
+                body,
+                config
+            );
+
+            if (response.status === 200) {
+                onClose(response.data?.data);
+                notifyWithToast('success', 'Project updated successfully');
+            }
+        } catch (error) {
+            notifyWithToast('error', error.response.data.message);
+        }
+
+        setLoading(false);
+    }
+
+    useEffect(() => {
+        setInitialProject(project);
+        setDeadline(project.deadline);
+    }, [project.name, project.description, project?.deadline]);
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={onClose}
+        >
+            <Box sx={modalStyle}>
+                <Box    
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <Typography variant="h5" align="center">
+                        Edit Project
+                    </Typography>
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        id="project_name"
+                        label="Project Name"
+                        name="project_name"
+                        defaultValue={project?.name}
+                        autoFocus
+                        onChange={(e) => {
+                            if (e.target.value !== project?.name) {
+                                setIsSubmitDisabled(false);
+                            } else {
+                                setIsSubmitDisabled(true);
+                            }
+                        }}
+                    />
+                    <LocalizationProvider
+                        dateAdapter={AdapterDayjs}
+                    >
+                        <DatePicker
+                            label="Deadline"
+                            defaultValue={dayjs(project?.deadline)}
+                            minDate={dayjs().add(1, 'day')}
+                            id="deadline"
+                            name="deadline"
+                            onChange={(date) => {
+                                if (date !== project?.deadline) {
+                                    setIsSubmitDisabled(false);
+                                } else {
+                                    setIsSubmitDisabled(true);
+                                }
+
+                                setDeadline(date);
+                            }}
+                            sx={{
+                                width: '100%',
+                            }}
+                        />
+                    </LocalizationProvider>
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        id="project_description"
+                        label="Project Description"
+                        name="project_description"
+                        multiline
+                        defaultValue={project?.description}
+                        onChange={(e) => {
+                            if (e.target.value !== project?.description) {
+                                setIsSubmitDisabled(false);
+                            } else {
+                                setIsSubmitDisabled(true);
+                            }
+                        }}
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{ mt: 2 }}
+                        startIcon={<CheckRoundedIcon />}
+                        disabled={isSubmitDisabled}
+                    >
+                        Save
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+
+const ConfirmProjectCompleteModal = ({isOpen, onClose, project}) => {
+    const {authTokens} = useContext(AuthContext);
+    const {setLoading} = useLoading();
+    const projectId = useParams().id;
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`
+            }
+        }
+
+        setLoading(true);
+        try {
+            const response = await axios.put(
+                `${baseUrl}complete_project/${projectId}/`,
+                null,
+                config
+            );
+
+            if (response.status === 200) {
+                onClose(response.data?.data);
+                notifyWithToast('success', 'Project completed successfully');
+            }
+        } catch (error) {
+            notifyWithToast('error', error.response.data.message);
+        }
+        setLoading(false);
+    }
+
+    return (
+        <Modal
+            open={isOpen}
+            onClose={onClose}
+        >
+            <Box sx={modalStyle}>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <Typography variant="body1" align="center">
+                        Are you sure you want to complete {project?.name}?
+                    </Typography>
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="success"
+                        sx={{ mt: 2 }}
+                        startIcon={<CheckRoundedIcon />}
+                    >
+                        Complete
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    )
+}
+
+
+
 export {
     CreateOrgModal, 
     AddMemberModal, 
@@ -1605,4 +1934,7 @@ export {
     ConfirmAcceptTaskModal,
     ConfirmRejectTaskModal,
     RateTaskModal,
+    TerminateTaskModal,
+    EditProjectModal,
+    ConfirmProjectCompleteModal,
 };

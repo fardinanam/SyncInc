@@ -128,7 +128,14 @@ const OrganizationEmployees = (props) => {
         <>
             <TitleBar 
                 title={organizationName}
-                subtitle="Employees"
+                subtitleElement={
+                    <Typography variant="h7"
+                        fontWeight="bold"
+                        color="text.secondary"
+                    >
+                        Employees
+                    </Typography>
+                }
             >
                 <OrganizationNavMenu organization_id={id}/>
             </TitleBar>

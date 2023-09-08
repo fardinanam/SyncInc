@@ -9,6 +9,7 @@ import AuthContext from '../context/AuthContext';
 import { baseUrl } from "../utils/config";
 import ProjectsStack from '../components/ProjectsStack';
 import notifyWithToast from "../utils/toast";
+import SearchBar from '../components/SearchBar';
 
 const columnStackStyle = {
     direction: "column",
@@ -21,6 +22,7 @@ const Projects = () => {
     const { setLoading } = useLoading();
     const { authTokens } = useContext(AuthContext);
     const navigate = useNavigate();
+    const [projects, setProjects] = useState([]);
     const [newProjects, setNewProjects] = useState([]);
     const [projectsInProgress, setProjectsInProgress] = useState([]);
     const [completedProjects, setCompletedProjects] = useState([]);
@@ -51,9 +53,8 @@ const Projects = () => {
                 }  
 
             )
-            console.log(response)
-            console.log(response.data?.data?.projects);
-            categorizeProjects(response.data?.data?.projects);
+            
+            setProjects(response.data?.data?.projects);
         } catch (error) {
             navigate(-1);
             notifyWithToast("error", error.response.data.message);
@@ -61,9 +62,23 @@ const Projects = () => {
         setLoading(false);
     }
 
+    const handleSearch = (e) => {
+        const searchValue = e.target.value.toLowerCase();
+        const filteredProjects = projects?.filter(project => {
+            return project.name?.toLowerCase().includes(searchValue) ||
+                project.client?.toLowerCase().includes(searchValue);
+        });
+
+        categorizeProjects(filteredProjects);
+    }
+
     useEffect(() => {
         fetchUserProjectDetails();
     }, []);
+
+    useEffect(() => {
+        categorizeProjects(projects);
+    }, [projects]);
 
     return (
         <>
@@ -71,25 +86,31 @@ const Projects = () => {
                 display= 'flex'
                 flexGrow={1}
                 marginBottom={2}
+                justifyContent="space-between"
+                alignItems="center"
             >
-                    <Typography 
-                        variant='h5'
-                        sx={{ fontWeight: 'bold' }}
-                    >
-                        My Projects
-                    </Typography>
+                <Typography 
+                    variant='h5'
+                    sx={{ fontWeight: 'bold' }}
+                >
+                    My Projects
+                </Typography>
+                <SearchBar 
+                    placeholder="Search by project or client name..."
+                    onChange={handleSearch}
+                />
             </Box>
             <Grid  
                 container 
                 spacing={3}
             >
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} lg={4}>
                     <ProjectsStack title="New Projects" projects={newProjects} />
                 </Grid>
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} lg={4}>
                     <ProjectsStack title="Projects in Progress" projects={projectsInProgress} />
                 </Grid>
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} lg={4}>
                     <ProjectsStack title="Completed Projects" projects={completedProjects} />
                 </Grid>
             </Grid>
