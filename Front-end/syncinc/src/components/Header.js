@@ -50,26 +50,14 @@ const Header = ({open, onDrawerToggle}) => {
                     sx={{mr: 2, height: 30 }}
                 />
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1}}>
-                    SyncInc.
+                {!isExtraSmall &&
+                    "SyncInc."
+                }
                 </Typography>
-                {/* <SearchBar /> */}
-                {/* <IconButton sx={{ ml: 1 }} onClick={() => {} } color="inherit">
-                    <Badge color="primary" badgeContent={10} max={9}>
-                        <NotificationsIcon
-                            fontSize="medium"
-                        />
-                    </Badge>
-                </IconButton> */}
-                <NotificationMenu />
-                <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1}}>
-                    {!isExtraSmall &&
-                        "SyncInc."
-                    }
-                    </Typography>
                 <IconButton onClick={colorMode.toggleColorMode} color="inherit">
                     {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
                 </IconButton>
+                <NotificationMenu />
                 <ProfileMenu />
             </Toolbar>
         </AppBar>
