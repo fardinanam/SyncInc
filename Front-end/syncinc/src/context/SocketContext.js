@@ -4,9 +4,10 @@ import axios from 'axios';
 import { baseUrl } from '../utils/config';
 const SocketContext = createContext();
 
+
 const SocketProvider = ({ children }) => {
     let { authTokens, user } = useContext(AuthContext)
-    let url = `ws://127.0.0.1:8000/ws/socket_apps/${user?.username}/`
+    
     const [chatSocket, setChatSocket] = useState(null)
     const [notifications, setNotifications] = useState([]);
     
@@ -49,7 +50,9 @@ const SocketProvider = ({ children }) => {
     //  }, [user]);
 
     useEffect(() => {
+        console.log(notifications)
         if (user !== null) {
+            let url = `ws://127.0.0.1:8000/ws/socket_apps/${user?.username}/`
             const chatSocket = new WebSocket(url)
             setChatSocket(chatSocket)
             getUnreadNotifications()
@@ -80,19 +83,10 @@ const SocketProvider = ({ children }) => {
     
     console.log(notifications)
     return (
-        <SocketContext.Provider value={ {notifications, setNotifications} }>
+        <SocketContext.Provider value={ {chatSocket, notifications, setNotifications} }>
             {children}
         </SocketContext.Provider>
     )
-}
-    
-const useSocket = () => {
-    const { chatSocket, setChatSocket} = useContext(SocketContext);
-        
-    return {
-        chatSocket,
-        setChatSocket
-     };
 }
     
 export default SocketContext;
