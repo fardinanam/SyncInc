@@ -14,8 +14,12 @@ import { Divider, Toolbar } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
 import TelegramIcon from '@mui/icons-material/Telegram';
+import { useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 const ProfileMenu = () => {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     let {user, logoutUser} = useContext(AuthContext);
     const [anchorElUser, setAnchorElUser] = useState(null);
     
@@ -47,10 +51,12 @@ const ProfileMenu = () => {
     return (
         <Toolbar sx={{ flexGrow: 0 }}>
             <Avatar alt={user.first_name + ' ' + user.last_name} src={user.profile_picture && user.profile_picture} />
-            <Typography ml={1}>
-                {user.first_name + " " + user.last_name}
-            </Typography>
-            <Tooltip title="Open settings">
+            { !isMobile && 
+                <Typography ml={1}>
+                    {user.first_name + " " + user.last_name}
+                </Typography>
+            }
+            <Tooltip title="Open Profile Menu">
                 <IconButton onClick={handleOpenUserMenu} sx={{ fontSize: "large" }}>
                     <ExpandMoreIcon />
                 </IconButton>

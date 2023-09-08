@@ -1125,6 +1125,14 @@ const AddTaskModal = ({isOpen, onClose, taskType, task, projectId}) => {
         }
     }
 
+    const handleClose = () => {
+        onClose();
+        setDeadline('');
+        setSelectedTags([]);
+        setIsSubmitDisabled(true);
+    }
+
+
     useEffect(() => {
         if (task) {
             setSelectedTags(task.tags?.map(tag => tag.name));
@@ -1134,7 +1142,7 @@ const AddTaskModal = ({isOpen, onClose, taskType, task, projectId}) => {
     return (
         <Modal
             open={isOpen}
-            onClose={() => onClose()}
+            onClose={handleClose}
         >
             <Box sx={modalStyle}>
                 <Typography id="add-task-modal-title" variant="h5" align="center">
