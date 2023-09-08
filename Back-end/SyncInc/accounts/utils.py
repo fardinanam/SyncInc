@@ -2,6 +2,8 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.conf import settings
 
+# front_end_url = 'https://syncinc.netlify.app'
+# deployed_url = 'https://syncinc-backend.onrender.com'
 front_end_url = 'http://localhost:3000'
 deployed_url = 'http://127.0.0.1:8000'
 

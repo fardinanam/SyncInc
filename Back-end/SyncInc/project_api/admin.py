@@ -10,6 +10,8 @@ admin.site.register(Project)
 admin.site.register(UserTask)
 admin.site.register(VendorTask)
 admin.site.register(Message)
+admin.site.register(UserTaskSubmission)
+admin.site.register(UserTaskReview)
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):

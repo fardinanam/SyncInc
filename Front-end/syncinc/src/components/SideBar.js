@@ -13,6 +13,7 @@ import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 import WorkIcon from '@mui/icons-material/Work';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useMediaQuery } from '@mui/material';
 
 const drawerWidth = 240;
 
@@ -32,16 +33,21 @@ const selectedStyle = {
     },
 }
 
-const SideBar = (props) => {
+const SideBar = ({open, onDrawerToggle}) => {
     const navigate = useNavigate();
     const location = useLocation();
     const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const mainColor = theme.palette.main[theme.palette.mode]
 
     return (
         <Drawer
-            variant="permanent"
+            variant={ isMobile ? "temporary" : "permanent"}
+            anchor='left'
+            open={open}
+            onClose={onDrawerToggle}
+            onClick={onDrawerToggle}
             sx={{
                 width: drawerWidth,
                 flexShrink: 0,
