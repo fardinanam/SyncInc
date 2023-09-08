@@ -3,7 +3,7 @@ import Typography from '@mui/material/Typography';
 import { useNavigate } from 'react-router-dom';
 import { useState, useContext, useLayoutEffect } from 'react';
 import SummaryCard from '../components/SummaryCard';
-import { Grid } from '@mui/material';
+import { CssBaseline, Grid } from '@mui/material';
 import FormatListNumberedRtlRoundedIcon from '@mui/icons-material/FormatListNumberedRtlRounded';
 import DashboardCard from '../components/DashboardCard';
 import AuthContext from '../context/AuthContext';
@@ -13,6 +13,7 @@ import { useLoading } from '../context/LoadingContext';
 import { Work } from '@mui/icons-material';
 import DescriptionIcon from '@mui/icons-material/Description';
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
+import ContributionGraph from '../components/ContributionGraph';
 
 export default function ClippedDrawer() {
     const navigate = useNavigate();
@@ -108,6 +109,7 @@ export default function ClippedDrawer() {
                     />
                 </DashboardCard>
                 </Grid>
+            <ContributionGraph />
             </Grid>
         </>
         // </MainLayout>

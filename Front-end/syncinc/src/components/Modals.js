@@ -1221,11 +1221,7 @@ const AssignTaskModal = ({isOpen, onClose, task, organization_id}) => {
     const handleSearchChange = (event) => {
         const inputText = event.target.value;
         if (inputText.trim() !== '') {
-            isTagSuggestionEnabled
-            ? setFilteredOptions(
-                matchedTagOptions?.filter(option => option.username.toLowerCase().includes(inputText.toLowerCase()))
-            )
-            : setFilteredOptions(
+            setFilteredOptions(
                 options?.filter(option => option.name.toLowerCase().includes(inputText.toLowerCase()))
             );
         } else {

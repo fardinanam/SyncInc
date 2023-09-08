@@ -62,15 +62,15 @@ const ProjectCard = ({name, client, description, children, roles, onClick, task_
                         spacing={0.5}
                     >
                         {roles?.includes("Admin") && <Tooltip title="Admin"> 
-                                <AdminPanelSettingsIcon size="small" color='primary'/>
+                                <AdminPanelSettingsIcon size="small" color='disabled'/>
                             </Tooltip>
                         }
                         {roles?.includes("Project Leader") && <Tooltip title="Leader"> 
-                                <ManageAccountsIcon size="small" color='primary'/>
+                                <ManageAccountsIcon size="small" color='disabled'/>
                             </Tooltip>
                         }
                         {roles?.includes("Assignee") && <Tooltip title="Assignee">
-                                <SupervisedUserCircleIcon size="small" color='primary'/>
+                                <SupervisedUserCircleIcon size="small" color='disabled'/>
                             </Tooltip>
                         }
                     </Stack>

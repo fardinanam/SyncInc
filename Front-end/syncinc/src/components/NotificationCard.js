@@ -11,21 +11,23 @@ const NotificationCard = (props) => {
         <Card
             elevation={0}
             sx={{
-                borderRadius: 1,
                 '&:hover': {
                     cursor: "pointer",
                 },
                 backgroundColor: "transparent",
             }}
         >
-            <CardContent>
-                <Stack direction="row" spacing={2}>
+            <CardContent
+                sx={{
+                    padding: '0 !important',
+                }}
+            >
+                <Stack direction="row" spacing={1}>
                     <Box 
                         display="flex"
                         flexDirection="column"
                         alignItems="center"
                         justifyContent="center"
-                        fontSize={20}
                     >
                         <Avatar
                             alt={notification.sender.name}

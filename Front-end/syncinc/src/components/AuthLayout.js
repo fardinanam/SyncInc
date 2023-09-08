@@ -1,4 +1,4 @@
-import { Container, Grid, Typography, Box, CssBaseline, SvgIcon } from "@mui/material"
+import { Grid, Typography, Box, CssBaseline } from "@mui/material"
 import Logo from "../assets/logo.svg"
 import Copyright from "./Copyright"
 
