@@ -1,6 +1,6 @@
 import { useLayoutEffect, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Typography, Stack } from "@mui/material"
+import { Box, Typography, Stack, Tooltip } from "@mui/material"
 import SummaryCard from "../components/SummaryCard";
 import AuthContext from "../context/AuthContext";
 import { useLoading } from "../context/LoadingContext";
@@ -11,11 +11,15 @@ import dayjs from "dayjs";
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AdjustIcon from '@mui/icons-material/Adjust';
+import IndeterminateCheckBoxRoundedIcon from '@mui/icons-material/IndeterminateCheckBoxRounded';
+import SearchBar from "../components/SearchBar";
+import FilterButton from "../components/FilterButton";
 
 const Tasks = () => {
     const { authTokens } = useContext(AuthContext);
     const { setLoading } = useLoading();
     const [tasks, setTasks] = useState([]);
+    const [filteredTasks, setFilteredTasks] = useState([]);
     const navigate = useNavigate();
 
     const fetchTasks = async () => {
@@ -37,15 +41,26 @@ const Tasks = () => {
         setLoading(false);
     }
 
+    const handleSearchChange = (e) => {
+        const value = e.target.value.toLowerCase();
+        const filtered = tasks.filter((task) => task.name.toLowerCase().includes(value));
+        setFilteredTasks(filtered);
+    }
+
     useLayoutEffect(() => {
         fetchTasks();
     }, []);
+
+    useEffect(() => {
+        setFilteredTasks(tasks);
+    }, [tasks]);
 
     return (
         <>
             <Box 
                 display= 'flex'                
                 alignItems='center'
+                justifyContent='space-between'
             >
                 <Typography
                     variant='h5'
@@ -54,6 +69,19 @@ const Tasks = () => {
                 >
                     My Tasks
                 </Typography>
+                <Box
+                    display='flex'
+                    alignItems='center'
+                    justifyContent='flex-end'
+                    columnGap={1}
+                >
+                    <SearchBar 
+                        placeholder='Search Tasks...'
+                        onChange={handleSearchChange}
+                    />
+                    {/* <FilterButton /> */}
+                </Box>
+
             </Box>
             <Stack
                 display='flex'
@@ -66,11 +94,12 @@ const Tasks = () => {
                 columnGap={2}
             >
                 {
-                    tasks.map((task) => {
+                    filteredTasks.map((task) => {
                         let count;
                         let name;
                         
-                        if (task.status === 'Completed' || task.status === 'Rejected') {
+                        if (task.status === 'Completed' || task.status === 'Rejected' 
+                            || task.status === 'Terminated') {
                             count = dayjs().diff(task.end_time, 'day');
                             name = count === 1 ? "Day Ago" : "Days Ago";
 
@@ -114,10 +143,20 @@ const Tasks = () => {
                         >
                             {
                                 task.status === 'Overdue' || task.status === 'Rejected' 
-                                ? <CancelIcon color="error" fontSize="large" /> 
+                                ? <Tooltip title="Overdued or Rejected" >
+                                    <CancelIcon color="error" fontSize="large" /> 
+                                    </Tooltip>
                                 : task.status === 'Completed'
-                                ? <CheckCircleIcon color="success" fontSize="large" />
-                                : <AdjustIcon color="success" fontSize="large" />
+                                ? <Tooltip title="Completed" >
+                                    <CheckCircleIcon color="success" fontSize="large" />
+                                </Tooltip> 
+                                : task.status === 'Terminated' 
+                                ? <Tooltip title="Terminated" >
+                                    <IndeterminateCheckBoxRoundedIcon color="error" fontSize="large" />
+                                </Tooltip> 
+                                : <Tooltip title="In Progress" >
+                                    <AdjustIcon color="success" fontSize="large" />
+                                </Tooltip>
                             }
                         </SummaryCard>
                     )})

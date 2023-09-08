@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +31,7 @@ SECRET_KEY = 'django-insecure-*!l72n@%a(g23(o0#=_r@_lnpqhs4@0v5y^5_y(+tfwh1z3t$d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'syncinc.onrender.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'syncinc-backend.onrender.com']
 
 
 # Application definition
@@ -84,52 +88,47 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'SyncInc.wsgi.application'
 
+deployment_server= os.getenv('SERVER')
+DATABASES = {}
 
-# render.com database with external connection
-# PGPASSWORD=qU3u0dLIAdalFATVUyvxgJ5Y5R3ZHvk9 psql -h dpg-cjgrbik1ja0c73cahom0-a.oregon-postgres.render.com -U syncinc syncinc_8ynr
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'syncinc_8ynr',
-#         'USER': 'syncinc',
-#         'PASSWORD': 'qU3u0dLIAdalFATVUyvxgJ5Y5R3ZHvk9',
-#         'HOST': 'dpg-cjgrbik1ja0c73cahom0-a.oregon-postgres.render.com',
-#         'PORT': '5432',
-#     }
-# }
-
-# render.com database with internal connection
-# postgres://syncinc:LzlKgJ0AZzn3aqQ3SuhptILWtk5PtGF6@dpg-cjghjeb37aks73ck2tm0-a/syncinc_4q2g
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'syncinc_8ynr',
-#         'USER': 'syncinc',
-#         'PASSWORD': 'qU3u0dLIAdalFATVUyvxgJ5Y5R3ZHvk9',
-#         'HOST': 'dpg-cjgrbik1ja0c73cahom0-a',
-#         'PORT': '5432',
-#     }
-# }
-
-# local database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if deployment_server == 'LOCAL':
+    print('Using local database')
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('LOCAL_DATABASE_ENGINE'),
+            'NAME': os.getenv('LOCAL_DATABASE_NAME'),
+        }
     }
-}
+elif deployment_server.startswith('RENDER'):
+    print('Using render database')
+
+    host = os.getenv('RENDER_DATABASE_HOST')
+
+    if deployment_server.endswith('INTERNAL'):
+        print('Render internal database')
+        host = host.split('.')[0]
+        
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('RENDER_ENGINE'),
+            'NAME': os.getenv('RENDER_DATABASE_NAME'),
+            'USER': os.getenv('RENDER_DATABASE_USER'),
+            'PASSWORD': os.getenv('RENDER_DATABASE_PASSWORD'),
+            'HOST': host,
+            'PORT': os.getenv('RENDER_DATABASE_PORT'),
+        }
+    }
 
 # Firebase settings
 FIREBASE_CONFIG = {
-    "apiKey": "AIzaSyDcIUeQAWgl6PmGCem497gcCPPFyqoIfFM",
-    "authDomain": "syncinc-3d861.firebaseapp.com",
-    "projectId": "syncinc-3d861",
-    "storageBucket": "syncinc-3d861.appspot.com",
-    "messagingSenderId": "404253910105",
-    "appId": "1:404253910105:web:b30866c59c45a0ea6c3d48",
-    "measurementId": "G-4XW1ME7ND8",
-    "databaseURL": ""
+    "apiKey": os.getenv('FIREBASE_API_KEY'),
+    "authDomain": os.getenv('FIREBASE_AUTH_DOMAIN'),
+    "projectId": os.getenv('FIREBASE_PROJECT_ID'),
+    "storageBucket": os.getenv('FIREBASE_STORAGE_BUCKET'),
+    "messagingSenderId": os.getenv('FIREBASE_MESSAGING_SENDER_ID'),
+    "appId": os.getenv('FIREBASE_APP_ID'),
+    "measurementId": os.getenv('FIREBASE_MEASUREMENT_ID'),
+    "databaseURL": os.getenv('FIREBASE_DATABASE_URL'), 
 }
 
 
@@ -220,12 +219,9 @@ CORS_ALLOW_HEADERS = [
 ]
 
 # Email Settings
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
 EMAIL_USE_TLS = True
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'syncinc408'
-EMAIL_HOST_PASSWORD = 'whobckarhkecskox'
-
-
-
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')

@@ -5,13 +5,15 @@ import AuthContext from '../context/AuthContext';
 import notifyWithToast from "../utils/toast";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import { CssBaseline, Input, Typography } from "@mui/material";
+import { CssBaseline, Input, Typography, TextField } from "@mui/material";
 import Chip from "@mui/material/Chip";
 import {useDropzone} from 'react-dropzone';
 import DragAndDropIcon from "../assets/drag-and-drop-icon-17.jpg";
 import PublishRoundedIcon from '@mui/icons-material/PublishRounded';
 import axios from "axios";
 import { baseUrl } from "../utils/config";
+import InputAdornment from '@mui/material/InputAdornment';
+import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 
 const SubmitTask = ({task, onSubmitSuccess}) => {
     const { authTokens } = useContext(AuthContext);
@@ -82,6 +84,7 @@ const SubmitTask = ({task, onSubmitSuccess}) => {
         e.preventDefault();
         const body = new FormData();
         body.append('file', acceptedFiles[0]);
+        body.append('details', e.target['submission-comment'].value);
 
         const config = {
             headers: {
@@ -156,6 +159,14 @@ const SubmitTask = ({task, onSubmitSuccess}) => {
                     }
                 </Box>
             </Box>
+            <TextField
+                id="submission-comment"
+                label="Comment"
+                name="submission-comment"
+                multiline
+                maxRows={4}
+                fullWidth
+            />
             <Box 
                 display="flex"
                 flexDirection="row"

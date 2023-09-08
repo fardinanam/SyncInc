@@ -7,6 +7,19 @@ const isValidPassword = (password) => {
 }
 
 const isValidNumber = (number) => {
-    return /^01\d{9}$/.test(number);
+    return /^([0|\+[0-9]{1,5})?([0-9]{6,10})$/.test(number);
 }
-export { isValidEmail, isValidPassword, isValidNumber };
+
+const isValidName = (name) => {
+    // should only contain letters and spaces
+    return /^[a-zA-Z\s]+$/.test(name);
+}
+
+const isValidUsername = (username) => {
+    // should only contain letters, numbers, and underscores, period
+    // start with a letter
+
+    return /^[a-zA-Z][a-zA-Z0-9_.]+$/.test(username);
+}
+
+export { isValidEmail, isValidPassword, isValidNumber, isValidName, isValidUsername };

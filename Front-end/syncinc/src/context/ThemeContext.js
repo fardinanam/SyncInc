@@ -18,6 +18,13 @@ const baseTheme = {
             dark: "#121212"
         },
     },
+    typography: {
+        fontFamily: [
+            'sans-serif',
+            'Poppins',
+            'Roboto'
+        ].join(','),
+    },
 };
 
 const ColorModeContext = createContext({ toggleColorMode: () => {} });

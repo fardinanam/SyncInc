@@ -14,10 +14,12 @@ import { useLoading } from "../context/LoadingContext"
 import ListChips from "../components/ListChips";
 import { InfoSectionStyle } from "../styles/styles";
 import StackField from "../components/StackField";
+import { useMediaQuery } from "@mui/material";
 
 const Profile = () => {
     const { user, setUser, authTokens } = useContext(AuthContext);
     const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const mainColor = theme.palette.main
     const [profileInfo, setProfileInfo] = useState({});
     const [isProfilePicModalOpen, setIsProfilePicModalOpen] = useState(false);
@@ -171,23 +173,33 @@ const Profile = () => {
                     My Profile
                 </Typography>
                 <Box
-                    display={"flex"}
-                    flexDirection={"column"}
+                    display="flex"
+                    flexDirection="column"
                     sx={InfoSectionStyle}
                 >
                     <Box
-                        display={"flex"}
+                        display="flex"
+                        flexWrap="wrap"
+                        rowGap={1}
+                        columnGap={2}
                     >
-                        <Avatar alt={profileInfo.first_name} src={profileInfo.profile_picture && profileInfo.profile_picture} sx={{ width: 75, height: 75 }} />
+                        <Box 
+                            display="flex"
+                            flexDirection="row"
+                            alignItems="center"
+                            justifyContent="center"
+                            flexGrow={isMobile ? 1 : 0}
+                        >
+                            <Avatar alt={profileInfo.first_name} src={profileInfo.profile_picture && profileInfo.profile_picture} sx={{ width: 75, height: 75 }} />
+                        </Box>
                         <Box
-                            display={"flex"}
-                            flexDirection={"column"}
-                            justifyContent={"start"}
+                            display="flex"
+                            flexDirection="column"
+                            justifyContent="start"
                             flexGrow={1}
-                            ml={2}
                         >
                             <Typography 
-                                fontWeight={"bold"}
+                                fontWeight="bold"
                             >
                                 {profileInfo.first_name} {profileInfo.last_name}
                             </Typography>
@@ -199,8 +211,8 @@ const Profile = () => {
                             </Typography>
                         </Box>
                         <Box 
-                            display={"flex"}
-                            alignItems={"center"}
+                            display="flex"
+                            alignItems="center"
                         >
                             <Button 
                                 variant="outlined"
