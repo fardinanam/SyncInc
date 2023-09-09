@@ -33,7 +33,6 @@ const NotificationMenu = () => {
     const navigate = useNavigate();
     const {chatSocket, notifications, setNotifications} = useContext(SocketContext)
     const [newNotifications, setNewNotifications] = useState([]);
-    console.log('chatSocket:', chatSocket)
 
     useEffect(() => {
         const unreadNotifications = notifications.filter(notification => notification.read === false);
@@ -45,7 +44,8 @@ const NotificationMenu = () => {
                 id: notification.id,
                 status: 'read'
             }));
-            chatSocket.send(JSON.stringify(notificationData));
+
+            chatSocket?.send(JSON.stringify(notificationData));
             
             setNewNotifications([]);
             setAnchorElNotification(event.currentTarget);
@@ -62,9 +62,7 @@ const NotificationMenu = () => {
 
     const handleNotification = (type, attributeId) => {
         handleCloseNotificationMenu();
-        console.log(type)
         if(type === 'org_invite') {
-            console.log('org_invite')
             navigate('/invites');
             navigate(0)
         } else if(type === 'org_invite_ac') {

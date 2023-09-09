@@ -28,6 +28,8 @@ class LoginView(APIView):
                         'data': serializer.errors
                     }, status=status.HTTP_403_FORBIDDEN)
                 
+                print(user.profile_picture)
+                
                 if user.is_email_verified is False:
                     return Response({
                         'message': 'Email not verified',
@@ -36,6 +38,7 @@ class LoginView(APIView):
 
                 # refresh = RefreshToken.for_user(user)
                 refresh = CustomTokenObtainPairSerializer.get_token(user)
+                print(refresh.access_token)
 
                 return Response({
                     'refresh': str(refresh),
