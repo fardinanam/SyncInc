@@ -11,12 +11,13 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from channels.db import database_sync_to_async
 
-def notify_user(sender, receiver, attribute, message):
+def notify_user(sender, receiver, type, attribute_id, message):
     
     notification = Notification.objects.create(
             sender = sender,
             receiver = receiver,
-            attribute = attribute,
+            type = type,
+            attribute_id = attribute_id,
             message = message
     )
     receiver_name = receiver.username
@@ -452,11 +453,10 @@ def invite_employee(request, organization_id):
         invitation.save()
         data = EmployeeSerializer(employee).data
         
-        attribute = 'org_invite'
+        type = 'org_invite'
         message = user.username +" has invited you to join " + organization.name + " organization"
-       
         
-        notify_user(user, employee, attribute, message)
+        notify_user(user, employee, type, organization.id, message)
         
         return Response({
             'message': f'Invitation sent successfully to the {employee.name}',
@@ -527,8 +527,8 @@ def accept_invite(request, invitation_id):
         
         invited_by = invitation.invited_by
         message = username + " accepted your invitation to join " + organization.name + " organization"
-        attribute = 'org_invite_accept_'+str(organization.id)
-        notify_user(user, invited_by, attribute, message)
+        type = 'org_invite_ac'
+        notify_user(user, invited_by, type, organization.id, message)
 
         return Response({
             'message': f'Invite accepted successfully',
@@ -869,8 +869,8 @@ def assign_user_task(request):
         serializer = GetUserTaskSerializer(task)
 
         message = "You are assigned a new task " + task.name + " in project "+ task.project.name
-        attribute = 'task_assigned_'+str(task.id)
-        notify_user(user, assignee, attribute, message)
+        type = 'task'
+        notify_user(user, assignee, type, task.id, message)
 
         return Response({
             'message': 'Task assigned successfully',
@@ -977,6 +977,11 @@ def assign_project_leader(request, project_id):
         project.save()
 
         serializer = EmployeeSerializer(project_leader)
+
+        type = 'project'
+        message = user.username +" has made you leader of " + project.name + " project"
+        
+        notify_user(user, project_leader, type, project.id, message)
 
         return Response({
             'message': 'Project leader assigned successfully',

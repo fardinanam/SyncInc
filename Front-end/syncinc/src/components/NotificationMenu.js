@@ -36,9 +36,7 @@ const NotificationMenu = () => {
     console.log('chatSocket:', chatSocket)
 
     useEffect(() => {
-        console.log('notifications:', notifications)
         const unreadNotifications = notifications.filter(notification => notification.read === false);
-        console.log('unreadNotifications:', unreadNotifications)
         setNewNotifications(unreadNotifications);
     }, [notifications]);
     const handleOpenNotificationMenu = (event) => {
@@ -47,37 +45,36 @@ const NotificationMenu = () => {
                 id: notification.id,
                 status: 'read'
             }));
-            console.log(notificationData)
             chatSocket.send(JSON.stringify(notificationData));
             
             setNewNotifications([]);
-            console.log('handleOpenNotificationMenu')
             setAnchorElNotification(event.currentTarget);
         }
     };
 
     const handleCloseNotificationMenu = () => {
         setAnchorElNotification(null);
+
         notifications.forEach(notification => {
             notification.read = true;
         });
-        console.log('handleCloseNotificationMenu')
     };
 
-    const handleNotification = (attribute) => {
+    const handleNotification = (type, attributeId) => {
         handleCloseNotificationMenu();
-        console.log(attribute)
-        if(attribute === 'org_invite') {
+        console.log(type)
+        if(type === 'org_invite') {
             console.log('org_invite')
             navigate('/invites');
             navigate(0)
-        } else if(attribute.startsWith('org_invite_ac')) {
-            const orgId = attribute.split('_')[2];
-            navigate('/organization/' + orgId + '/employees');
+        } else if(type === 'org_invite_ac') {
+            navigate('/organization/' + attributeId);
             navigate(0);
-        } else if(attribute.startsWith('task_assigned')) {
-            const taskId = attribute.split('_')[2];
-            navigate('/task/' + taskId);
+        } else if(type === 'task') {
+            navigate('/task/' + attributeId);
+            navigate(0);
+        } else if(type === 'project') {
+            navigate('/project/' + attributeId);
             navigate(0);
         }
     };
@@ -136,7 +133,7 @@ const NotificationMenu = () => {
                     {notifications?.map((notification, idx) => (
                         <ListItem
                             key={`notification-${idx}`}
-                            onClick={ () => {handleNotification(notification.attribute)} }
+                            
                             sx={{
                                 cursor: 'pointer',
                                 '&:hover': {
@@ -145,6 +142,8 @@ const NotificationMenu = () => {
 
                                 backgroundColor: notification.read ? 'inherit' : theme.palette.mode === 'dark' ? blue[900] : blue[100],
                             }}
+
+                            onClick={ () => {handleNotification(notification.type, notification.attribute_id)} }
                         >
                             <NotificationCard notification={ notification } />
                         </ListItem>
