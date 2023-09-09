@@ -1,7 +1,7 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import AuthContext from '../context/AuthContext';
 import axios from 'axios';
-import { baseUrl } from '../utils/config';
+import { wsBaseUrl, baseUrl } from '../utils/config';
 const SocketContext = createContext();
 
 
@@ -39,7 +39,7 @@ const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         if (isLoggedIn) {
-            let url = `wss://${baseUrl}ws/socket_apps/${user?.username}/`
+            let url = `${wsBaseUrl}ws/socket_apps/${user?.username}/`
             const chatSocket = new WebSocket(url)
             setChatSocket(chatSocket)
             getUserNotifications()
@@ -49,11 +49,11 @@ const SocketProvider = ({ children }) => {
             setNotifications([])
             // console.log('Chat Socket:', chatSocket)
         }
-     }, [isLoggedIn]);
+    }, [isLoggedIn]);
 
     useEffect(() => {
         if (isLoggedIn) {
-            let url = `wss://${baseUrl}ws/socket_apps/${user?.username}/`
+            let url = `${wsBaseUrl}ws/socket_apps/${user?.username}/`
             const chatSocket = new WebSocket(url)
             setChatSocket(chatSocket)
             getUserNotifications()
@@ -63,7 +63,7 @@ const SocketProvider = ({ children }) => {
             setChatSocket(null)
             // console.log('Chat Socket:', chatSocket)
         }
-     }, []);
+    }, []);
     
     
     if(chatSocket !== null) {
