@@ -1,28 +1,8 @@
-import { useContext, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useLoading } from "../context/LoadingContext";
-import axios, { all } from "axios";
-
-import { Box, Button, Fab, Grid, Typography } from "@mui/material";
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import AuthContext from '../context/AuthContext';
-import { baseUrl } from "../utils/config";
-import TitleBar from "../components/TitleBar";
+import { useEffect, useState } from "react";
+import { Box, Grid } from "@mui/material";
 import ProjectsStack from '../components/ProjectsStack';
-import OrganizationNavMenu from "../components/OrganizationNavMenu";
-import notifyWithToast from "../utils/toast";
-import SearchBar from "../components/SearchBar";
-import { fabStyle } from "../styles/styles";
 
-const OrganizationProjects = () => {
-    const  { id } = useParams();
-    const { setLoading } = useLoading();
-    const { authTokens } = useContext(AuthContext);
-    const navigate = useNavigate();
-
-    const [organizationName, setOrganizationName] = useState();
-    const [role, setRole] = useState();
-    const [projects, setProjects] = useState([]);
+const OrganizationProjects = ({projects, search}) => {
     const [newProjects, setNewProjects] = useState([]);
     const [projectsInProgress, setProjectsInProgress] = useState([]);
     const [completedProjects, setCompletedProjects] = useState([]);
@@ -38,33 +18,8 @@ const OrganizationProjects = () => {
         //projects that have end_time lower than current time is assigned to completedProjects
         setCompletedProjects(projects.filter(project => project.end_time !== null && new Date(project.end_time) < today));
     }
-    // use axios to get organization details
-    const fetchOrganizationProjectDetails = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get(
-                `${baseUrl}organization_projects/${id}/`,  
-                {
-                    headers: {
-                        'Authorization': 'Bearer ' + authTokens?.access,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    }
-                }  
 
-            )
-            setOrganizationName(response.data?.data?.name);
-            setRole(response.data?.data?.role)
-            setProjects(response.data?.data?.projects);
-        } catch (error) {
-            navigate(-1);
-            notifyWithToast("error", error.response.data.message);
-        }
-        setLoading(false);
-    }
-
-    const handleSearch = (e) => {
-        const searchValue = e.target.value.toLowerCase();
+    const handleSearch = (searchValue) => {
         const filteredProjects = projects?.filter(project => {
             return project.name?.toLowerCase().includes(searchValue) || project.client?.toLowerCase().includes(searchValue);
         });
@@ -73,46 +28,29 @@ const OrganizationProjects = () => {
     }
 
     useEffect(() => {
-        fetchOrganizationProjectDetails();
-    }, []);
+        if (projects?.length > 0)
+            categorizeProjects(projects);
+    }, [projects]);
 
     useEffect(() => {
-        categorizeProjects(projects);
-    }, [projects]);
+        handleSearch(search);
+    }, [search]);
+
 
     return (
         <>  
-            <TitleBar 
-                title={organizationName}
-                subtitleElement={
-                    <Typography variant="h7"
-                        fontWeight="bold"
-                        color="text.secondary"
-                    >
-                        Projects
-                    </Typography>
-                }
-            >   
-                <Box 
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="center"
-                    alignItems="center"
-                >
-                    <OrganizationNavMenu organization_id={id}/>
-                </Box>
-            </TitleBar>
             <Box display="flex" 
                 justifyContent="flex-end" 
                 mb={1}
                 rowGap={1}
                 columnGap={1}
             >
-                <SearchBar 
+                {/* <SearchBar 
                     placeholder="Search by project or client name..."
                     onChange={handleSearch}
-                />
-            {
+                /> */}
+            </Box>
+            {/* {
                 role === 'Admin' &&
                     <Fab
                         color="primary"
@@ -123,8 +61,7 @@ const OrganizationProjects = () => {
                     >
                         <AddRoundedIcon />
                     </Fab>
-            }
-            </Box>
+            } */}
             <Grid  
                 container 
                 spacing={2}

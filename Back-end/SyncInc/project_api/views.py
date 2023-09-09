@@ -1419,3 +1419,65 @@ def delete_project(request, project_id):
             'message': 'Something went wrong',
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_organization(request, organization_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+        
+        organization = Organization.objects.get(id=organization_id)
+
+        # check if the user is admin of the organization
+        designation = user.designations.filter(organization=organization).first()
+
+        if not designation or designation.role != 'Admin':
+            return Response({
+                'message': 'You are not authorized to delete this organization',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        organization.delete()
+        
+        return Response({
+            'message': 'Organization deleted successfully',
+            'data': None
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_organization_details(request, organization_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        # get the organization of the given id
+        organization = Organization.objects.get(id=organization_id)
+
+        if not organization:
+            return Response({
+                'message': 'Organization not found',
+                'data': None
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = OrganizationSerializer(organization, context={'user': user})
+
+        return Response({
+            'message': 'Organization details fetched successfully',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        })

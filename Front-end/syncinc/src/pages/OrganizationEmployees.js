@@ -1,42 +1,19 @@
-import { useContext, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
-import { Box, Typography, Button, Grid, IconButton, Fab } from "@mui/material";
-
-import AuthContext from '../context/AuthContext';
-import { baseUrl } from "../utils/config";
-
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
+import { Grid, Fab } from "@mui/material";
 import Paper from '@mui/material/Paper';
-import TagIcon from '@mui/icons-material/Tag';
-import SortIcon from '@mui/icons-material/Sort';
 import MemberTable from "../components/MemberTable";
-import { ArrowUpward, ArrowDownward } from '@mui/icons-material';
-import ListChips from "../components/ListChips";
-import TitleBar from "../components/TitleBar";
-import NavMenu from "../components/NavMenu";
-import {Toolbar} from "@mui/material";
 import { useLoading } from "../context/LoadingContext";
-import { Autocomplete, TextField } from '@mui/material'
-import AddIcon from '@mui/icons-material/Add';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { AddMemberModal } from "../components/Modals";
-import OrganizationNavMenu from "../components/OrganizationNavMenu";
 import { fabStyle } from "../styles/styles";
 
-const OrganizationEmployees = (props) => {
-
-    const { authTokens } = useContext(AuthContext);
+const OrganizationEmployees = ({employees, search}) => {
     const { id }= useParams();
-    const { setLoading } = useLoading();
     
     let [addModalOpen, setAddModalOpen] = useState(false);
+    const [filteredEmployees, setFilteredEmployees] = useState([]);
     
     const handleAddModalOpen = () => {
         console.log("handle Member modal open")
@@ -46,42 +23,27 @@ const OrganizationEmployees = (props) => {
         setAddModalOpen(false);
     }
 
-    const [organizationName, setOrganizationName] = useState();
-    const [role, setRole] = useState()
-    const [employees, setEmployees] = useState([]);
-    const [filteredEmployees, setFilteredEmployees] = useState([]);
+    const [role, setRole] = useState();
 
     useEffect(() => {
-        fetchOrganizationEmployees();
+        // fetchOrganizationEmployees();
         handleNameSort();
     }, [id]);
 
-    // use axios to get organization details
-    const fetchOrganizationEmployees = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get(
-                `${baseUrl}organization_employees/${id}/`,  
-                {
-                    headers: {
-                        'Authorization': 'Bearer ' + authTokens?.access,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    }
-                }  
+    useEffect(() => {
+        setFilteredEmployees(employees);
+    }, [employees]);
 
-            )
-            setRole(response.data.data.role);
-            setOrganizationName(response.data.data.name);
-            setEmployees(response.data.data.employees);
-            setFilteredEmployees(response.data.data.employees)
-        } catch (error) {
-            console.log(error.response.data.message);
-            // window.location.href = '/organizations';
+    useEffect(() => {
+        if (!search || search === "") {
+            setFilteredEmployees(employees);
+            return;
         }
-        setLoading(false);
-
-    }
+        
+        setFilteredEmployees(employees.filter(employee => {
+            return employee.username?.toLowerCase().includes(search);
+        }));
+    }, [search]);
 
     let [nameSort, setNameSort] = useState(false);
         const handleNameSort = () => {
@@ -127,19 +89,6 @@ const OrganizationEmployees = (props) => {
     
     return (
         <>
-            <TitleBar 
-                title={organizationName}
-                subtitleElement={
-                    <Typography variant="h7"
-                        fontWeight="bold"
-                        color="text.secondary"
-                    >
-                        Employees
-                    </Typography>
-                }
-            >
-                <OrganizationNavMenu organization_id={id}/>
-            </TitleBar>
             <Paper 
                 sx={{
                     marginTop: '1.5rem',
@@ -148,11 +97,6 @@ const OrganizationEmployees = (props) => {
                 elevation={0}
             >
                 <Grid container spacing={2} >
-                    {/* <Grid item xs={12} md={8}>
-                        <Typography variant="h6">
-                            Search option here
-                        </Typography>
-                    </Grid> */}
                     {
                     role === 'Admin' &&
                     <Grid item display={'flex'} xs={12} md={12} sx={{justifyContent: 'flex-end'}}>
@@ -173,7 +117,7 @@ const OrganizationEmployees = (props) => {
 
                 <MemberTable
                     pageName="Employee"
-                    members={employees}
+                    members={filteredEmployees}
                 />
             </Paper>
             
