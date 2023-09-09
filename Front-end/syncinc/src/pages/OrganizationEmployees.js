@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
-import { Box, Typography, Button, Grid, IconButton } from "@mui/material";
+import { Box, Typography, Button, Grid, IconButton, Fab } from "@mui/material";
 
 import AuthContext from '../context/AuthContext';
 import { baseUrl } from "../utils/config";
@@ -28,6 +28,7 @@ import AddIcon from '@mui/icons-material/Add';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { AddMemberModal } from "../components/Modals";
 import OrganizationNavMenu from "../components/OrganizationNavMenu";
+import { fabStyle } from "../styles/styles";
 
 const OrganizationEmployees = (props) => {
 
@@ -155,19 +156,16 @@ const OrganizationEmployees = (props) => {
                     {
                     role === 'Admin' &&
                     <Grid item display={'flex'} xs={12} md={12} sx={{justifyContent: 'flex-end'}}>
-                        
-                        <Button 
-                            color="primary" 
-                            variant="outlined" 
-                            size="small"
-                            sx={{
-                                mr: '1rem'
-                            }}
+                        <Fab
+                            color="primary"
+                            aria-label="add"
+                            size="medium"
                             onClick={() => handleAddModalOpen()}
-                            startIcon={<AddRoundedIcon fontSize="small"/>}
+                            sx={fabStyle}
                         >
-                                Employee
-                        </Button>
+                            <AddRoundedIcon />
+                        </Fab>
+
                         <AddMemberModal id={id} memberType={'employee'} open={addModalOpen} handleClose={handleAddModalClose}/>
                     </Grid>
                     }

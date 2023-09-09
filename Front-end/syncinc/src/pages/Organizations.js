@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { CreateOrgModal } from '../components/Modals';
-import { Grid, Typography } from '@mui/material';
+import { Fab, Grid, Typography } from '@mui/material';
 import SummaryCard from '../components/SummaryCard';
 import WorkIcon from '@mui/icons-material/Work';
 import notifyWithToast from '../utils/toast';
@@ -14,11 +14,15 @@ import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSetting
 import { baseUrl } from '../utils/config';
 import AuthContext from '../context/AuthContext';
 import { useLoading } from '../context/LoadingContext';
+import { fabStyle } from '../styles/styles';
+import SearchBar from '../components/SearchBar';
 
 const Organizations = () => {
     const navigate = useNavigate();
     const {authTokens} = useContext(AuthContext);
     const [organizations, setOrganizations] = useState([]);
+    const [filteredOrganizations, setFilteredOrganizations] = useState([]);
+
     const {setLoading} = useLoading();
     useEffect(() => {
         fetchOrganizations();
@@ -66,6 +70,19 @@ const Organizations = () => {
         setLoading(false);
     }
 
+    const handleSearch = (e) => {
+        const searchValue = e.target.value.toLowerCase();
+        const filteredOrganizations = organizations?.filter(organization => {
+            return organization.name?.toLowerCase().includes(searchValue);
+        });
+
+        setFilteredOrganizations(filteredOrganizations);
+    }
+
+    useEffect(() => {
+        setFilteredOrganizations(organizations);
+    }, [organizations]);
+
     return (
         <>
             <Box 
@@ -78,9 +95,19 @@ const Organizations = () => {
                         sx={{ fontWeight: 'bold' }}
                     >My Organizations</Typography>
                 </Box>  
-                <Button variant='contained' size='small' onClick={handleOpen}
-                    startIcon={<AddRoundedIcon fontSize="small"/>}
-                > Organization</Button>
+                <SearchBar
+                    placeholder="Search Organizations"
+                    onChange={handleSearch}
+                />
+                <Fab
+                    size="medium"
+                    color="primary"
+                    aria-label="add"
+                    sx={fabStyle}
+                    onClick={handleOpen}
+                >
+                    <AddRoundedIcon />
+                </Fab>
                 <CreateOrgModal open={isOpen} handleClose={handleClose} handleOpen={handleOpen} />
             </Box>
             <Grid  
@@ -90,7 +117,7 @@ const Organizations = () => {
                 columns={{ xs: 12, sm: 6, md: 3 }}
             >
                 {
-                    organizations?.map((organization, idx) => (
+                    filteredOrganizations?.map((organization, idx) => (
                         <Grid 
                             item 
                             key={`organization-${idx}`}

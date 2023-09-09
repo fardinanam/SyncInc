@@ -21,7 +21,7 @@ export default function ClippedDrawer() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const navigate = useNavigate();
-    const {authTokens} = useContext(AuthContext);
+    const {authTokens, isLoggedIn} = useContext(AuthContext);
     const [numOrganizations, setNumOrganizations] = useState([]);
     const [numProjects, setNumProjects] = useState([]);
     const [numTasks, setNumTasks] = useState([]);
@@ -30,10 +30,12 @@ export default function ClippedDrawer() {
     const {setLoading} = useLoading();
     const [percentProjectTasks, setPercentProjectTasks] = useState([]);
     useLayoutEffect(() => {
-        fetchNumberItems();
-        fetchContributions();
-        fetchPercentProjectTasks();
-    }, []);
+        if (isLoggedIn) {
+            fetchNumberItems();
+            fetchContributions();
+            fetchPercentProjectTasks();
+        }
+    }, [isLoggedIn]);
 
     const fetchNumberItems = async () => {
         setLoading(true);

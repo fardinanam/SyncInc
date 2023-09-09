@@ -75,6 +75,22 @@ const SideBar = ({open, onDrawerToggle}) => {
                         <ListItemText primary="Dashboard" />
                     </ListItemButton>
                 </ListItem>
+
+                <ListItem key="tasks" disablePadding>
+                    <ListItemButton
+                        onClick={() => navigate('/tasks')}
+                        selected={location.pathname.startsWith('/task')}
+                        sx={selectedStyle}
+                    >
+                        <ListItemIcon>
+                            <AssignmentRoundedIcon fontSize='small' 
+                                color={location.pathname.startsWith('/task') ? 'primary' : ''}
+                            />
+                        </ListItemIcon>
+                        <ListItemText primary="Tasks" />
+                    </ListItemButton>
+                </ListItem>
+
                 <ListItem 
                     key="projects" 
                     disablePadding
@@ -92,22 +108,7 @@ const SideBar = ({open, onDrawerToggle}) => {
                         <ListItemText primary="Projects" />
                     </ListItemButton>
                 </ListItem>
-
-                <ListItem key="tasks" disablePadding>
-                    <ListItemButton
-                        onClick={() => navigate('/tasks')}
-                        selected={location.pathname.startsWith('/task')}
-                        sx={selectedStyle}
-                    >
-                        <ListItemIcon>
-                            <AssignmentRoundedIcon fontSize='small' 
-                                color={location.pathname.startsWith('/task') ? 'primary' : ''}
-                            />
-                        </ListItemIcon>
-                        <ListItemText primary="Tasks" />
-                    </ListItemButton>
-                </ListItem>
-
+                
                 <ListItem key="organizations" disablePadding>
                     <ListItemButton 
                         onClick={() => navigate('/organizations')}

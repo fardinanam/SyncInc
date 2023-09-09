@@ -19,7 +19,7 @@ import { getComparator, stableSort } from '../utils/comparator';
 import SearchBar from './SearchBar';
 import AssignmentReturnedRoundedIcon from '@mui/icons-material/AssignmentReturnedRounded';
 
-const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canAddTask, project_id, deadline}) => {
+const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id}) => {
     const [order, setOrder] = useState('asc');
     const [orderBy, setOrderBy] = useState('deadline');
 
@@ -29,8 +29,6 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
     const [isAssignTaskModalOpen, setIsAssignTaskModalOpen] = useState(false);
     const [assignTaskModalData, setAssignTaskModalData] = useState({});
     const [tasks, setTasks] = useState([]);
-    const [newTasks, setNewTasks] = useState([]);
-    const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
 
     const handleAssignTask = (task) => {
         setAssignTaskModalData(task);
@@ -57,26 +55,8 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
         }
     }
 
-    const handleAddTaskModalClose = (newTask) => {
-        setIsAddTaskModalOpen(false);
-        if (newTask) {
-            console.log("new Task: ", newTask);
-            newTask["tags"] = newTask.tags_details;
-            setNewTasks(prevState => ([
-                ...prevState,
-                newTask
-            ]));
-
-            setTasks(prevState => ([
-                ...prevState,
-                newTask
-            ]));
-        }
-    }
-
     const handleSearch = (event) => {
         const searchedValue = event.target.value.toLowerCase();
-        const tasks = [...newTasks, ...initialTasks]
         const searchedTasks = tasks?.filter((task) => {
             return task.name.toLowerCase().includes(searchedValue) 
                 || task.status.toLowerCase().includes(searchedValue) ;
@@ -110,7 +90,6 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
     return (
         <Paper 
             sx={{
-                marginTop: '1rem',
                 borderRadius: '0.5rem'
             }} 
             elevation={0}
@@ -145,35 +124,6 @@ const CollapsibleTaskTable = ({title, initialTasks, roles, organization_id, canA
                         placeholder="Search by name or status..."
                     />
                     }
-                {
-                    canAddTask && roles?.includes("Project Leader") &&
-                    <Box 
-                        display='flex'
-                        flexDirection='column'
-                        justifyContent='center'
-                    >
-                        <Button
-                            color="primary"
-                            variant="outlined"
-                            size="small"
-                            onClick={() => setIsAddTaskModalOpen(true)}
-                            sx={{
-                                height: '2rem',
-                            }}
-                            startIcon={<AddRoundedIcon fontSize='small'/>}
-                        >
-                            Task
-                        </Button>
-
-                        <AddTaskModal 
-                            isOpen={isAddTaskModalOpen}
-                            onClose={handleAddTaskModalClose}
-                            taskType={"User"}
-                            projectId={project_id}
-                            projectDeadline={deadline}
-                        />
-                    </Box>
-                }
                 </Stack>
             </Box>
                 <Collapse

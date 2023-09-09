@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useLoading } from "../context/LoadingContext";
 import axios, { all } from "axios";
 
-import { Box, Button, Grid, Typography } from "@mui/material";
+import { Box, Button, Fab, Grid, Typography } from "@mui/material";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import AuthContext from '../context/AuthContext';
 import { baseUrl } from "../utils/config";
@@ -12,6 +12,7 @@ import ProjectsStack from '../components/ProjectsStack';
 import OrganizationNavMenu from "../components/OrganizationNavMenu";
 import notifyWithToast from "../utils/toast";
 import SearchBar from "../components/SearchBar";
+import { fabStyle } from "../styles/styles";
 
 const OrganizationProjects = () => {
     const  { id } = useParams();
@@ -91,11 +92,19 @@ const OrganizationProjects = () => {
                         Projects
                     </Typography>
                 }
-            >
-                <OrganizationNavMenu organization_id={id}/>
+            >   
+                <Box 
+                    display="flex"
+                    flexDirection="column"
+                    justifyContent="center"
+                    alignItems="center"
+                >
+                    <OrganizationNavMenu organization_id={id}/>
+                </Box>
             </TitleBar>
             <Box display="flex" 
-                justifyContent="flex-end" m={1}
+                justifyContent="flex-end" 
+                mb={1}
                 rowGap={1}
                 columnGap={1}
             >
@@ -105,24 +114,20 @@ const OrganizationProjects = () => {
                 />
             {
                 role === 'Admin' &&
-                    <Box 
-                        display="flex"
-                        flexDirection="row"
-                        justifyContent="flex-end"
-                        alignItems="center"
+                    <Fab
+                        color="primary"
+                        aria-label="add"
+                        size="medium"
+                        onClick={() => {navigate(`/organization/${id}/add-project`)}}
+                        sx={fabStyle}
                     >
-                    <Button variant="contained" onClick={() => {navigate(`/organization/${id}/add-project`)}}
-                    size="small"
-                    startIcon={<AddRoundedIcon fontSize="small"/>}
-                    >
-                        Project
-                    </Button>
-                    </Box>
+                        <AddRoundedIcon />
+                    </Fab>
             }
             </Box>
             <Grid  
                 container 
-                spacing={3}
+                spacing={2}
             >
                 <Grid item xs={12} lg={4}>
                     <ProjectsStack title="New Projects" projects={newProjects} />

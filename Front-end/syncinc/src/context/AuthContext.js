@@ -10,15 +10,17 @@ import axios from 'axios';
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
-    let [isStarting, setIsStarting] = useState(true); // to call updateToken() on start
-    let [authTokens, setAuthTokens] = useState(() => 
+    const [isStarting, setIsStarting] = useState(true); // to call updateToken() on start
+    const [authTokens, setAuthTokens] = useState(() => 
             localStorage.getItem('authTokens') 
             ? JSON.parse(localStorage.getItem('authTokens')) 
             : null
         );
-    let [user, setUser] = useState(
+    const [user, setUser] = useState(
         () => authTokens ? jwt_decode(authTokens.access) : null
     );
+    
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     
     const {setLoading} = useLoading();
 
@@ -50,10 +52,12 @@ const AuthProvider = ({ children }) => {
                 setAuthTokens(data);
                 setUser(jwt_decode(data?.access)); // decode the JWT token
                 localStorage.setItem('authTokens', JSON.stringify(data));
+                setIsLoggedIn(true);
                 navigate('/dashboard');
             }
         } catch (error) {
             navigate('/login');
+            setIsLoggedIn(false);
             notifyWithToast("error", error.response?.data?.message);
         }
 
@@ -64,6 +68,7 @@ const AuthProvider = ({ children }) => {
         setAuthTokens(null);
         setUser(null);
         localStorage.removeItem('authTokens');
+        setIsLoggedIn(false);
         navigate('/login');
     }
 
@@ -89,6 +94,7 @@ const AuthProvider = ({ children }) => {
                     setAuthTokens(data);
                     localStorage.setItem('authTokens', JSON.stringify(data));
                     setUser(jwt_decode(data.access));
+                    setIsLoggedIn(true);
                 } 
             } catch (error) {
                 console.log("Error refreshing token");
@@ -100,9 +106,10 @@ const AuthProvider = ({ children }) => {
     let contextData = {
         authTokens: authTokens,
         user: user,
+        isLoggedIn: isLoggedIn,
         setUser: setUser,
         loginUser: loginUser,
-        logoutUser: logoutUser
+        logoutUser: logoutUser,
     }
 
     useLayoutEffect(() => {
