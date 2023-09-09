@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import IconButton from '@mui/material/IconButton';
 import Badge from '@mui/material/Badge';
@@ -30,21 +30,29 @@ const NotificationMenu = () => {
     
     const navigate = useNavigate();
     const {chatSocket, notifications, setNotifications} = useContext(SocketContext)
-    const [showNotifications, setShowNotifications] = useState(notifications);
+    const [newNotifications, setNewNotifications] = useState([]);
     console.log('chatSocket:', chatSocket)
+
+    useEffect(() => {
+        console.log('notifications:', notifications)
+        const unreadNotifications = notifications.filter(notification => notification.read === false);
+        console.log('unreadNotifications:', unreadNotifications)
+        setNewNotifications(unreadNotifications);
+    }, [notifications]);
     const handleOpenNotificationMenu = (event) => {
         if (notifications.length > 0) {
-            setShowNotifications(notifications);
             const notificationData = notifications.map(notification => ({
                 id: notification.id,
                 status: 'read'
             }));
             console.log(notificationData)
             chatSocket.send(JSON.stringify(notificationData));
-            setNotifications([]);
+            notifications.forEach(notification => {
+                notification.read = true;
+            });
+            setNewNotifications([]);
             console.log('handleOpenNotificationMenu')
             setAnchorElNotification(event.currentTarget);
-            
         }
     };
 
@@ -53,33 +61,29 @@ const NotificationMenu = () => {
         console.log('handleCloseNotificationMenu')
     };
 
-    const handleNotification = (type) => {
+    const handleNotification = (attribute) => {
         handleCloseNotificationMenu();
-        if(type === 'org_invite') {
+        console.log(attribute)
+        if(attribute === 'org_invite') {
+            console.log('org_invite')
             navigate('/invites');
-        } else if(type === 'org_invite_accept') {
-            navigate('/organizations');
+            navigate(0)
+        } else if(attribute.startsWith('org_invite_ac')) {
+            const orgId = attribute.split('_')[2];
+            navigate('/organization/' + orgId + '/employees');
+            navigate(0);
+        } else if(attribute.startsWith('task_assigned')) {
+            const taskId = attribute.split('_')[2];
+            navigate('/task/' + taskId);
+            navigate(0);
         }
     };
-
-
-    // dummy notifications
-    // let notifications = [
-    //     {
-    //         id: 1,
-    //         type: "Linked",
-    //         description: user?.username + " has invited you to join SyncInc.",
-    //         sender: user,
-    //         link: "/invites",
-    //     }
-    // ]
-    console.log('Notifications:', notifications)
 
     return (
         <>
             <IconButton onClick={handleOpenNotificationMenu} color="inherit">
             <StyledBadge color="primary" 
-                badgeContent={notifications.length} max={9}>
+                badgeContent={newNotifications.length} max={9}>
                 <NotificationsIcon
                     fontSize="medium"
                 />
@@ -105,7 +109,7 @@ const NotificationMenu = () => {
                     {notifications?.map((notification, idx) => (
                         <MenuItem
                             key={`notification-${idx}`}
-                            onClick={ () => {handleNotification(notification.type)} }
+                            onClick={ () => {handleNotification(notification.attribute)} }
                         >
                             <NotificationCard notification={ notification } />
                         </MenuItem>

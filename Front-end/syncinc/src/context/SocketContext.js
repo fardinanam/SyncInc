@@ -39,12 +39,14 @@ const SocketProvider = ({ children }) => {
 
     // useEffect(() => {
     //     if (user !== null) {
+    //         let url = `ws://127.0.0.1:8000/ws/socket_apps/${user?.username}/`
     //         const chatSocket = new WebSocket(url)
     //         setChatSocket(chatSocket)
     //         getUnreadNotifications()
     //         console.log('Chat Socket:', chatSocket)
     //     } else {
     //         setChatSocket(null)
+    //         setNotifications([])
     //         console.log('Chat Socket:', chatSocket)
     //     }
     //  }, [user]);
@@ -63,11 +65,8 @@ const SocketProvider = ({ children }) => {
             console.log('Chat Socket:', chatSocket)
         }
      }, []);
-    // chatSocket.onopen = (event) => {
-    //     chatSocket.send(JSON.stringify({'data': 'Hello World'}));
-    // };
     
-
+    
     if(chatSocket !== null) {
         chatSocket.onmessage = function(e){
             let data = JSON.parse(e.data)

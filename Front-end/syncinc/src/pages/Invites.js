@@ -14,7 +14,7 @@ import UserInfo from "../components/UserInfo";
 
 
 const Invites = (props) => {
-
+    console.log("Invites")
     const { authTokens } = useContext(AuthContext);
     const { id }= useParams();
     const { setLoading } = useLoading();

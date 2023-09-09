@@ -11,12 +11,12 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from channels.db import database_sync_to_async
 
-def notify_user(sender, receiver, type, message):
+def notify_user(sender, receiver, attribute, message):
     
     notification = Notification.objects.create(
             sender = sender,
             receiver = receiver,
-            type = type,
+            attribute = attribute,
             message = message
     )
     receiver_name = receiver.username
@@ -452,11 +452,11 @@ def invite_employee(request, organization_id):
         invitation.save()
         data = EmployeeSerializer(employee).data
         
-        type = "organization_invite"
+        attribute = 'org_invite'
         message = user.username +" has invited you to join " + organization.name + " organization"
        
         
-        notify_user(user, employee, type, message)
+        notify_user(user, employee, attribute, message)
         
         return Response({
             'message': f'Invitation sent successfully to the {employee.name}',
@@ -527,8 +527,8 @@ def accept_invite(request, invitation_id):
         
         invited_by = invitation.invited_by
         message = username + " accepted your invitation to join " + organization.name + " organization"
-        type = "organization_invite_accepted"
-        notify_user(user, invited_by, type, message)
+        attribute = 'org_invite_accept_'+str(organization.id)
+        notify_user(user, invited_by, attribute, message)
 
         return Response({
             'message': f'Invite accepted successfully',
@@ -869,8 +869,8 @@ def assign_user_task(request):
         serializer = GetUserTaskSerializer(task)
 
         message = "You are assigned a new task " + task.name + " in project "+ task.project.name
-        type = "task_assignement"
-        notify_user(user, assignee, type, message)
+        attribute = 'task_assigned_'+str(task.id)
+        notify_user(user, assignee, attribute, message)
 
         return Response({
             'message': 'Task assigned successfully',
@@ -1193,10 +1193,10 @@ def get_user_notifications(request):
         username = get_data_from_token(request, 'username')
         user = User.objects.get(username=username)
         
-        notifications = Notification.objects.filter(receiver=user, read=False)
+        notifications = Notification.objects.filter(receiver=user)
         serializer = NotificationSerializer(notifications, many=True)
         return Response({
-            'message': 'Unread notifications fetched successfully',
+            'message': 'User notifications fetched successfully',
             'data': serializer.data
         }, status=status.HTTP_200_OK)
     
