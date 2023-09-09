@@ -45,7 +45,8 @@ const NotificationMenu = () => {
                 id: notification.id,
                 status: 'read'
             }));
-            chatSocket.send(JSON.stringify(notificationData));
+            
+            chatSocket?.send(JSON.stringify(notificationData));
             
             setNewNotifications([]);
             setAnchorElNotification(event.currentTarget);
