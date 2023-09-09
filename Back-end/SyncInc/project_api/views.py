@@ -1110,6 +1110,12 @@ def submit_user_task(request, task_id):
         serializer.save()
         
         serializer = GetUserTaskSerializer(task, context={'user': user})
+        
+        project_leader = task.project.project_leader
+        message = user.username + " submitted " + task.name 
+        type = 'task'
+        notify_user(user, project_leader, type, task.id, message)
+
         return Response({
             'message': 'Task submitted successfully',
             'data': serializer.data
@@ -1144,6 +1150,11 @@ def update_user_task_status(request, task_id):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         
+        assignee = task.assignee
+        message = user.username + " has reviewed your submission of task " + task.name
+        type = 'task'
+        notify_user(user, assignee, type, task.id, message)
+
         return Response({
             'message': 'Task status updated successfully',
             'data': serializer.data
@@ -1177,6 +1188,11 @@ def update_user_task_rating(request, task_id):
         serializer = UpdateUserTaskRatingSerializer(data=request.data, instance=task, context={'user': user})
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        assignee = task.assignee
+        message = user.username + " has rated your submission of task " + task.name
+        type = 'task'
+        notify_user(user, assignee, type, task.id, message)
         
         print("serializer saved", serializer.data)
         return Response({
