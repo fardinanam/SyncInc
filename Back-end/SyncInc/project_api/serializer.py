@@ -607,7 +607,7 @@ class NotificationSerializer(serializers.ModelSerializer):
     sender = BasicUserInfoSerializer()
     class Meta:
         model = Notification
-        fields = ['id', 'sender', 'type', 'message']
+        fields = ['id', 'sender', 'attribute', 'message', 'read']
     
 class UpdateProjectSerializer(serializers.ModelSerializer):
     class Meta:
