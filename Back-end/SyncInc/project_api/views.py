@@ -1112,7 +1112,7 @@ def submit_user_task(request, task_id):
         serializer = GetUserTaskSerializer(task, context={'user': user})
         
         project_leader = task.project.project_leader
-        message = user.username + " submitted " + task.name 
+        message = user.username + " submitted task " + task.name 
         type = 'task'
         notify_user(user, project_leader, type, task.id, message)
 
