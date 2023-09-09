@@ -7,8 +7,9 @@ import MenuItem from '@mui/material/MenuItem';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AuthContext from '../context/AuthContext';
 import NotificationCard from './NotificationCard';
-import { Stack } from '@mui/material';
-
+import { ListItem, Popover, Stack, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import {blue} from '@mui/material/colors';
 import SocketContext from '../context/SocketContext';
 
 import { styled } from '@mui/material/styles';
@@ -26,6 +27,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 
 const NotificationMenu = () => {
     let {user} = useContext(AuthContext);
+    const theme = useTheme();
     const [anchorElNotification, setAnchorElNotification] = useState(null);
     
     const navigate = useNavigate();
@@ -44,9 +46,7 @@ const NotificationMenu = () => {
                 status: 'read'
             }));
             chatSocket.send(JSON.stringify(notificationData));
-            notifications.forEach(notification => {
-                notification.read = true;
-            });
+            
             setNewNotifications([]);
             setAnchorElNotification(event.currentTarget);
         }
@@ -54,6 +54,10 @@ const NotificationMenu = () => {
 
     const handleCloseNotificationMenu = () => {
         setAnchorElNotification(null);
+
+        notifications.forEach(notification => {
+            notification.read = true;
+        });
     };
 
     const handleNotification = (type, attributeId) => {
@@ -85,8 +89,13 @@ const NotificationMenu = () => {
                 />
             </StyledBadge>
             </IconButton>
-            <Menu
-                sx={{ mt: '45px' }}
+            <Popover
+                sx={{ 
+                    mt: '45px', 
+                    width: '25rem',
+                    maxHeight: '40rem', 
+                    padding: '0.5rem !important',
+                }}
                 id="menu-appbar"
                 anchorEl={anchorElNotification}
                 anchorOrigin={{
@@ -101,17 +110,46 @@ const NotificationMenu = () => {
                 open={Boolean(anchorElNotification)}
                 onClose={handleCloseNotificationMenu}
             >
-                <Stack justifyContent="center" spacing={1}>
+                <Stack 
+                    direction="row"
+                    justifyContent="flex-start"
+                    alignItems="center"
+                    spacing={1}
+                    padding={2}
+                >
+                    <NotificationsIcon fontSize='large' />
+                    <Typography
+                        variant="h6"
+                        sx={{
+                            fontWeight: 'bold',
+                        }}
+                    >
+                        Notifications
+                    </Typography>
+                </Stack>
+                <Stack justifyContent="center" spacing={1}
+                    width="inherit"
+                >
                     {notifications?.map((notification, idx) => (
-                        <MenuItem
+                        <ListItem
                             key={`notification-${idx}`}
+                            
+                            sx={{
+                                cursor: 'pointer',
+                                '&:hover': {
+                                    backgroundColor: theme.palette.action.hover,
+                                },
+
+                                backgroundColor: notification.read ? 'inherit' : theme.palette.mode === 'dark' ? blue[900] : blue[100],
+                            }}
+
                             onClick={ () => {handleNotification(notification.type, notification.attribute_id)} }
                         >
                             <NotificationCard notification={ notification } />
-                        </MenuItem>
+                        </ListItem>
                     ))}
                 </Stack>
-            </Menu>
+            </Popover>
         </>
     )
 }

@@ -14,7 +14,7 @@ const ContributionGraph = ({ contributions }) => {
     useEffect(() => {
         const contributionsList = contributions.map((contribution) => {
             if (contribution.end_time) {
-                const days = 365 - dayjs().diff(contribution.end_time, 'day') - (7 - currentDayInWeek % 7) - 1;
+                const days = 365 - (dayjs().day() -  dayjs(contribution.end_time).day()) - (7 - currentDayInWeek % 7);
                 const level = contribution.status === 'Completed' ? 2 : -1;
                 return {
                     days: days,
@@ -22,11 +22,11 @@ const ContributionGraph = ({ contributions }) => {
                 }
             }
         });
-
+        
         const squares = document.querySelector('.squares');
         squares.innerHTML = '';
-        const currentDay = 365 - (7 - currentDayInWeek % 7);
-        for (var i = 1; i < 365; i++) {
+        const currentDay = 365 - (7 - currentDayInWeek % 7) + 1;
+        for (var i = 1; i < 366; i++) {
             if (i === currentDay) {
                 break;
             }

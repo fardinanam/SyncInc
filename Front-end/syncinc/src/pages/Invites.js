@@ -11,9 +11,12 @@ import Paper from '@mui/material/Paper';
 import { useLoading } from "../context/LoadingContext";
 import notifyWithToast from "../utils/toast";
 import UserInfo from "../components/UserInfo";
+import { useTheme } from "@mui/material/styles";
 
 
 const Invites = (props) => {
+    const theme = useTheme();   
+    const mainColor = theme.palette.main[theme.palette.mode];
     console.log("Invites")
     const { authTokens } = useContext(AuthContext);
     const { id }= useParams();
@@ -106,21 +109,25 @@ const Invites = (props) => {
                     marginTop: '1rem',
                     borderRadius: '0.5rem',
                     padding: '0.5rem',
+                    backgroundColor: 'inherit',
                 }} 
                 elevation={0}
             >   {invites?.length > 0 ? 
                 <Stack
-                    rowGap={1}
-                    columnGap={1}
                     flexDirection="column"
+                    backgroundColor="inherit"
+                    spacing={1}
                 >
                     {invites?.map((invite) => (
                     <Stack
                         flexDirection="row"
                         justifyContent="space-between"
                         key={invite.id}
-                        columnGap={1}
-                        rowGap={1}
+                        p={1}
+                        sx={{
+                            backgroundColor: mainColor,
+                            borderRadius: '0.5rem',
+                        }}
                     >   
                         <Box
                             display="flex"
