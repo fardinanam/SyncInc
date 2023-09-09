@@ -39,7 +39,7 @@ const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         if (isLoggedIn) {
-            let url = `ws://${baseUrl}/ws/socket_apps/${user?.username}/`
+            let url = `wss://${baseUrl}/ws/socket_apps/${user?.username}/`
             const chatSocket = new WebSocket(url)
             setChatSocket(chatSocket)
             getUserNotifications()
@@ -53,7 +53,7 @@ const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         if (isLoggedIn) {
-            let url = `ws://127.0.0.1:8000/ws/socket_apps/${user?.username}/`
+            let url = `wss://${baseUrl}/ws/socket_apps/${user?.username}/`
             const chatSocket = new WebSocket(url)
             setChatSocket(chatSocket)
             getUserNotifications()
