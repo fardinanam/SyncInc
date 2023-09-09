@@ -38,7 +38,6 @@ class LoginView(APIView):
 
                 # refresh = RefreshToken.for_user(user)
                 refresh = CustomTokenObtainPairSerializer.get_token(user)
-                print(refresh.access_token)
 
                 return Response({
                     'refresh': str(refresh),
