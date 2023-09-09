@@ -26,6 +26,7 @@ import OrganizationVendors from "./pages/OrganizationVendors";
 import TaskDetails from "./pages/TaskDetails";
 import Invites from "./pages/Invites";
 import { SocketProvider } from "./context/SocketContext";
+import OrganizationDetails from "./pages/OrganizationDetails";
 
 function App() {
 
@@ -51,10 +52,10 @@ function App() {
                                             <Route path="/dashboard" element={<Home />} exact />
                                             <Route path="/projects" element={<Projects />} exact />
                                             <Route path="/organizations" element={<Organizations />} exact />
-                                            
+                                            <Route path="/organization/:id" element={<OrganizationDetails />} exact />
                                         
-                                            <Route path="/organization/:id/projects" element={<OrganizationProjects />} exact />
-                                            <Route path="/organization/:id/employees" element={<OrganizationEmployees />} exact />
+                                            {/* <Route path="/organization/:id/projects" element={<OrganizationProjects />} exact /> */}
+                                            {/* <Route path="/organization/:id/employees" element={<OrganizationEmployees />} exact /> */}
                                             <Route path="/organization/:id/vendors" element={<OrganizationVendors />} exact />
                                             
                                             

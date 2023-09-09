@@ -48,4 +48,6 @@ urlpatterns = [
     path('get_user_contributions/', views.get_user_contributions, name='user_contributions'),
     path('delete_user_task/<int:task_id>/', views.delete_user_task, name='delete_task'),
     path('delete_project/<int:project_id>/', views.delete_project, name='delete_project'),
+    path('delete_organization/<int:organization_id>/', views.delete_organization, name='delete_organization'),
+    path('get_organization_details/<int:organization_id>/', views.get_organization_details, name='get_organization_details'),
 ]

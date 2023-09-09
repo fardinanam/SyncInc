@@ -126,7 +126,7 @@ const Organizations = () => {
                             title={organization.name}
                             count={organization.num_projects}
                             name= {organization.num_projects === 1 ? "Project" : "Projects"}
-                            onClick={() => navigate(`/organization/${organization.id}/projects` ) }  
+                            onClick={() => navigate(`/organization/${organization.id}` ) }  
                         >
                             {organization?.role && organization.role.toLowerCase() === "admin"
                                 ? <AdminPanelSettingsRoundedIcon fontSize='large' color='success' />

@@ -3,11 +3,8 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { isValidEmail, isValidNumber } from "../utils/validators";
 import { baseUrl } from "../utils/config";
 import AuthContext from '../context/AuthContext';
 import axios from "axios";
@@ -15,7 +12,6 @@ import AddItemLayout from "../components/AddItemLayout";
 import notifyWithToast from "../utils/toast";
 import { useLoading } from "../context/LoadingContext";
 import { useState, useEffect } from "react";
-import ErrorPage from "./ErrorPage";
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 
 const AddProject = () => {
@@ -87,72 +83,67 @@ const AddProject = () => {
 
     };
     {
-        // if(role !== "Admin") {
-        //     {console.log(role)}
-        //     return <ErrorPage />
-        // } else {
-            return(
-                <AddItemLayout
-                    title="Add Project"
-                    onClose={() => navigate(`/organization/${id}/projects`)}
+        return(
+            <AddItemLayout
+                title="Add Project"
+                onClose={() => navigate(`/organization/${id}`)}
+            >
+                <Grid container
+                        spacing={2}
+                        component="form"
+                        onSubmit={handleSubmit}
                 >
-                    <Grid container
-                            spacing={2}
-                            component="form"
-                            onSubmit={handleSubmit}
-                    >
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                name="project_name"
-                                label="Project Name"
-                                required
-                                fullWidth
-                                id="project_name"
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                name="client_name"
-                                label="Client Name"
-                                required
-                                fullWidth
-                                id="client_name"
-                            />
-                        </Grid>
-                        <Grid item sm={12}>
-                            <TextField
-                                name="description"
-                                label="Description"
-                                required
-                                fullWidth
-                                multiline
-                                rows={10}
-                                id="description"
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={12}>
-                            <Box 
-                                sx={{
-                                    display: 'flex',
-                                    justifyContent: 'end',
-                                }}
-                            >
-                                <Button 
-                                    variant="contained" 
-                                    size="small" 
-                                    color="primary" 
-                                    type="submit"
-                                    startIcon={<SaveRoundedIcon />}
-                                >
-                                    Save
-                                </Button>
-                                {/* <Button variant="contained" color="secondary">Cancel</Button> */}
-                            </Box>
-                        </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            name="project_name"
+                            label="Project Name"
+                            required
+                            fullWidth
+                            id="project_name"
+                        />
                     </Grid>
-                </AddItemLayout>
-            )
-       // }
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            name="client_name"
+                            label="Client Name"
+                            required
+                            fullWidth
+                            id="client_name"
+                        />
+                    </Grid>
+                    <Grid item sm={12}>
+                        <TextField
+                            name="description"
+                            label="Description"
+                            required
+                            fullWidth
+                            multiline
+                            rows={10}
+                            id="description"
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={12}>
+                        <Box 
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'end',
+                            }}
+                        >
+                            <Button 
+                                variant="contained" 
+                                size="small" 
+                                color="primary" 
+                                type="submit"
+                                startIcon={<SaveRoundedIcon />}
+                            >
+                                Save
+                            </Button>
+                            {/* <Button variant="contained" color="secondary">Cancel</Button> */}
+                        </Box>
+                    </Grid>
+                </Grid>
+            </AddItemLayout>
+        )
     }
     
 }

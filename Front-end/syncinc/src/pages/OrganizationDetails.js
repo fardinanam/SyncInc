@@ -1,36 +1,77 @@
-import { useContext, useEffect, useState } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import axios from "axios";
-
-import { Box, Typography, Button, Grid } from "@mui/material";
-import MainLayout from "../components/MainLayout";
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import WorkIcon from '@mui/icons-material/Work';
-
-
-import SummaryCard from "../components/SummaryCard";
-import AuthContext from '../context/AuthContext';
-import { baseUrl } from "../utils/config";
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import ToggleButton from '@mui/material/ToggleButton';
-
-import OrganizationMembers from "./OrganizationEmployees";
+import { useState, useContext, useEffect } from "react";
+import TitleBar from "../components/TitleBar";
+import OrganizationNavMenu from "../components/OrganizationNavMenu";
+import { useParams } from "react-router-dom";
+import { Tab, Tabs, Typography, Box, SpeedDial, Stack } from "@mui/material";
+import SearchBar from "../components/SearchBar";
+import DescriptionIcon from '@mui/icons-material/Description';
+import SupervisedUserCircleIcon from '@mui/icons-material/SupervisedUserCircle';
 import OrganizationProjects from "./OrganizationProjects";
+import OrganizationEmployees from "./OrganizationEmployees";
+import { useLoading } from "../context/LoadingContext";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { baseUrl } from "../utils/config";
+import notifyWithToast from "../utils/toast";
+import AuthContext from "../context/AuthContext";
+import { fabStyle } from "../styles/styles";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import SpeedDialAction from "@mui/material/SpeedDialAction";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import PersonAddRoundedIcon from "@mui/icons-material/PersonAddRounded";
 import { AddMemberModal } from "../components/Modals";
+import UserInfo from "../components/UserInfo";
+import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
+import ConfirmDialog from "../components/Dialogs";
 
-const OrganizationDetails = (props) => {
-    const { authTokens } = useContext(AuthContext);
-    const navigate = useNavigate();
+
+const OrganizationDetails = () => {
     const { id } = useParams();
+    const [tab, setTab] = useState("Projects");
+    const [organizationName, setOrganizationName] = useState();
+    const [role, setRole] = useState();
+    const [projects, setProjects] = useState([]);
+    const [employees, setEmployees] = useState([]);
+    const [admin, setAdmin] = useState();
+    const { setLoading } = useLoading();
+    const navigate = useNavigate();
+    const { authTokens } = useContext(AuthContext);
+    const [editSpeedDialOpen, setEditSpeedDialOpen] = useState(false);
+    const [addEmployeeModalOpen, setAddEmployeeModalOpen] = useState(false);
+    const [searchedText, setSearchedText] = useState("");
+    const [isDeleteOrgDialogOpen, setIsDeleteOrgDialogOpen] = useState(false);
 
-    const [selectedValue, setSelectedValue] = useState('projects');
-    const [organization, setOrganization] = useState();
-
-    const fetchOrganizationData = async () => {
+    const fetchOrganizationDetails = async () => {
+        setLoading(true);
         try {
             const response = await axios.get(
-                `${baseUrl}get_organizations/${id}`,  
+                `${baseUrl}get_organization_details/${id}/`,
+                {
+                    headers: {
+                        'Authorization': 'Bearer ' + authTokens?.access,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                }
+
+            )
+
+            setOrganizationName(response.data?.data?.name);
+            setRole(response.data?.data?.role)
+            setAdmin(response.data?.data?.admin);
+        } catch (error) {
+            navigate(-1);
+            notifyWithToast("error", error.response.data.message);
+        }
+        setLoading(false);
+    }
+
+
+    const fetchOrganizationProjectDetails = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(
+                `${baseUrl}organization_projects/${id}/`,  
                 {
                     headers: {
                         'Authorization': 'Bearer ' + authTokens?.access,
@@ -40,115 +81,232 @@ const OrganizationDetails = (props) => {
                 }  
 
             )
-            
-            setOrganization(response.data?.data);
-            
+
+            setProjects(response.data?.data?.projects);
         } catch (error) {
-            console.log(error.response?.data?.message);
+            navigate(-1);
+            notifyWithToast("error", error.response.data.message);
         }
+        setLoading(false);
+    }
+
+    const fetchOrganizationEmployees = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(
+                `${baseUrl}organization_employees/${id}/`,  
+                {
+                    headers: {
+                        'Authorization': 'Bearer ' + authTokens?.access,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                }  
+
+            )
+
+            setEmployees(response.data.data.employees);
+            // setFilteredEmployees(response.data.data.employees)
+        } catch (error) {
+            console.log(error.response.data.message);
+        }
+        setLoading(false);
+
+    }
+
+    const handleDeleteOrganization = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.delete(
+                `${baseUrl}delete_organization/${id}/`,
+                {
+                    headers: {
+                        'Authorization': 'Bearer ' + authTokens?.access,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                }
+            )
+
+            if (response.status === 200) {
+                notifyWithToast("success", response.data.message);
+                navigate("/organizations");
+            }
+        } catch (error) {
+            notifyWithToast("error", error.response.data.message);
+        }
+        setLoading(false);
     }
 
     useEffect(() => {
-        fetchOrganizationData();
+        fetchOrganizationDetails();
+        fetchOrganizationProjectDetails();
+        fetchOrganizationEmployees();
     }, []);
 
-    const handleToggleChange = (event, newValue) => {
-        console.log("Something is happening")
-        if(newValue != null) {
-            setSelectedValue(newValue);
-        }
-    }
-
-    let [memberModalOpen, setMemberModalOpen] = useState(false);
-    const handleAddMemberModalOpen = () => {
-        console.log("handle Member modal open")
-        setMemberModalOpen(true);
-    }
-    const handleAddMemberModalClose = () => {
-        setMemberModalOpen(false);
-    }
     return (
         <>
-            <Grid 
-                container
-            >
-                <Grid 
-                    item
-                    display={'flex'}
-                    xs={12} md={4}
-                    alignItems={"center"}
-                    justifyContent={"flex-start"}
-                >
-                    <Typography
-                        variant='h5'
-                        sx={{ fontWeight: 'bold' }}
-                        flexGrow={1}
+            <TitleBar 
+                title={organizationName}
+                subtitleElement={
+                    <Typography variant="h7"
+                        fontWeight="bold"
+                        color="text.secondary"
                     >
-                        {organization?.name}
+                        {tab}
                     </Typography>
-                </Grid>
-                <Grid 
-                    item 
-                    display={'flex'}
-                    xs={12} md={4}
-                    alignItems={"center"}
-                    justifyContent={"center"}
+                }
+            >
+            <Stack direction="row"
+                flexWrap="wrap"
+                rowGap={1}
+                columnGap={1}
+                justifyContent="flex-end"
+            >
+                <Box 
+                    display="flex"
+                    flexDirection="column"
+                    alignItems="center"
+                    justifyContent="center"
                 >
-                    <ToggleButtonGroup  
-                        value={selectedValue}
-                        exclusive
-                        fullWidth
-                        size="small"
-                        onChange = {handleToggleChange}
-                        
-                    >
-                        <ToggleButton value="projects">
-                            <Typography
-                                variant='button'
-                                flexGrow={1}
-                            >
-                                projects
-                            </Typography>
-                        </ToggleButton>
-                        <ToggleButton value="members">
-                            <Typography
-                                variant='button'
-                                flexGrow={1}
-                            >
-                                members
-                            </Typography>
-                        </ToggleButton>
-                    </ToggleButtonGroup>
-                </Grid>
-                <Grid 
-                    item
-                    display={'flex'}
-                    xs={12} md={4}
-                    alignItems={'center'}
-                    justifyContent={'flex-end'}
+                <UserInfo
+                    sx={{
+                        width: '3rem',
+                        height: '3rem'
+                    }}
+                    userInfo={admin}
+                />
+                </Box>
+                <Stack 
+                    direction="column"
+                    justifyContent="center"
                 >
-                    <Button variant='contained' 
-                        size='small'
-                        onClick={() => selectedValue === 'projects'? 
-                        navigate(`/organization/${organization?.id}/add-project`) 
-                        : 
-                        handleAddMemberModalOpen()} 
-                        startIcon={<AddRoundedIcon fontSize="small"/>}
-                        >          
-                        {selectedValue === 'projects'? 'Project' : 'Member'}
-                    </Button>
-                    <AddMemberModal
-                        open={memberModalOpen}
-                        id={id}
-                        handleClose={handleAddMemberModalClose}
+                    <Typography fontWeight="light">
+                        Admin
+                    </Typography>
+                    <Typography variant="subtitle2">
+                        {admin?.name}
+                    </Typography>
+                </Stack>
+            </Stack>
+            </TitleBar>
+            <Box display="flex" 
+                justifyContent="space-between" 
+                mb={1}
+                rowGap={1}
+                columnGap={1}
+            >
+                <Tabs
+                    value={tab}
+                    indicatorColor="primary"
+                    textColor="primary"
+                    variant="scrollable"
+                    scrollButtons="auto"
+                    aria-label="scrollable auto tabs example"
+                    onChange={(event, newValue) => {
+                        setTab(newValue);
+                    }}
+                >
+                    <Tab 
+                        label="Projects" 
+                        icon={<DescriptionIcon />} 
+                        value={"Projects"} 
+                        iconPosition="start"
                     />
+                    <Tab 
+                        label="Employees" 
+                        icon={<SupervisedUserCircleIcon />} 
+                        value={"Employees"} 
+                        iconPosition="start"
+                    />
+                </Tabs>
+                <Box 
+                    display="flex"
+                    flexDirection="column"
+                    justifyContent="center"
+                    alignItems="flex-end"
+                >
+                    <SearchBar 
+                        placeholder={`Search ${tab}...`}
+                        onChange={(event) => setSearchedText(event.target.value)}
+                    />
+                </Box>
+                
+            </Box>
+            {
+                tab === "Projects" &&
+                <OrganizationProjects 
+                    projects={projects}
+                    role={role}
+                    search={searchedText}
+                />
+            }
+            {
+                tab === "Employees" &&
+                <OrganizationEmployees 
+                    employees={employees}
+                    search={searchedText}
+                />
+            }
 
-                </Grid>
-            
-            </Grid>
-            
+            {
+                role === 'Admin' &&
+                <Box>
+                    <SpeedDial
+                        ariaLabel="Organization Actions"
+                        sx={fabStyle}
+                        icon={<EditRoundedIcon />}
+                        onClose={() => setEditSpeedDialOpen(false)}
+                        onOpen={() => setEditSpeedDialOpen(true)}
+                        open={editSpeedDialOpen}
+                    >
+                        <SpeedDialAction
+                            key="Add Project"
+                            icon={<AddRoundedIcon />}
+                            tooltipTitle="Project"
+                            tooltipOpen
+                            onClick={() => navigate(`/organization/${id}/add-project`)}
+                        />
+                        <SpeedDialAction
+                            key="Add Employee"
+                            icon={<PersonAddRoundedIcon />}
+                            tooltipTitle="Employee"
+                            tooltipOpen
+                            onClick={() => setAddEmployeeModalOpen(true)}
+                        />
+                        {
+                            role === 'Admin' &&
+                            <SpeedDialAction
+                                key="Delete Organization"
+                                icon={<DeleteRoundedIcon />}
+                                tooltipTitle="Organization"
+                                tooltipOpen
+                                onClick={() => setIsDeleteOrgDialogOpen(true)}
+                            />
+                        }
+                    </SpeedDial>
+                    <AddMemberModal id={id} 
+                        memberType={'employee'}     
+                        open={addEmployeeModalOpen} 
+                        handleClose={()=>setAddEmployeeModalOpen(false)}
+                    />
+                </Box> 
+            }
+            {
+                role === 'Admin' &&
+                <ConfirmDialog
+                    open={isDeleteOrgDialogOpen}
+                    title="Delete Organization"
+                    helpText={`Are you sure you want to delete ${organizationName}? Deleting an organization will delete all its projects and employees and cannot be undone.`}
+                    actionType="Delete"
+                    confirmColor={"error"}
+                    confirmIcon={<DeleteRoundedIcon />}
+                    handleClose={() => setIsDeleteOrgDialogOpen(false)}
+                    handleConfirm={handleDeleteOrganization}
+                />
+            }
         </>
-    );
-};
+    )
+}
 
 export default OrganizationDetails;

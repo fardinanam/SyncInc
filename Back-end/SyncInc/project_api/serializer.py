@@ -12,10 +12,10 @@ class OrganizationSerializer(serializers.ModelSerializer):
     num_projects = serializers.SerializerMethodField()
     num_members = serializers.SerializerMethodField()
     role = serializers.SerializerMethodField(read_only=True)
-
+    admin = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Organization
-        fields = ['id', 'name', 'num_projects', 'num_members', 'role']
+        fields = ['id', 'name', 'num_projects', 'num_members', 'role', 'admin']
     
     def get_role(self, obj):
         if not self.context.get('user'):
@@ -32,6 +32,17 @@ class OrganizationSerializer(serializers.ModelSerializer):
     
     def get_num_members(self, obj):
         return obj.employees.count() + obj.vendors.count()
+    
+    def get_admin(self, obj):
+        admin = Designation.objects.filter(organization=obj, role='Admin').first().employee
+        if admin:
+            return {
+                'username': admin.username,
+                'email': admin.email,
+                'name': admin.first_name + ' ' + admin.last_name,
+                'profile_picture': admin.profile_picture
+            }
+        return None
     
     def validate(self, data):
         valid_data = super().validate(data)
