@@ -158,23 +158,21 @@ const Tasks = () => {
                             key={task.id}
                             onClick={() => navigate(`/task/${task.id}`)}
                         >
+                            <Tooltip title={task?.status}>
                             {
                                 task.status === 'Overdue' || task.status === 'Rejected' 
-                                ? <Tooltip title="Overdued or Rejected" >
+                                ? 
                                     <CancelIcon color="error" fontSize="large" /> 
-                                    </Tooltip>
                                 : task.status === 'Completed'
-                                ? <Tooltip title="Completed" >
+                                ?
                                     <CheckCircleIcon color="success" fontSize="large" />
-                                </Tooltip> 
                                 : task.status === 'Terminated' 
-                                ? <Tooltip title="Terminated" >
+                                ?
                                     <IndeterminateCheckBoxRoundedIcon color="error" fontSize="large" />
-                                </Tooltip> 
-                                : <Tooltip title="In Progress" >
+                                :
                                     <AdjustIcon color="success" fontSize="large" />
-                                </Tooltip>
                             }
+                            </Tooltip>
                         </SummaryCard>
                     )})
                 }

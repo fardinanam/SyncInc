@@ -106,7 +106,7 @@ const NotificationMenu = () => {
                 onClose={handleCloseNotificationMenu}
             >
                 <Stack justifyContent="center" spacing={1}>
-                    {notifications?.map((notification, idx) => (
+                    {showNotifications?.map((notification, idx) => (
                         <MenuItem
                             key={`notification-${idx}`}
                             onClick={ () => {handleNotification(notification.attribute)} }

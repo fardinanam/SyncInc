@@ -19,4 +19,10 @@ const modalStyle = {
     pb: 3,
 };
 
-export { InfoSectionStyle, modalStyle }
+const fabStyle = {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+}
+
+export { InfoSectionStyle, modalStyle, fabStyle }

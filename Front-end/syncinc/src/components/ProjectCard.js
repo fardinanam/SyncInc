@@ -41,7 +41,11 @@ const ProjectCard = ({name, client, description, children, roles, onClick, task_
             }
                 : onClick}
         >
-            <CardContent>
+            <CardContent
+                sx={{
+                    padding: '1rem !important',
+                }}
+            >
                 {children}
                 <Box 
                     display='flex'
@@ -49,7 +53,7 @@ const ProjectCard = ({name, client, description, children, roles, onClick, task_
                     flexDirection='row'
                 >
                 <Typography
-                    variant="h6"
+                    variant="h7"
                     fontWeight={'bold'}
                 >
                     {name && name}
@@ -81,6 +85,9 @@ const ProjectCard = ({name, client, description, children, roles, onClick, task_
                 </Box>
                 <Typography
                     color="text.secondary"
+                    sx={{
+                        fontSize: '0.9rem',
+                    }}
                 >
                     Client: {client}
                 </Typography>

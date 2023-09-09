@@ -25,6 +25,8 @@ import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import GradeRoundedIcon from '@mui/icons-material/GradeRounded';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
+import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
+import ConfirmDialog from "../components/Dialogs";
 
 const TaskDetails = () => {
     const taskId = useParams().id;
@@ -42,6 +44,7 @@ const TaskDetails = () => {
     const [isRejectTaskModalOpen, setIsRejectTaskModalOpen] = useState(false);
     const [isRateTaskModalOpen, setIsRateTaskModalOpen] = useState(false);
     const [isCreateNewVersionModalOpen, setIsCreateNewVersionModalOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     
     const [viewersReview, setViewersReview] = useState({});
     const [canEdit, setCanEdit] = useState(false);
@@ -97,6 +100,26 @@ const TaskDetails = () => {
         }
     }
 
+    const handleDeleteTask = async () => {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`
+            }
+        }
+
+        setLoading(true);
+        try {
+            const response = await axios.delete(`${baseUrl}delete_user_task/${taskId}/`, config);
+            notifyWithToast('success', 'Task deleted successfully');
+            setDeleteDialogOpen(false);
+            navigate(-1);
+        } catch (error) {   
+            notifyWithToast('error', 'Failed to delete task');
+        }
+        setLoading(false);
+    }
+
     const handleRateTaskModalClose = (updatedTask) => {
         setIsRateTaskModalOpen(false);
         if (updatedTask) {
@@ -128,6 +151,7 @@ const TaskDetails = () => {
         setIsCreateNewVersionModalOpen(false);
         if (updatedTask) {
             navigate("/task/" + updatedTask?.id);
+            navigate(0);
         }
     }
 
@@ -388,6 +412,23 @@ const TaskDetails = () => {
                         </Grid>
                     }
                     <Grid item xs={12} md={6}>
+                        {
+                            (task?.status === "Completed" ||
+                            task?.status === "Accepted" ||
+                            task?.status === "Rejected") ||
+                            task?.status === "Terminated" ?
+                            <StackField
+                                title="End Date"
+                                value={dayjs(task?.end_time).format("DD MMM, YYYY")}
+                            />
+                            :
+                            <StackField
+                                title="Deadline"
+                                value={dayjs(task?.deadline).format("DD MMM YYYY")}
+                            />
+                        }
+                    </Grid>
+                    <Grid item xs={12} md={6}>
                         <Box 
                             display="flex"
                             flexDirection="column"
@@ -405,23 +446,6 @@ const TaskDetails = () => {
                             </Box>
                             }
                         </Box>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                        {
-                            (task?.status === "Completed" ||
-                            task?.status === "Accepted" ||
-                            task?.status === "Rejected") ||
-                            task?.status === "Terminated" ?
-                            <StackField
-                                title="End Date"
-                                value={dayjs(task?.end_time).format("DD MMM, YYYY")}
-                            />
-                            :
-                            <StackField
-                                title="Deadline"
-                                value={dayjs(task?.deadline).format("DD MMM YYYY")}
-                            />
-                        }
                     </Grid>
                     <Grid item xs={12} md={6}>
                             <StackField
@@ -640,6 +664,8 @@ const TaskDetails = () => {
             <Box
                 display='flex'
                 justifyContent='flex-end'
+                columnGap={1}
+                rowGap={1}
             >
             {
                 canTerminate &&
@@ -681,7 +707,31 @@ const TaskDetails = () => {
                         projectId={task?.project?.id}
                     />
                 </>
-            }                  
+            }  
+            {
+                roles?.includes("Project Leader") &&
+                <>
+                    <Button
+                        variant="outlined"
+                        color="error"
+                        size="small"
+                        startIcon={<DeleteRoundedIcon />}
+                        onClick={() => setDeleteDialogOpen(true)}
+                    >
+                        Delete
+                    </Button>
+                    <ConfirmDialog
+                        title="Delete Task"
+                        helpText={`Are you sure you want to delete the task ${task?.name}?`}
+                        actionType="Delete"
+                        open={deleteDialogOpen}
+                        handleClose={() => setDeleteDialogOpen(false)}
+                        handleConfirm={handleDeleteTask}
+                        confirmIcon={<DeleteRoundedIcon />}
+                        confirmColor="error"
+                    />
+                </>
+            }        
             </Box>
         </Stack>
         </>

@@ -1356,3 +1356,66 @@ def get_user_projects_completed_task_percentage(request):
             'data': None
         }, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_user_task(request, task_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        # get all the tasks assigned to the user
+        task = UserTask.objects.get(id=task_id)
+
+        # check if the user is a project leader
+        if not task.project.project_leader or task.project.project_leader != user:
+            return Response({
+                'message': 'You are not authorized to delete this task',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        task.delete()
+        
+        return Response({
+            'message': 'Task deleted successfully',
+            'data': None
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_project(request, project_id):
+    try:
+        username = get_data_from_token(request, 'username')
+        user = User.objects.get(username=username)
+
+        # get all the tasks assigned to the user
+        project = Project.objects.get(id=project_id)
+
+        # check if the user is admin of the organization
+        designation = user.designations.filter(organization=project.organization).first()
+
+        if not designation or designation.role != 'Admin':
+            return Response({
+                'message': 'You are not authorized to delete this project',
+                'data': None
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        project.delete()
+        
+        return Response({
+            'message': 'Project deleted successfully',
+            'data': None
+        }, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        print(e)        
+        return Response({
+            'message': 'Something went wrong',
+            'data': None
+        }, status=status.HTTP_400_BAD_REQUEST)

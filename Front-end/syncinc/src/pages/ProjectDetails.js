@@ -5,7 +5,7 @@ import { baseUrl } from "../utils/config";
 import AuthContext from "../context/AuthContext";
 import notifyWithToast from "../utils/toast";
 import axios from "axios";
-import { Box, Button, Chip, CssBaseline, Grid, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Chip, CssBaseline, Grid, SpeedDial, SpeedDialAction, Stack, Typography } from "@mui/material";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import CollapsibleTaskTable from "../components/CollapsibleTaskTable";
 import { AddMemberModal, AddTaskModal, ConfirmProjectCompleteModal, EditProjectModal } from "../components/Modals";
@@ -18,6 +18,9 @@ import StatusChip from "../components/StatusChip";
 import dayjs from "dayjs";
 import { useTheme } from "@mui/material/styles";
 import ManageAccountsRoundedIcon from '@mui/icons-material/ManageAccountsRounded';
+import { fabStyle } from "../styles/styles";
+import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
+import ConfirmDialog from "../components/Dialogs";
 
 const ProjectDetails = () => {
     const theme = useTheme();
@@ -31,10 +34,13 @@ const ProjectDetails = () => {
     const [status, setStatus] = useState();
     const [roles, setRoles] = useState([]);
     const [openAssignProjectLeaderModal, setOpenAssignProjectLeaderModal] = useState(false);
+    const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
     const [isEditProjectModalOpen, setIsEditProjectModalOpen] = useState(false);
     const [canComplete, setCanComplete] = useState(false);
     const [canChangeProjectLeader, setCanChangeProjectLeader] = useState(false);
     const [isCompleteProjectModalOpen, setIsCompleteProjectModalOpen] = useState(false);
+    const [isDeleteProjectDialogOpen, setIsDeleteProjectDialogOpen] = useState(false);
+    const [speedDialOpen, setSpeedDialOpen] = useState(false);
 
 
     const fetchProjectDetails = async () => {
@@ -117,6 +123,41 @@ const ProjectDetails = () => {
             }));
         }
         setIsCompleteProjectModalOpen(false);
+    }
+
+    const handleAddTaskModalClose = (newTask) => {
+        setIsAddTaskModalOpen(false);
+        if (newTask) {
+            newTask["tags"] = newTask.tags_details;
+
+            setUserTasks(prevState => ([
+                ...prevState,
+                newTask
+            ]));
+        }
+    }
+
+    const handleDeleteProject = async () => {
+        const config = {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + authTokens?.access,
+            },
+        }
+
+        try {
+            let response = await axios.delete(
+                `${baseUrl}delete_project/${id}`,
+                config
+            )
+
+            if (response.status === 200) {
+                notifyWithToast("success", "Project deleted successfully");
+                navigate("/organization/" + project?.organization?.id + "/projects/");
+            }
+        } catch (error) {
+            notifyWithToast("error", error.response.data.message);
+        }
     }
 
     useEffect(() => {
@@ -203,24 +244,6 @@ const ProjectDetails = () => {
                                     @{project.project_leader?.username}
                                 </Typography>
                             </Stack>
-                            {
-                                canChangeProjectLeader &&
-                                <Box 
-                                    display="flex"
-                                    flexDirection="column"
-                                    alignItems="center"
-                                    justifyContent="center"
-                                >
-                                    <Button
-                                        size="small"
-                                        variant="outlined"
-                                        onClick={() => setOpenAssignProjectLeaderModal(true)}
-                                        startIcon={<ManageAccountsRoundedIcon fontSize="small"/>}
-                                    >
-                                        Change Leader
-                                    </Button>
-                                </Box>
-                            }
                         </> :
                         <>
                             {
@@ -250,140 +273,201 @@ const ProjectDetails = () => {
                             }
                         </>
                     }
-                    <AddMemberModal 
-                        id={id}
-                        memberType="project_leader"
-                        open={openAssignProjectLeaderModal}
-                        handleClose={handleProjectLeaderModalClose}
-                        title="Assign Project Leader"
-                    />
                     </Stack> 
 
                 </Box>
             </TitleBar>
-            <Box 
-                display="flex"
-                flexDirection="column"
-                sx={{
-                    borderRadius: "0.5rem",
-                    p: 2,
-                    backgroundColor: mainColor,
-                }}
+            <Stack
+                direction="column"
+                justifyContent="flex-start"
+                rowGap={1}
+                columnGap={1}
             >
-                <Box
-                    display={"flex"}
-                    
+                <Box 
+                    display="flex"
+                    flexDirection="column"
+                    rowGap={1}
+                    columnGap={1}
+                    sx={{
+                        borderRadius: "0.5rem",
+                        p: 2,
+                        backgroundColor: mainColor,
+                    }}
                 >
-                    <Typography
-                        fontWeight={"bold"}
-                        flexGrow={1}
-                        mb={1}
+                    <Box
+                        display={"flex"}
                     >
-                        Project Details
-                    </Typography>
-                    {roles.includes("Project Leader") && status !== "Completed" &&
-                    <>
-                        <Button 
-                            size="small"
-                            variant="outlined"
-                            endIcon={<EditRoundedIcon fontSize="small"/>}
-                            onClick={() => setIsEditProjectModalOpen(true)}
+                        <Typography
+                            fontWeight={"bold"}
+                            flexGrow={1}
+                            mb={1}
                         >
-                            Edit
-                        </Button>
-                        <EditProjectModal
-                            isOpen={isEditProjectModalOpen}
-                            onClose={handleEditProjectModalClose}
-                            project={project}
-                        />
-                        {canComplete &&
-                            <>
-                                <Button 
-                                    size="small"
-                                    variant="outlined"
-                                    color="success"
-                                    sx={{ ml: 1 }}
-                                    startIcon={<CheckRoundedIcon fontSize="small"/>}
-                                    onClick={() => setIsCompleteProjectModalOpen(true)}
-                                >
-                                    Mark As Completed
-                                </Button>
-                                <ConfirmProjectCompleteModal
-                                    isOpen={isCompleteProjectModalOpen}
-                                    onClose={handleCompleteProjectModalClose}
-                                    project={project}
+                            Project Details
+                        </Typography>
+                    </Box>
+                    <Grid
+                        container
+                        spacing={2}
+                    >
+                        <Grid item xs={12} md={6}>
+                            <StackField
+                                title="Project Name"
+                                value={project?.name}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <StackField
+                                title="Client Name"
+                                value={project?.client?.name}
+                            />
+                        </Grid>
+                        {
+                            status === "Completed" ?
+                            <Grid item xs={12} md={6}>
+                                <StackField
+                                    title="Completed On"
+                                    value={dayjs(project?.end_time).format("DD MMM, YYYY")}
                                 />
-                            </>
+                            </Grid>
+                            :
+                            <Grid item xs={12} md={6}>
+                                <StackField
+                                    title="Deadline"
+                                    value={project?.deadline ? dayjs(project?.deadline).format("DD MMM, YYYY") : "Not Set"}
+                                />
+                            </Grid>
                         }
-                    </>
-                    }
-                </Box>
-                <Grid
-                    container
-                    spacing={2}
-                >
-                    <Grid item xs={12} md={6}>
-                        <StackField
-                            title="Project Name"
-                            value={project?.name}
-                        />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                        <StackField
-                            title="Client Name"
-                            value={project?.client?.name}
-                        />
-                    </Grid>
-                    {
-                        status === "Completed" ?
                         <Grid item xs={12} md={6}>
-                            <StackField
-                                title="Completed On"
-                                value={dayjs(project?.end_time).format("DD MMM, YYYY")}
-                            />
-                        </Grid>
-                        :
-                        <Grid item xs={12} md={6}>
-                            <StackField
-                                title="Deadline"
-                                value={project?.deadline ? dayjs(project?.deadline).format("DD MMM, YYYY") : "Not Set"}
-                            />
-                        </Grid>
-                    }
-                    <Grid item xs={12} md={6}>
-                        <Box 
-                            display="flex"
-                            flexDirection="column"
-                            justifyContent="center"
-                        >
-                            <Typography fontSize="small" fontWeight="light">
-                                Status
-                            </Typography>
-                            <Box display="flex"
-                                flexDirection="row"
-                                justifyContent="flex-start"
+                            <Box 
+                                display="flex"
+                                flexDirection="column"
+                                justifyContent="center"
                             >
-                                <StatusChip status={status} />
+                                <Typography fontSize="small" fontWeight="light">
+                                    Status
+                                </Typography>
+                                <Box display="flex"
+                                    flexDirection="row"
+                                    justifyContent="flex-start"
+                                >
+                                    <StatusChip status={status} />
+                                </Box>
                             </Box>
-                        </Box>
-                    </Grid>   
-                    <Grid item xs={12}>
-                        <StackField
-                            title="Description"
-                            value={project?.description}
-                        />
+                        </Grid>   
+                        <Grid item xs={12}>
+                            <StackField
+                                title="Description"
+                                value={project?.description}
+                            />
+                        </Grid>
                     </Grid>
-                </Grid>
+                </Box>
+                
+                <CollapsibleTaskTable 
+                    title="User Tasks"
+                    initialTasks={userTasks}
+                    roles={roles}
+                    organization_id={project?.organization?.id}
+                />
+            </Stack>
+            { !(roles?.includes("Employee") && roles?.length === 1) &&
+            <Box>
+                <SpeedDial
+                    ariaLabel="edit project"
+                    sx={fabStyle}
+                    icon={<EditRoundedIcon />}
+                    onClose={() => setSpeedDialOpen(false)}
+                    onOpen={() => setSpeedDialOpen(true)}
+                    open={speedDialOpen}
+                >
+                    {
+                        canChangeProjectLeader &&
+                        <SpeedDialAction
+                            key="Change Project Leader"
+                            icon={<ManageAccountsRoundedIcon />}
+                            tooltipTitle="Leader"
+                            tooltipOpen
+                            onClick={() => setOpenAssignProjectLeaderModal(true)}
+                        />
+                    }
+                    {
+                        canComplete &&
+                        <SpeedDialAction
+                            key="Mark As Completed"
+                            icon={<CheckRoundedIcon />}
+                            tooltipTitle="Mark"
+                            tooltipOpen
+                            onClick={() => setIsCompleteProjectModalOpen(true)}
+                        />
+                    }
+                    {
+                        roles.includes("Project Leader") && status !== "Completed" &&
+                        <SpeedDialAction
+                            key="Edit Project"
+                            icon={<EditRoundedIcon />}
+                            tooltipTitle="Edit"
+                            tooltipOpen
+                            onClick={() => setIsEditProjectModalOpen(true)}
+                        />
+                    }
+                    {
+                        !(project?.end_time && status === "Completed") && 
+                        roles.includes("Project Leader") &&
+                        <SpeedDialAction
+                            key="Add Task"
+                            icon={<AddRoundedIcon />}
+                            tooltipTitle="Task"
+                            tooltipOpen
+                            onClick={() => setIsAddTaskModalOpen(true)}
+                        />
+                    }
+                    {
+                        roles.includes("Admin") &&
+                        <SpeedDialAction
+                            key="Delete Project"
+                            icon={<DeleteRoundedIcon />}
+                            tooltipTitle="Project"
+                            tooltipOpen
+                            onClick={() => setIsDeleteProjectDialogOpen(true)}
+                        />
+
+                    }
+                </SpeedDial>
             </Box>
-            
-            <CollapsibleTaskTable 
-                title="User Tasks"
-                initialTasks={userTasks}
-                roles={roles}
-                organization_id={project?.organization?.id}
-                project_id={id}
-                deadline={project?.deadline}
-                canAddTask={!(project?.end_time && status === "Completed") && roles?.includes("Project Leader") ? true : false}
+            }
+            <EditProjectModal
+                isOpen={isEditProjectModalOpen}
+                onClose={handleEditProjectModalClose}
+                project={project}
+            />
+            <ConfirmProjectCompleteModal
+                isOpen={isCompleteProjectModalOpen}
+                onClose={handleCompleteProjectModalClose}
+                project={project}
+            />
+            <AddTaskModal 
+                isOpen={isAddTaskModalOpen}
+                onClose={handleAddTaskModalClose}
+                taskType={"User"}
+                projectId={id}
+                projectDeadline={project?.deadline}
+            />
+            <AddMemberModal 
+                id={id}
+                memberType="project_leader"
+                open={openAssignProjectLeaderModal}
+                handleClose={handleProjectLeaderModalClose}
+                title="Assign Project Leader"
+            />
+            <ConfirmDialog
+                title="Delete Project"
+                helpText="Are you sure you want to delete this project? This will delete all the tasks associated with this project and the action can't be undone."
+                actionType="Delete"
+                open={isDeleteProjectDialogOpen}
+                handleClose={() => setIsDeleteProjectDialogOpen(false)}
+                handleConfirm={handleDeleteProject}
+                confirmIcon={<DeleteRoundedIcon />}
+                confirmColor="error"
             />
         </>
     );

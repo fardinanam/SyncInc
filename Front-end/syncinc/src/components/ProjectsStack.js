@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Stack, Typography, Paper, Collapse, IconButton } from '@mui/material';
+import { Box, Stack, Typography, Paper, Collapse, IconButton } from '@mui/material';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import ProjectCard from './ProjectCard';
@@ -17,7 +17,7 @@ const ProjectsStack = ({title, projects}) => {
                     borderRadius: '0.5rem',
                 }}
             >
-            <Typography variant='h6' sx={{ fontWeight: 'bold', paddingTop: '10px', paddingBottom: '10px'}}>
+            <Typography variant='h7' sx={{ fontWeight: 'bold', paddingTop: '1rem', paddingBottom: '1rem'}}>
                 <IconButton
                     aria-label="expand row"
                     size="small"
@@ -36,8 +36,9 @@ const ProjectsStack = ({title, projects}) => {
                 timeout="auto"
                 unmountOnExit
             >
-                <Stack justifyContent="center" spacing={2} mt={2}>
-                    {projects?.map((project, idx) => (
+                <Stack justifyContent="center" spacing={1} mt={1}>
+                    {   projects?.length > 0 ?
+                        projects?.map((project, idx) => (
                         <ProjectCard
                             key={`project-${idx}`}
                             name={project?.name}
@@ -48,7 +49,23 @@ const ProjectsStack = ({title, projects}) => {
                             onClick={() => navigate(`/project/${project.id}`)}
                         />
                         
-                    ))}
+                    ))
+                    :
+                        <Box
+                            display='flex'
+                            justifyContent='center'
+                            alignItems='center'
+                            height='5rem'
+                            backgroundColor='background.default'
+                            borderRadius="0.5rem"
+                        >
+                            <Typography variant='h7' color='text.secondary'
+                                fontWeight="bold"
+                            >
+                                No projects to show
+                            </Typography>
+                        </Box>
+                    }
                 </Stack>
             </Collapse>
         </>

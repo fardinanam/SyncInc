@@ -1,6 +1,6 @@
 import { useTheme } from '@mui/material/styles';
 import { Card, CardContent, Typography, Stack, Box } from '@mui/material';
-import { LinearProgress } from '@mui/material';
+import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 import dayjs from 'dayjs';
 
 const ProgressBarCard = (props) => {
@@ -58,21 +58,30 @@ const ProgressBarCard = (props) => {
                             {name}
                         </Typography>
                     </Stack>
-                    {/* { deadline &&
+                    { deadline &&
                         <Box 
-                            display="block"
+                            display="flex"
+                            flexDirection="column"
+                            justifyContent="center"
+                            alignItems="center"
+                            variant="contained"
                             sx={{
+                                backgroundColor: '#52CD9F',
+                                padding: '0.2rem 0.3rem',
+                                borderRadius: '0.3rem',
                                 height: '2rem',
-                                padding: '0.2rem 0.5rem',
-                                borderRadius: '0.5rem',
-                                background: '#26C706',
-                                fontSize: '0.8rem',
-                                fontWeight: 'bold',
                             }}
                         >
-                            Due: {-dayjs().diff(deadline, 'day')} days 
+                            <Typography
+                                sx={{
+                                    fontSize: '0.7rem',
+                                    color: 'white',
+                                }}
+
+                            >
+                            Due: {-dayjs().diff(dayjs(deadline), 'day') === 1 ? "Tomorrow" : new Date(deadline).toISOString().slice(0,10) } </Typography>
                         </Box>
-                    } */}
+                    }
                 </Stack>
                 <LinearProgress 
                     color={ colorPicker(100 * completed_tasks / total_tasks) } 
@@ -81,8 +90,10 @@ const ProgressBarCard = (props) => {
                     {
                         height: 10,
                         borderRadius: 5,
-                        // different color for dark and light mode
                         backgroundColor: theme.palette.mode === 'dark' ? '#242424' : '#E0E0E0',
+                        [`& .${linearProgressClasses.bar}`]: {
+                            borderRadius: 5,
+                        },
                     }
                 }/>
                 
