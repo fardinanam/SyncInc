@@ -153,7 +153,7 @@ const ProjectDetails = () => {
 
             if (response.status === 200) {
                 notifyWithToast("success", "Project deleted successfully");
-                navigate("/organization/" + project?.organization?.id + "/projects/");
+                navigate("/organization/" + project?.organization?.id);
             }
         } catch (error) {
             notifyWithToast("error", error.response.data.message);
@@ -201,7 +201,7 @@ const ProjectDetails = () => {
                         fontWeight="bold"
                         color="text.secondary"
                         sx={{ cursor: "pointer" }}
-                        onClick={() => navigate("/organization/" + project?.organization?.id + "/projects/")}
+                        onClick={() => navigate("/organization/" + project?.organization?.id)}
                     >
                         {project?.organization?.name}
                     </Typography>

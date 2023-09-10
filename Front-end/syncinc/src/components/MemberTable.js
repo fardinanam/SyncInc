@@ -44,6 +44,10 @@ const MemberTable = ({pageName, members}) => {
                             // convert to integer
                             averageTime = Math.round(averageTime);
                         }
+
+                        if (averageTime < 0) {
+                            averageTime = 0;
+                        }
                         
                         return (
                             <TableRow

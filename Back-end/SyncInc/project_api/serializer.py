@@ -422,7 +422,7 @@ class GetUserTaskSerializer(serializers.ModelSerializer):
             return 'In Progress'
         
     def get_project(self, obj):
-        project = {'name': obj.project.name, 'id': obj.project.id}
+        project = {'name': obj.project.name, 'id': obj.project.id, 'deadline': obj.project.deadline}
         return project
 
     def get_organization(self, obj):
