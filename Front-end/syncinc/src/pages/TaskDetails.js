@@ -66,7 +66,7 @@ const TaskDetails = () => {
         try {
             const response = await axios.get(`${baseUrl}get_user_task/${taskId}/`, config);
 
-            // console.log(response.data?.data);
+            console.log(response.data?.data);
             setTask(response.data?.data);
             setRoles(response.data?.data?.roles);
         } catch (error) {
@@ -254,7 +254,7 @@ const TaskDetails = () => {
                         variant="h7"
                         fontWeight="bold"
                         color="text.secondary"
-                        onClick={() => navigate("/organization/" + task?.organization?.id + "/projects/")}
+                        onClick={() => navigate("/organization/" + task?.organization?.id)}
                         sx={{ cursor: "pointer" }}
                     > {task?.organization?.name}</Typography>
                 </>
@@ -705,6 +705,7 @@ const TaskDetails = () => {
                         task={task}
                         taskType={"User"}
                         projectId={task?.project?.id}
+                        projectDeadline={task?.project?.deadline}
                     />
                 </>
             }  

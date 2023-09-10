@@ -41,7 +41,7 @@ const OrganizationEmployees = ({employees, search}) => {
         }
         
         setFilteredEmployees(employees.filter(employee => {
-            return employee.username?.toLowerCase().includes(search);
+            return employee.username?.toLowerCase().includes(search.toLowerCase());
         }));
     }, [search]);
 

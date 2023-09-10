@@ -10,9 +10,9 @@ const OrganizationNavMenu = ({organization_id}) => {
     const menuItems = ["Projects", "Employees"];
     const handleMenuSelect = (menu) => {
         if(menu.toLowerCase() === "projects")
-            navigate(`/organization/${organization_id}/projects`);
+            navigate(`/organization/${organization_id}`);
         else if(menu.toLowerCase() === "employees")
-            navigate(`/organization/${organization_id}/employees`);
+            navigate(`/organization/${organization_id}`);
     }
 
     return (
