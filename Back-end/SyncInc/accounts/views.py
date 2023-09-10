@@ -28,6 +28,8 @@ class LoginView(APIView):
                         'data': serializer.errors
                     }, status=status.HTTP_403_FORBIDDEN)
                 
+                print(user.profile_picture)
+                
                 if user.is_email_verified is False:
                     return Response({
                         'message': 'Email not verified',

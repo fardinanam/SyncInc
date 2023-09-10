@@ -26,11 +26,6 @@ const OrganizationEmployees = ({employees, search}) => {
     const [role, setRole] = useState();
 
     useEffect(() => {
-        // fetchOrganizationEmployees();
-        handleNameSort();
-    }, [id]);
-
-    useEffect(() => {
         setFilteredEmployees(employees);
     }, [employees]);
 
@@ -45,47 +40,6 @@ const OrganizationEmployees = ({employees, search}) => {
         }));
     }, [search]);
 
-    let [nameSort, setNameSort] = useState(false);
-        const handleNameSort = () => {
-            if (nameSort) {
-                employees.sort((a, b) => (a.name < b.name) ? 1 : -1);
-            } else {
-                employees.sort((a, b) => (a.name > b.name) ? 1 : -1);
-            }
-            setNameSort(!nameSort);
-        }
-
-        let [numTasksSort, setNumTasksSort] = useState(false);
-        const handleNumTasksSort = () => {
-            if (numTasksSort) {
-                employees.sort((a, b) => (a.completed_tasks > b.completed_tasks) ? 1 : -1);
-            } else {
-                employees.sort((a, b) => (a.completed_tasks < b.completed_tasks) ? 1 : -1);
-            }
-            setNumTasksSort(!numTasksSort);
-        }
-
-        let [ratingSort, setRatingSort] = useState(false);
-        const handleRatingSort = () => {
-            if (ratingSort) {
-                employees.sort((a, b) => (a.avg_rating > b.avg_rating) ? 1 : -1);
-            } else {
-                employees.sort((a, b) => (a.avg_rating < b.avg_rating) ? 1 : -1);
-            }
-            setRatingSort(!ratingSort);
-        }
-        let [timeSort, setTimeSort] = useState(false);
-        const handleTimeSort = () => {
-            if (timeSort) {
-                employees.sort((a, b) => (a.averageTime > b.averageTime) ? 1 : -1);
-            } else {
-                employees.sort((a, b) => (a.averageTime < b.averageTime) ? 1 : -1);
-            }
-            setTimeSort(!timeSort);
-        }
-    
-    useEffect(() => {
-    }, [nameSort, numTasksSort, ratingSort, timeSort]);
     
     return (
         <>

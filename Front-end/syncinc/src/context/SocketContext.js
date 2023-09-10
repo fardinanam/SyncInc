@@ -1,7 +1,7 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import AuthContext from '../context/AuthContext';
 import axios from 'axios';
-import { baseUrl } from '../utils/config';
+import { wsBaseUrl, baseUrl } from '../utils/config';
 const SocketContext = createContext();
 
 
@@ -26,7 +26,7 @@ const SocketProvider = ({ children }) => {
                 `${baseUrl}get_user_notifications/`,
                 config
             )
-            // console.log(response.data.data)
+
             if(response.data.data) {
                 let updatedNotifications = response.data.data
                 updatedNotifications.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -39,7 +39,7 @@ const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         if (isLoggedIn) {
-            let url = `ws://127.0.0.1:8000/ws/socket_apps/${user?.username}/`
+            let url = `${wsBaseUrl}ws/socket_apps/${user?.username}/`
             const chatSocket = new WebSocket(url)
             setChatSocket(chatSocket)
             getUserNotifications()
@@ -49,12 +49,11 @@ const SocketProvider = ({ children }) => {
             setNotifications([])
             // console.log('Chat Socket:', chatSocket)
         }
-     }, [isLoggedIn]);
+    }, [isLoggedIn]);
 
     useEffect(() => {
-        console.log(notifications)
         if (isLoggedIn) {
-            let url = `ws://127.0.0.1:8000/ws/socket_apps/${user?.username}/`
+            let url = `${wsBaseUrl}ws/socket_apps/${user?.username}/`
             const chatSocket = new WebSocket(url)
             setChatSocket(chatSocket)
             getUserNotifications()
@@ -64,26 +63,24 @@ const SocketProvider = ({ children }) => {
             setChatSocket(null)
             // console.log('Chat Socket:', chatSocket)
         }
-     }, []);
+    }, []);
     
     
     if(chatSocket !== null) {
         chatSocket.onmessage = function(e){
             let data = JSON.parse(e.data)
             let newNotification = data.message
-            console.log(newNotification)
+
             const updatedNotifications = [...notifications, newNotification];
             updatedNotifications.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             // setNotifications((prevNotifications) => [...prevNotifications, newNotification])
             setNotifications(updatedNotifications)
-            console.log(notifications)
             // console.log(newNotification)
             //ack message
             // chatSocket.send(JSON.stringify({ 'status': 'received', 'id': newNotification.id }));
         }
     }
     
-    console.log(notifications)
     return (
         <SocketContext.Provider value={ {chatSocket, notifications, setNotifications} }>
             {children}

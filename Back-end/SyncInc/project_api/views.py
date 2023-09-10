@@ -868,9 +868,10 @@ def assign_user_task(request):
 
         serializer = GetUserTaskSerializer(task)
 
-        message = "You are assigned a new task " + task.name + " in project "+ task.project.name
-        type = 'task'
-        notify_user(user, assignee, type, task.id, message)
+        if assignee != user:
+            message = "You are assigned a new task " + task.name + " in project "+ task.project.name
+            type = 'task'
+            notify_user(user, assignee, type, task.id, message)
 
         return Response({
             'message': 'Task assigned successfully',
@@ -900,7 +901,14 @@ def get_user_items_count(request):
             designation = Designation.objects.filter(organization=project.organization, employee=user).first()
             if designation.role == 'Admin' or project.project_leader == user or UserTask.objects.filter(project=project, assignee=user).exists():
                 data['numProjects'] += 1
+
+        for project in Project.objects.filter(organization__designation__in=designations, end_time__isnull=False):
+            designation = Designation.objects.filter(organization=project.organization, employee=user).first()
+            if designation.role == 'Admin' or project.project_leader == user or UserTask.objects.filter(project=project, assignee=user).exists():
+                data['numCompletedProjects'] += 1
+
         data['numTasks'] = UserTask.objects.filter(assignee=user).count()
+        data['numCompletedTasks'] = UserTask.objects.filter(assignee=user, status="Completed").count()
         print(data)
         return Response({
             'message': f'Item counts of {user.username} fetched successfully',
@@ -978,10 +986,10 @@ def assign_project_leader(request, project_id):
 
         serializer = EmployeeSerializer(project_leader)
 
-        type = 'project'
-        message = user.username +" has made you leader of " + project.name + " project"
-        
-        notify_user(user, project_leader, type, project.id, message)
+        if user != project_leader:
+            type = 'project'
+            message = user.username +" has made you leader of " + project.name + " project"
+            notify_user(user, project_leader, type, project.id, message)
 
         return Response({
             'message': 'Project leader assigned successfully',
@@ -1112,9 +1120,11 @@ def submit_user_task(request, task_id):
         serializer = GetUserTaskSerializer(task, context={'user': user})
         
         project_leader = task.project.project_leader
-        message = user.username + " submitted task " + task.name 
-        type = 'task'
-        notify_user(user, project_leader, type, task.id, message)
+        
+        if user != project_leader:
+            message = user.username + " submitted task " + task.name
+            type = 'task'
+            notify_user(user, project_leader, type, task.id, message)
 
         return Response({
             'message': 'Task submitted successfully',
@@ -1151,9 +1161,11 @@ def update_user_task_status(request, task_id):
         serializer.save()
         
         assignee = task.assignee
-        message = user.username + " has reviewed your submission of task " + task.name
-        type = 'task'
-        notify_user(user, assignee, type, task.id, message)
+
+        if assignee != user:
+            message = user.username + " has reviewed your submission of task " + task.name
+            type = 'task'
+            notify_user(user, assignee, type, task.id, message)
 
         return Response({
             'message': 'Task status updated successfully',
@@ -1188,13 +1200,14 @@ def update_user_task_rating(request, task_id):
         serializer = UpdateUserTaskRatingSerializer(data=request.data, instance=task, context={'user': user})
         serializer.is_valid(raise_exception=True)
         serializer.save()
-
-        assignee = task.assignee
-        message = user.username + " has rated your submission of task " + task.name
-        type = 'task'
-        notify_user(user, assignee, type, task.id, message)
         
-        print("serializer saved", serializer.data)
+        assignee = task.assignee
+
+        if assignee != user:
+            message = user.username + " has rated your submission of task " + task.name
+            type = 'task'
+            notify_user(user, assignee, type, task.id, message)
+
         return Response({
             'message': 'Task rated successfully',
             'data': serializer.data
