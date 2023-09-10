@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { useNavigate } from 'react-router-dom';
 import { useState, useContext, useLayoutEffect } from 'react';
-import { Grid } from '@mui/material';
+import { Grid, Paper } from '@mui/material';
 import DashboardCard from '../components/DashboardCard';
 import AuthContext from '../context/AuthContext';
 import { baseUrl } from '../utils/config';
@@ -16,15 +16,19 @@ import ProgressBarCard from '../components/ProgressBarCard';
 import { Stack } from '@mui/material';
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import CustomCircularProgress from '../components/CustomCircularProgress';
+
 
 export default function ClippedDrawer() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const navigate = useNavigate();
     const {authTokens, isLoggedIn} = useContext(AuthContext);
-    const [numOrganizations, setNumOrganizations] = useState([]);
-    const [numProjects, setNumProjects] = useState([]);
-    const [numTasks, setNumTasks] = useState([]);
+    const [numOrganizations, setNumOrganizations] = useState(0);
+    const [numProjects, setNumProjects] = useState(0);
+    const [numCompletedProjects, setNumCompletedProjects] = useState(0)
+    const [numTasks, setNumTasks] = useState(0);
+    const [numCompletedTasks, setNumCompletedTasks] = useState(0)
     const [contributions, setContributions] = useState([]);
 
     const {setLoading} = useLoading();
@@ -54,7 +58,9 @@ export default function ClippedDrawer() {
             
             setNumOrganizations(response.data?.data?.numOrganizations);
             setNumProjects(response.data?.data?.numProjects);
+            setNumCompletedProjects(response.data?.data?.numCompletedProjects)
             setNumTasks(response.data?.data?.numTasks);
+            setNumCompletedTasks(response.data?.data?.numCompletedTasks)
         } catch (error) {
             console.log(error.response?.data?.message);
         }
@@ -128,50 +134,62 @@ export default function ClippedDrawer() {
                     <Grid 
                         item
                     >
-                    <DashboardCard
-                        title="My Organizations"
-                        count={numOrganizations}
-                        name="Organizations Affiliated"  
-                        onClick={() => navigate('/organizations')}
-                    >
-                        <Work 
-                            color='primary'
-                            fontSize='large'
-                        />
-                    </DashboardCard>
+                        <DashboardCard
+                            title="My Organizations"
+                            count={numOrganizations}
+                            name="Organizations Affiliated"  
+                            onClick={() => navigate('/organizations')}
+                        >
+                            <Work 
+                                color='primary'
+                                fontSize='large'
+                            />
+                        </DashboardCard>
                     </Grid>
                     <Grid 
                         item
                     >
-                    <DashboardCard
-                        title="My Projects"
-                        count={numProjects}
-                        name="Projects Joined"
-                        onClick={() => navigate('/projects')}   
-                    >
-                        <DescriptionIcon 
-                            color='primary'
-                            fontSize='large'
-                        />
-                    </DashboardCard>
+                        <DashboardCard
+                            title="My Projects"
+                            count={numProjects}
+                            name="Projects Joined"
+                            onClick={() => navigate('/projects')}   
+                        >
+                            <DescriptionIcon 
+                                color='primary'
+                                fontSize='large'
+                            />
+                        </DashboardCard>
+
                     </Grid>
                     <Grid 
                         item
                     >
-                    <DashboardCard
-                        title="My Tasks"
-                        count={numTasks}
-                        name="Tasks Assigned"
-                        onClick={() => navigate('/tasks')}
-                    >
-                        <AssignmentRoundedIcon 
-                            color='primary'
-                            fontSize='large'
-                        />
-                    </DashboardCard>
+                        <DashboardCard
+                            title="My Tasks"
+                            count={numTasks}
+                            name="Tasks Assigned"
+                            onClick={() => navigate('/tasks')}
+                        >
+                            <AssignmentRoundedIcon 
+                                color='primary'
+                                fontSize='large'
+                            />
+                        </DashboardCard>
                     </Grid>
-                    
+                
                 </Grid>
+                <Stack 
+                    direction="row"
+                    rowGap={2}
+                    columnGap={2}
+                    justifyContent="flex-start"
+                    alignItems={"center"}
+                    flexWrap={"wrap"}
+                >
+                    <CustomCircularProgress type={"Project"} numerator={numCompletedProjects} denominator={numProjects} />
+                    <CustomCircularProgress type={"Task"} numerator={numCompletedTasks} denominator={numTasks} />
+                </Stack>
                 { !isMobile &&
                 <Stack 
                     justifyContent='flex-start'

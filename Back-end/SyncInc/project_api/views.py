@@ -901,7 +901,14 @@ def get_user_items_count(request):
             designation = Designation.objects.filter(organization=project.organization, employee=user).first()
             if designation.role == 'Admin' or project.project_leader == user or UserTask.objects.filter(project=project, assignee=user).exists():
                 data['numProjects'] += 1
+
+        for project in Project.objects.filter(organization__designation__in=designations, end_time__isnull=False):
+            designation = Designation.objects.filter(organization=project.organization, employee=user).first()
+            if designation.role == 'Admin' or project.project_leader == user or UserTask.objects.filter(project=project, assignee=user).exists():
+                data['numCompletedProjects'] += 1
+
         data['numTasks'] = UserTask.objects.filter(assignee=user).count()
+        data['numCompletedTasks'] = UserTask.objects.filter(assignee=user, status="Completed").count()
         print(data)
         return Response({
             'message': f'Item counts of {user.username} fetched successfully',
