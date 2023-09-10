@@ -20,11 +20,11 @@ const CustomCircularProgress = ({ type, numerator, denominator }) => {
             if (denominator === 0)
                 setPercentage(0);
             else {
-                const percentage = ((numerator / denominator) * 100.0).toFixed(0);
-                setPercentage(percentage);
+                const p = parseFloat(((numerator / denominator) * 100.0)).toFixed(0);
+                setPercentage(p);
             }
         }
-        console.log(percentage)
+        
     }, [numerator, denominator])
 
 
