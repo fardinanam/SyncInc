@@ -1,5 +1,6 @@
 import { Box, useTheme, Typography, Paper, Stack } from "@mui/material";
 import LibraryAddCheckIcon from "@mui/icons-material/LibraryAddCheck"
+import { useState, useEffect } from "react";
 
 import {
   CircularProgressbar,
@@ -9,16 +10,24 @@ import {
 import "react-circular-progressbar/dist/styles.css";
 
 const CustomCircularProgress = ({ type, numerator, denominator }) => {
-    let percentage = 0
+    const [percentage, setPercentage] = useState(0);
+
     const theme = useTheme()
-    if (numerator && denominator) {
-    if (denominator === 0)
-        percentage = 0
-      else {
-        percentage = (numerator / denominator) * 100.0
-      }
-    }
-    console.log(percentage)
+
+    useEffect(() => {
+
+        if (numerator && denominator) {
+            if (denominator === 0)
+                setPercentage(0);
+            else {
+                const percentage = ((numerator / denominator) * 100.0).toFixed(0);
+                setPercentage(percentage);
+            }
+        }
+        console.log(percentage)
+    }, [numerator, denominator])
+
+
     return (
       <Paper
       sx={{

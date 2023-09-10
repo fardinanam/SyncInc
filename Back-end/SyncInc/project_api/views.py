@@ -902,6 +902,7 @@ def get_user_items_count(request):
             if designation.role == 'Admin' or project.project_leader == user or UserTask.objects.filter(project=project, assignee=user).exists():
                 data['numProjects'] += 1
 
+        data['numCompletedProjects'] = 0
         for project in Project.objects.filter(organization__designation__in=designations, end_time__isnull=False):
             designation = Designation.objects.filter(organization=project.organization, employee=user).first()
             if designation.role == 'Admin' or project.project_leader == user or UserTask.objects.filter(project=project, assignee=user).exists():
