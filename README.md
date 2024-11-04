@@ -1,62 +1,46 @@
 # SyncInc.
 
-## Django Setup
-- install python virtual environment
+## Backend Setup
+- go to the backend directory
   ```bash
-    pip install virtualenv
+    cd Back-end
   ```
-- create a virtual environment
+- From `/Syncinc` folder, copy the `.env.example` file and rename it to `.env`
+- Fill in the required fields in the `.env` file
+    - For using sqlite3, set the following environment variables as follows:
+        ```env
+        SERVER=LOCAL
+        LOCAL_DATABASE_ENGINE="django.db.backends.sqlite3"
+        LOCAL_DATABASE_NAME="db.sqlite3"
+        ```
+- Use `venv` or `conda` to create a virtual environment. For `venv`, run the following commands:
+
   ```bash
-    virtualenv ENV
+    python -m venv env
+    source env/bin/activate
   ```
-- activate the virtual environment
-  ```bash
-    ENV\Scripts\activate
-  ```
-- install dependencies
+- install dependencies in the virtual environment
   ```bash
     pip install --upgrade pip
     pip install -r requirements.txt
+  ```
+> [!WARNING]
+> If you face any problem installing `psycopg2`, remove it from the `requirements.txt` file and install `psycopg2-binary` manually instead.
+
+- Migrate the database
+
+  ```bash
+      python manage.py makemigrations accounts
+      python manage.py makemigrations project_api
+      python manage.py migrate accounts
+      python manage.py migrate project_api
+      python manage.py migrate
   ```
 - run the server
   ```bash
     python manage.py runserver
   ```
 
-### Django Setup using Anaconda
-- install anaconda
-  - for **WindowsOS**, follow
-https://docs.anaconda.com/free/anaconda/install/windows/ 
-  - for **LinuxOS**, follow https://docs.anaconda.com/free/anaconda/install/linux/ 
-
-- create a virtual environment
-  ```bash
-    conda create -n ENV 
-  ```
-- activate the virtual environment
-  ```bash
-    conda activate ENV
-  ```
-- install dependencies (please make sure you are in the "Back-end" directory)
-  ```bash
-    pip install --upgrade pip
-    pip install -r requirements.txt
-  ```
-- run the server
-  ```bash
-    python manage.py runserver
-  ```
-
-
-## How to run the database migration
-
-```bash
-    python manage.py makemigrations accounts
-    python manage.py makemigrations project_api
-    python manage.py migrate accounts
-    python manage.py migrate project_api
-    python manage.py migrate
-```
 
 ## React Setup
 - go to the project directory
